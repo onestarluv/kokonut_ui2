@@ -1,5 +1,6 @@
 package org.crebs.coreui.menu.kokonut;
 
+import org.crebs.coreui.Messages;
 import kr.gomsv.kokonutMail.api.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -97,7 +98,7 @@ public final class MailMenu {
     }
 
     private static void failed(Player player) {
-        if (player.isOnline()) player.sendMessage(Component.text("[우편함] 우편을 불러오지 못했어요. 잠시 후 다시 열어 주세요.", RED));
+        if (player.isOnline()) Messages.send(player, "우편을 불러오지 못했어요. 잠시 후 다시 열어 주세요.");
     }
 
     private static void show(CoreUi coreUi, MailboxService mail, Player player, View view) {
@@ -110,7 +111,7 @@ public final class MailMenu {
                 if (!BUSY.add(p.getUniqueId())) return;
                 mail.claim(p, entry.id()).whenComplete((result, error) -> {
                     BUSY.remove(p.getUniqueId());
-                    if (error == null) p.sendMessage(mail.describe(result));
+                    if (error == null) Messages.send(p, mail.describe(result));
                     claimSound(p, error == null && result.status() == MailResult.Status.CLAIMED);
                     if (p.isOnline()) load(coreUi, mail, p, view.page().page(), null, 0);
                 });

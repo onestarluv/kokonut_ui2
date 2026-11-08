@@ -68,17 +68,17 @@ public final class CoreUi extends JavaPlugin {
         Objects.requireNonNull(getCommand("coreui")).setExecutor((sender, command, label, args) -> {
             if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
                 if (!sender.hasPermission("coreui.reload")) {
-                    sender.sendMessage("You do not have permission to reload CoreUi");
+                    Messages.send(sender, "You do not have permission to reload CoreUi");
                     return true;
                 }
-                sender.sendMessage("Rebuilding CoreUi resource pack...");
+                Messages.send(sender, "Rebuilding CoreUi resource pack...");
                 applyTextConfig();
                 reloadPack().whenComplete((path, error) -> {
                     if (!isEnabled()) return;
                     getServer().getScheduler().runTask(this, () -> {
-                        if (error == null) sender.sendMessage("Loaded " + glyphs.all().size() + " glyphs. Pack: " + path);
+                        if (error == null) Messages.send(sender, "Loaded " + glyphs.all().size() + " glyphs. Pack: " + path);
                         else {
-                            sender.sendMessage("Pack rebuild failed. Check the console for details");
+                            Messages.send(sender, "Pack rebuild failed. Check the console for details");
                             getLogger().log(java.util.logging.Level.SEVERE, "Resource pack generation failed", error);
                         }
                     });
@@ -87,44 +87,44 @@ public final class CoreUi extends JavaPlugin {
             }
             if (args.length == 1 && args[0].equalsIgnoreCase("quest")) {
                 if (!sender.hasPermission("coreui.demo")) {
-                    sender.sendMessage("You do not have permission to open the CoreUi demo");
+                    Messages.send(sender, "You do not have permission to open the CoreUi demo");
                     return true;
                 }
                 if (!(sender instanceof Player player)) {
-                    sender.sendMessage("Open the prototype in-game: /coreui quest");
+                    Messages.send(sender, "Open the prototype in-game: /coreui quest");
                     return true;
                 }
                 if (!org.crebs.coreui.menu.demo.QuestPrototype.open(this, player)) {
-                    sender.sendMessage("프로토타입 이미지가 없어요. Glyphs/proto 폴더와 glyphs.yml을 넣고 /coreui reload 하세요.");
+                    Messages.send(sender, "프로토타입 이미지가 없어요. Glyphs/proto 폴더와 glyphs.yml을 넣고 /coreui reload 하세요.");
                 }
                 return true;
             }
             if (args.length == 0 || args[0].equalsIgnoreCase("demo")) {
                 if (!sender.hasPermission("coreui.demo")) {
-                    sender.sendMessage("You do not have permission to open the CoreUi demo");
+                    Messages.send(sender, "You do not have permission to open the CoreUi demo");
                     return true;
                 }
                 if (!(sender instanceof Player player)) {
-                    sender.sendMessage("Open the demo in-game: /coreui demo [light|dark]");
+                    Messages.send(sender, "Open the demo in-game: /coreui demo [light|dark]");
                     return true;
                 }
                 if (args.length > 2 || args.length == 2
                         && !args[1].equalsIgnoreCase("light") && !args[1].equalsIgnoreCase("dark")) {
-                    sender.sendMessage("Usage: /coreui demo [light|dark]");
+                    Messages.send(sender, "Usage: /coreui demo [light|dark]");
                     return true;
                 }
                 var example = glyphs.all().get("example-arrow");
                 if (example == null) {
-                    sender.sendMessage("Demo resources are not ready. Wait for pack generation or run /coreui reload");
+                    Messages.send(sender, "Demo resources are not ready. Wait for pack generation or run /coreui reload");
                     return true;
                 }
                 ThemeColour theme = args.length == 2 && args[1].equalsIgnoreCase("light")
                         ? ThemeColour.LIGHT : ThemeColour.DARK;
                 open(player, DemoMenu.create(example, theme, this::close, this::setTheme));
-                sender.sendMessage("CoreUi demo opened. Apply plugins/CoreUi/Pack/CoreUi.zip to your client resource packs");
+                Messages.send(sender, "CoreUi demo opened. Apply plugins/CoreUi/Pack/CoreUi.zip to your client resource packs");
                 return true;
             }
-            sender.sendMessage("Usage: /coreui demo [light|dark] | /coreui reload");
+            Messages.send(sender, "Usage: /coreui demo [light|dark] | /coreui reload");
             return true;
         });
         Objects.requireNonNull(getCommand("coreui")).setTabCompleter((sender, command, label, args) -> {
@@ -142,21 +142,21 @@ public final class CoreUi extends JavaPlugin {
         });
         Objects.requireNonNull(getCommand("메인메뉴")).setExecutor((sender, command, label, args) -> {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage("플레이어만 사용할 수 있습니다.");
+                Messages.send(sender, "플레이어만 사용할 수 있습니다.");
                 return true;
             }
             if (!org.crebs.coreui.menu.kokonut.MainMenu.open(this, player)) {
-                sender.sendMessage("메뉴 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
+                Messages.send(sender, "메뉴 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
             }
             return true;
         });
         Objects.requireNonNull(getCommand("도감")).setExecutor((sender, command, label, args) -> {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage("플레이어만 사용할 수 있습니다.");
+                Messages.send(sender, "플레이어만 사용할 수 있습니다.");
                 return true;
             }
             if (!org.crebs.coreui.menu.dex.ItemDexMenu.open(this, player)) {
-                sender.sendMessage("도감 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
+                Messages.send(sender, "도감 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
             }
             return true;
         });

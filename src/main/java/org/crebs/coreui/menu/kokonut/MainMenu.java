@@ -1,5 +1,6 @@
 package org.crebs.coreui.menu.kokonut;
 
+import org.crebs.coreui.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.object.ObjectContents;
@@ -88,7 +89,7 @@ public final class MainMenu {
         return List.of(
                 new Button("move", "이동", "menu/icon/warp_32", p -> soon(p, "이동")),
                 new Button("dex", "도감", "menu/icon/collect_32", p -> {
-                    if (!ItemDexMenu.open(coreUi, p)) p.sendMessage(Component.text("[메뉴] 도감을 아직 불러오지 못했어요.", RED));
+                    if (!ItemDexMenu.open(coreUi, p)) Messages.send(p, "도감을 아직 불러오지 못했어요.");
                 }),
                 new Button("style", "꾸미기", "menu/icon/deco_32", p -> {
                     // 꾸미기 = titles for now (Kokonut-Core); later it can become a hub for titles and cosmetics.
@@ -100,11 +101,11 @@ public final class MainMenu {
                 new Button("mail", "우편함", "menu/icon/post_32", p -> {
                     // Kokonut-Mail's MailboxService opens its own mailbox screen; close this dialog first.
                     if (!coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Mail")) {
-                        p.sendMessage(Component.text("[메뉴] 우편함 플러그인이 꺼져 있어요.", RED));
+                        Messages.send(p, "우편함 플러그인이 꺼져 있어요.");
                         return;
                     }
                     coreUi.close(p);
-                    if (!MailBridge.open(p)) p.sendMessage(Component.text("[메뉴] 우편함이 아직 준비되지 않았어요.", RED));
+                    if (!MailBridge.open(p)) Messages.send(p, "우편함이 아직 준비되지 않았어요.");
                 }),
                 new Button("settings", "설정", "menu/icon/setting_32", p -> soon(p, "설정")));
     }
@@ -112,7 +113,7 @@ public final class MainMenu {
     /** Closes the menu and runs another plugin's command (e.g. /장신구 opens the accessory inventory). */
     private static void run(CoreUi coreUi, Player player, String command) {
         if (coreUi.getServer().getPluginCommand(command) == null) {
-            player.sendMessage(Component.text("[메뉴] " + command + " 플러그인이 꺼져 있어요.", RED));
+            Messages.send(player, command + " 플러그인이 꺼져 있어요.");
             return;
         }
         coreUi.close(player);
@@ -120,7 +121,7 @@ public final class MainMenu {
     }
 
     private static void soon(Player player, String name) {
-        player.sendMessage(Component.text("[메뉴] " + name + " 기능은 준비 중이에요.", GOLD));
+        Messages.send(player, name + " 기능은 준비 중이에요.");
     }
 
     /** Builds one frame; {@code coreUi} is only used inside click callbacks, so offline checks may pass null. */
@@ -209,8 +210,7 @@ public final class MainMenu {
             image(icon, x + 1, y);
             String value = amount == null ? "…" : String.format("%,d", amount);
             right(value, x + 66, y + 4, GOLD);
-            b.hotspot("tip" + ids++).position(x, y).size(70, 16).onClick(p -> p.sendMessage(
-                    Component.text("[메뉴] " + unit + " " + value, GOLD))).add();
+            b.hotspot("tip" + ids++).position(x, y).size(70, 16).onClick(p -> Messages.send(p, unit + " " + value)).add();
         }
 
         /** 100 px bar with power-of-two fill pieces from the dex kit. */

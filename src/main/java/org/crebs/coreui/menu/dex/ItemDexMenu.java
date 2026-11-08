@@ -1,5 +1,6 @@
 package org.crebs.coreui.menu.dex;
 
+import org.crebs.coreui.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Player;
@@ -236,7 +237,7 @@ public final class ItemDexMenu {
             } else {
                 for (int i = 0; i < 3; i++) image("ui/slot_locked", RIGHT + 48 + i * 24, 207);
                 button("paper", 52, "획득 힌트", RIGHT + 148, 207, INK,
-                        p -> p.sendMessage(Component.text("[도감] " + e.name() + " · " + e.description().getFirst(), GOLD)));
+                        p -> Messages.send(p, e.name() + " · " + e.description().getFirst()));
             }
 
             image("item/gold_nugget", RIGHT, BUTTON_Y + 2);
@@ -249,7 +250,7 @@ public final class ItemDexMenu {
                 button("off", 60, "수령 완료", RIGHT + 140, BUTTON_Y, DIM, null);
             } else {
                 button("green", 60, "보상 받기", RIGHT + 140, BUTTON_Y, WHITE, p -> {
-                    p.sendMessage(Component.text("[도감] " + e.name() + " 등록 보상 " + e.reward() + " 코인 (샘플)", GOLD));
+                    Messages.send(p, e.name() + " 등록 보상 " + e.reward() + " 코인 (샘플)");
                     go(p, state.claim(key));
                 });
             }
@@ -279,7 +280,7 @@ public final class ItemDexMenu {
                         for (Milestone m : cat.milestones())
                             if (isClaimable(m)) next = next.claim(m.id());
                     for (Milestone m : catalog.globalMilestones()) if (isClaimable(m)) next = next.claim(m.id());
-                    p.sendMessage(Component.text("[도감] 보상 " + left + "개를 받았어요 (샘플)", GOLD));
+                    Messages.send(p, "보상 " + left + "개를 받았어요 (샘플)");
                     go(p, next);
                 });
             } else {
@@ -297,7 +298,7 @@ public final class ItemDexMenu {
                 text(m.reward(), x + 26, y + 12, DIM);
                 if (claimable) {
                     button("green", 46, "받기", x + 154, y, WHITE, p -> {
-                        p.sendMessage(Component.text("[도감] " + m.title() + " 보상: " + m.reward() + " (샘플)", GOLD));
+                        Messages.send(p, m.title() + " 보상: " + m.reward() + " (샘플)");
                         go(p, state.claim(m.id()));
                     });
                 } else {
@@ -364,7 +365,7 @@ public final class ItemDexMenu {
             text("서버 최초 등록", RIGHT, 208, DIM);
             right(catalog.firstDiscovery(), RIGHT + PAGE, 208, RED);
             button("paper", 100, "서버 순위 보기", RIGHT + 100, BUTTON_Y, INK,
-                    p -> p.sendMessage(Component.text("[도감] 서버 순위는 준비 중이에요", GOLD)));
+                    p -> Messages.send(p, "서버 순위는 준비 중이에요"));
         }
 
         // ------------------------------------------------------------ primitives

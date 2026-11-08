@@ -1,5 +1,6 @@
 package org.crebs.coreui.menu.demo;
 
+import org.crebs.coreui.Messages;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.crebs.coreui.glyph.Glyph;
@@ -30,15 +31,15 @@ public final class DemoMenu {
                 .toggle("notifications")
                     .position(10, 36).label("Notifications")
                     .description("Toggle animation").initialValue(true)
-                    .onChange((player, value) -> player.sendMessage("Notifications: " + value)).add()
+                    .onChange((player, value) -> Messages.send(player, "Notifications: " + value)).add()
                 .checkbox("sound")
                     .position(10, 74).label("Sound effects")
                     .description("Checkbox example").initialValue(true)
-                    .onChange((player, value) -> player.sendMessage("Sound effects: " + value)).add()
+                    .onChange((player, value) -> Messages.send(player, "Sound effects: " + value)).add()
                 .slider("volume")
                     .position(10, 112).label("Volume")
                     .range(0, 100).step(5).initialValue(50)
-                    .onChange((player, value) -> player.sendMessage("Volume: " + value)).add()
+                    .onChange((player, value) -> Messages.send(player, "Volume: " + value)).add()
                 .dropdown("theme")
                     .position(10, 150).label("Theme")
                     .description("Try both palettes")
@@ -55,7 +56,7 @@ public final class DemoMenu {
                     .resetValues("notifications", "sound", "volume", "theme").add()
                 .button("test")
                     .position(124, 250).size(104, 24).style(ButtonStyle.PRIMARY).label("Test click")
-                    .onClick(player -> player.sendMessage("CoreUi demo button clicked!")).add()
+                    .onClick(player -> Messages.send(player, "CoreUi demo button clicked!")).add()
                 .button("close")
                     .position(236, 250).size(112, 24).label("Close")
                     .onClick(close).add()

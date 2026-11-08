@@ -1,5 +1,6 @@
 package org.crebs.coreui.menu.demo;
 
+import org.crebs.coreui.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Player;
@@ -167,9 +168,9 @@ public final class QuestPrototype {
         // Bottom bar.
         text(b, ids, "퀘스트를 누르면 자세한 내용이 보여요", 48, 252, DIM);
         String primary = state.tab() == Tab.AVAILABLE ? "수락하기" : state.tab() == Tab.ACTIVE ? "포기하기" : "다시 보기";
-        button(b, ids, g, "button", "위치 찾기", 368, 246, p -> p.sendMessage("[프로토타입] 위치 찾기"));
+        button(b, ids, g, "button", "위치 찾기", 368, 246, p -> Messages.send(p, "[프로토타입] 위치 찾기"));
         button(b, ids, g, "button_primary", primary, 484, 246,
-                p -> p.sendMessage("[프로토타입] " + primary + (q == null ? "" : ": " + q.name())));
+                p -> Messages.send(p, "[프로토타입] " + primary + (q == null ? "" : ": " + q.name())));
         return b.build();
     }
 
