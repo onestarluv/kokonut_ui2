@@ -53,7 +53,7 @@ public final class MainMenu {
     public static boolean open(CoreUi coreUi, Player player) {
         var glyphs = coreUi.getGlyphs().all();
         if (!glyphs.containsKey("menu/ui/panel_116_0") || !glyphs.containsKey("menu/icon/deco_32") || !glyphs.containsKey("menu/icon/setting_32")
-                || !glyphs.containsKey("menu/ui/profile_148") || !glyphs.containsKey("menu/ui/tag_128")
+                || !glyphs.containsKey("menu/ui/profile_148") || !glyphs.containsKey("menu/ui/tag_8")
                 || !glyphs.containsKey("menu/ui/px_2") || !glyphs.containsKey("menu/ui/head_frame_20")
                 || !glyphs.containsKey("menu/icon/wiki") || !glyphs.containsKey("menu/icon/minelist")
                 || !glyphs.containsKey("menu/icon/discord") || !glyphs.containsKey("dex/ui/btn_paper_24")) return false;
@@ -235,11 +235,13 @@ public final class MainMenu {
          */
         void title(Component title, int x, int y, int max) {
             String plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(title);
-            int width = TextWidths.width(title) + (bold(title) ? plain.codePointCount(0, plain.length()) : 0);
-            int tag = Math.min(max / 8 * 8, Math.max(24, (width + 6 + 7) / 8 * 8));
-            image("menu/ui/tag_" + tag, x, y - 2);
-            b.label("txt" + ids++, title.colorIfAbsent(WHITE)).position(x + 3, y)
-                    .size(Math.max(1, Math.min(width, tag - 6)), 9).add();
+            int text = Math.min(max - 4, TextWidths.width(title) + (bold(title) ? plain.codePointCount(0, plain.length()) : 0));
+            int width = Math.max(8, text + 4);
+            // Exactly the text plus 2 px each side: the largest 8 px step plus an 8 px piece over its end.
+            int base = width / 8 * 8;
+            image("menu/ui/tag_" + base, x, y - 2);
+            if (width > base) image("menu/ui/tag_8", x + width - 8, y - 2);
+            b.label("txt" + ids++, title.colorIfAbsent(WHITE)).position(x + 2, y).size(Math.max(1, text), 9).add();
         }
 
         private static boolean bold(Component c) {

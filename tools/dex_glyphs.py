@@ -395,7 +395,7 @@ def title_glyphs():
         Img(w, 11, (0, 0, 0, 64)).save(f"menu/ui/plate_{w}")
     # Dark backing behind title names (the search field's leather ink): titles use chat colours chosen for a dark
     # chat background, so yellow or pink titles vanish on parchment without it.
-    for w in range(24, 201, 8):
+    for w in range(8, 201, 8):
         tag = Img(w, 11, INK)
         tag.rect(0, 10, w, 1, OUTLINE)
         tag.save(f"menu/ui/tag_{w}")

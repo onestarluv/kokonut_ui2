@@ -291,6 +291,8 @@ glyphs:
     ascent: 8
   menu/ui/tag_152:
     ascent: 8
+  menu/ui/tag_16:
+    ascent: 8
   menu/ui/tag_160:
     ascent: 8
   menu/ui/tag_168:
@@ -316,6 +318,8 @@ glyphs:
   menu/ui/tag_64:
     ascent: 8
   menu/ui/tag_72:
+    ascent: 8
+  menu/ui/tag_8:
     ascent: 8
   menu/ui/tag_80:
     ascent: 8

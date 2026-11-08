@@ -95,7 +95,7 @@ public final class TitleMenu {
     /** {@code /칭호} and the main menu: false (Core's chest GUI) while the glyphs are not loaded. */
     public static boolean open(CoreUi coreUi, TitleCatalog catalog, Player player) {
         var g = coreUi.getGlyphs().all();
-        if (!g.containsKey("menu/ui/field_176") || !g.containsKey("menu/ui/plate_200") || !g.containsKey("menu/ui/tag_200") || !g.containsKey("menu/ui/px_2") || !g.containsKey("dex/ui/page_0_0")) return false;
+        if (!g.containsKey("menu/ui/field_176") || !g.containsKey("menu/ui/plate_200") || !g.containsKey("menu/ui/tag_8") || !g.containsKey("menu/ui/px_2") || !g.containsKey("dex/ui/page_0_0")) return false;
         player.playSound(player, Sound.ITEM_BOOK_PAGE_TURN, SoundCategory.MASTER, 0.6f, 1f);
         show(coreUi, catalog, player, new State("", 0, null));
         return true;
@@ -383,12 +383,18 @@ public final class TitleMenu {
          * The backing's top is never on a later text line than the text, so the text paints over it. Returns its width.
          */
         int tagged(Component value, String plain, int x, int y, int max) {
-            int width = Math.min(max - 6, TextWidths.width(value) + (bold(value) ? plain.codePointCount(0, plain.length()) : 0));
-            int tag = Math.min(200, Math.max(24, (width + 6 + 7) / 8 * 8));
-            if (tag > max) tag = Math.max(24, max / 8 * 8);
-            image("menu/ui/tag_" + tag, x, y - 2);
-            rich(value, plain, x + 3, y, tag - 6, WHITE);
-            return tag;
+            int text = Math.min(max - 4, TextWidths.width(value) + (bold(value) ? plain.codePointCount(0, plain.length()) : 0));
+            int width = Math.min(200, Math.max(8, text + 4));
+            tag(x, y - 2, width);
+            rich(value, plain, x + 2, y, width - 4, WHITE);
+            return width;
+        }
+
+        /** A dark backing of exactly {@code width} px: the largest 8 px step plus an 8 px piece over its end. */
+        void tag(int x, int y, int width) {
+            int base = Math.min(200, width / 8 * 8);
+            image("menu/ui/tag_" + base, x, y);
+            if (width > base) image("menu/ui/tag_8", x + width - 8, y);
         }
 
         void plated(Component value, String plain, int cx, int y, TextColor color) {
