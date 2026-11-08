@@ -53,7 +53,7 @@ public final class MainMenu {
     public static boolean open(CoreUi coreUi, Player player) {
         var glyphs = coreUi.getGlyphs().all();
         if (!glyphs.containsKey("menu/ui/panel_116_0") || !glyphs.containsKey("menu/icon/deco_32") || !glyphs.containsKey("menu/icon/setting_32")
-                || !glyphs.containsKey("menu/ui/profile_148") || !glyphs.containsKey("menu/ui/tag_8")
+                || !glyphs.containsKey("menu/ui/profile_bg_8") || !glyphs.containsKey("menu/ui/tag_8")
                 || !glyphs.containsKey("menu/ui/px_2") || !glyphs.containsKey("menu/ui/head_frame_20")
                 || !glyphs.containsKey("menu/icon/wiki") || !glyphs.containsKey("menu/icon/minelist")
                 || !glyphs.containsKey("menu/icon/discord") || !glyphs.containsKey("dex/ui/btn_paper_24")) return false;
@@ -156,8 +156,11 @@ public final class MainMenu {
         c.image("menu/ui/tab_join", 13, PANEL_Y);
 
         // Profile row: face, title (or world) on top, nickname below. A backing in the chip colour first (line 3),
-        // so the head frame, title and name paint over it.
-        c.image("menu/ui/profile_148", 12, 32);
+        // so the head frame, title and name paint over it; it ends 4 px after the longer of the two lines.
+        String place = "위치 · " + info.place();
+        int top = info.title() != null ? 34 + c.titleWidth(info.title(), 124) : 36 + TextWidths.width(Component.text(place));
+        int right = Math.max(top, 36 + TextWidths.width(Component.text(info.name()))) + 4;
+        c.fill("menu/ui/profile_bg_", 12, 32, Math.clamp(right - 12, 32, 160));
         // Face at 16 px (2x) from the skin; until the skin is loaded, the client's 8x8 head object (y on a 9 px line).
         c.image("menu/ui/head_frame_20", 13, 33);
         if (info.face() != null) c.face(info.face(), 15, 35, 2);
@@ -165,7 +168,7 @@ public final class MainMenu {
         else c.image("menu/icon/kokonut", 15, 35);
         // Title backing at y 33..43 (inside the profile backing), nickname at y 45.
         if (info.title() != null) c.title(info.title(), 34, 35, 124);
-        else c.text("위치 · " + info.place(), 36, 35, DIM);
+        else c.text(place, 36, 35, DIM);
         c.text(info.name(), 36, 45, INK);
 
         // Link buttons (wiki, minelist, discord): icon only, the name in the tooltip; right-aligned to the divider.
@@ -233,6 +236,20 @@ public final class MainMenu {
          * The equipped title on the dark backing of the title screen ({@code menu/ui/tag_<w>}, drawn at y - 2): titles
          * use chat colours meant for a dark background. Bold adds about a pixel per character to the measured width.
          */
+        /** Width of {@link #title}'s backing: the text plus 2 px each side, at most {@code max}. */
+        int titleWidth(Component title, int max) {
+            String plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(title);
+            int text = Math.min(max - 4, TextWidths.width(title) + (bold(title) ? plain.codePointCount(0, plain.length()) : 0));
+            return Math.max(8, text + 4);
+        }
+
+        /** A plain backing of exactly {@code width} px from {@code <prefix><8 px step>} pieces (largest step + 8 px end). */
+        void fill(String prefix, int x, int y, int width) {
+            int base = width / 8 * 8;
+            image(prefix + base, x, y);
+            if (width > base) image(prefix + 8, x + width - 8, y);
+        }
+
         void title(Component title, int x, int y, int max) {
             String plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(title);
             int text = Math.min(max - 4, TextWidths.width(title) + (bold(title) ? plain.codePointCount(0, plain.length()) : 0));

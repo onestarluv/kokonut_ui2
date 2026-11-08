@@ -271,6 +271,46 @@ glyphs:
     ascent: 8
   menu/ui/profile_148:
     ascent: 8
+  menu/ui/profile_bg_104:
+    ascent: 8
+  menu/ui/profile_bg_112:
+    ascent: 8
+  menu/ui/profile_bg_120:
+    ascent: 8
+  menu/ui/profile_bg_128:
+    ascent: 8
+  menu/ui/profile_bg_136:
+    ascent: 8
+  menu/ui/profile_bg_144:
+    ascent: 8
+  menu/ui/profile_bg_152:
+    ascent: 8
+  menu/ui/profile_bg_16:
+    ascent: 8
+  menu/ui/profile_bg_160:
+    ascent: 8
+  menu/ui/profile_bg_24:
+    ascent: 8
+  menu/ui/profile_bg_32:
+    ascent: 8
+  menu/ui/profile_bg_40:
+    ascent: 8
+  menu/ui/profile_bg_48:
+    ascent: 8
+  menu/ui/profile_bg_56:
+    ascent: 8
+  menu/ui/profile_bg_64:
+    ascent: 8
+  menu/ui/profile_bg_72:
+    ascent: 8
+  menu/ui/profile_bg_8:
+    ascent: 8
+  menu/ui/profile_bg_80:
+    ascent: 8
+  menu/ui/profile_bg_88:
+    ascent: 8
+  menu/ui/profile_bg_96:
+    ascent: 8
   menu/ui/px_2:
     ascent: 8
   menu/ui/tab:
