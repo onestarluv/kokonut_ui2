@@ -110,7 +110,7 @@ public final class TitleMenu {
         int pages = Math.max(1, (shown.size() + ROWS - 1) / ROWS);
         int page = Math.clamp(state.page(), 0, pages - 1);
         Title selected = pick(shown, page, state.selected(), equipped);
-        View view = new View(player.getName(), MainMenu.head(player), catalog.ready(player), catalog.busy(player), owned, shown, equipped, selected, page, state.query());
+        View view = new View(displayName(player), MainMenu.head(player), catalog.ready(player), catalog.busy(player), owned, shown, equipped, selected, page, state.query());
         State now = new State(state.query(), page, selected == null ? null : selected.id());
         coreUi.open(player, build(coreUi.getGlyphs().all(), view, new Actions() {
             public void select(Player p, Title title) { show(coreUi, catalog, p, new State(now.query(), now.page(), title.id())); }
@@ -142,6 +142,20 @@ public final class TitleMenu {
             if (stillOpen(coreUi, player)) show(coreUi, catalog, player, state);
         });
         if (stillOpen(coreUi, player)) show(coreUi, catalog, player, state);
+    }
+
+    /**
+     * What other players see: the server nickname (/닉네임) when set, else the Minecraft name. Core's cache never
+     * blocks; while the first lookup is in flight the Minecraft name is shown and the next redraw picks the nickname up.
+     */
+    static String displayName(Player player) {
+        try {
+            Optional<String> nickname = kr.gomsv.kokonutCore.api.util.ServerNicknameUtil.cachedNickname(player.getUniqueId());
+            if (nickname != null && nickname.isPresent() && !nickname.get().isBlank()) return nickname.get();
+        } catch (LinkageError olderCore) {
+            // An older Kokonut-Core without the cache: keep the Minecraft name.
+        }
+        return player.getName();
     }
 
     private static boolean stillOpen(CoreUi coreUi, Player player) {
