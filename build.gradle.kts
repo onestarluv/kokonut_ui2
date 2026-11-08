@@ -12,8 +12,19 @@ repositories {
 
 dependencies {
     implementation("com.github.DRAGNIL68:Packer:d7bb7af0cf")
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:26.3.build.243-stable")
+    // Optional Kokonut-Core utility menu (/메뉴2).
+    compileOnly(files(providers.gradleProperty("kokonutCoreJar").orElse("../Kokonut_Core/build/libs/Kokonut-Core-cbt-1.0.jar")))
+    // Optional BetterHud (Kokonut_HUD) shader integration; resolved from the server at runtime.
+    compileOnly(files(providers.gradleProperty("betterHudApiJar").orElse("../Kokonut_HUD/api/build/libs/betterhud-api-cbt-1.0.jar")))
 }
+
+val collectPluginArtifact = tasks.register<Copy>("collectPluginArtifact") {
+    dependsOn(tasks.jar)
+    from(tasks.jar.flatMap { it.archiveFile })
+    into(layout.projectDirectory.dir("../plugin"))
+}
+tasks.jar { finalizedBy(collectPluginArtifact) }
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
@@ -29,7 +40,7 @@ publishing {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release = 21
+    options.release = 25
 }
 
 tasks {

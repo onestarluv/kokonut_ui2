@@ -15,9 +15,11 @@ public final class CoreMenu {
     private final int height;
     private final boolean rememberValues;
     private final List<MenuElement> elements;
+    private final boolean background;
 
     CoreMenu(String id, Component title, Component header, String defaultPage, ThemeColour theme,
-             int width, int height, boolean rememberValues, List<MenuElement> elements) {
+             int width, int height, boolean rememberValues, List<MenuElement> elements, boolean background) {
+        this.background = background;
         this.id = id;
         this.title = title;
         this.header = header;
@@ -63,6 +65,11 @@ public final class CoreMenu {
 
     public boolean remembersValues() {
         return rememberValues;
+    }
+
+    /** False when the menu supplies its own background (e.g. image glyphs) instead of the theme panel. */
+    public boolean hasBackground() {
+        return background;
     }
 
     public List<MenuElement> getElements() {

@@ -68,6 +68,8 @@ public final class MenuRenderer {
     private int contentTop() { return session.getMenu().hasHeader() && !paintingHeader ? HEADER_HEIGHT : 0; }
     private int canvasHeight() { return session.getMenu().getHeight() + (session.getMenu().hasHeader() ? HEADER_HEIGHT : 0); }
     private int canvasRows() { return (canvasHeight() + 8) / 9; }
+    /** Logical text-canvas width: 480 for classic menus, wider for large image-based menus. */
+    private static int canvasWidth(org.crebs.coreui.menu.CoreMenu menu) { return Math.max(480, menu.getWidth()); }
     private int overlayLine() { return canvasRows() - 1; }
 
     public Dialog render(MenuSession session, long tick) {
@@ -75,7 +77,7 @@ public final class MenuRenderer {
         return Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(NATIVE_TITLE).externalTitle(session.getMenu().getTitle())
                         .pause(false).canCloseWithEscape(true).afterAction(DialogBase.DialogAfterAction.NONE)
-                        .body(List.of(DialogBody.plainMessage(canvas, 511))).build())
+                        .body(List.of(DialogBody.plainMessage(canvas, canvasWidth(session.getMenu()) + 31))).build())
                 .type(DialogType.dialogList(RegistrySet.valueSet(RegistryKey.DIALOG, List.of()), null, 1, 1)));
     }
 
@@ -92,7 +94,8 @@ public final class MenuRenderer {
     private Component draw() {
         session.clearClicks();
         if (session.getMenu().hasHeader()) header();
-        quad(0, 0, session.getMenu().getWidth(), session.getMenu().getHeight(), dark ? PANEL_DARK : PANEL_LIGHT);
+        if (session.getMenu().hasBackground())
+            quad(0, 0, session.getMenu().getWidth(), session.getMenu().getHeight(), dark ? PANEL_DARK : PANEL_LIGHT);
         List<MenuElement> visible = session.getMenu().getElements().stream()
                 .filter(e -> e.visibleOn(session.getActivePage())).toList();
         DropdownElement popup = visible.stream().filter(DropdownElement.class::isInstance)
@@ -126,6 +129,10 @@ public final class MenuRenderer {
                 case SliderElement slider -> slider(slider);
                 case DropdownElement dropdown -> dropdown(dropdown);
                 case DisplayElement display -> display(display);
+                case HotspotElement hotspot -> {
+                    if (popupArea == null || !hotspot.bounds().overlaps(popupArea))
+                        hitBox(hotspot.bounds(), session.registerClick(hotspot, hotspot.onClick()));
+                }
                 default -> throw new IllegalStateException("Unexpected value: " + element);
             }
         }
@@ -150,7 +157,7 @@ public final class MenuRenderer {
                 body = body.append(LINE_BOUNDS.font(Key.key("coreui", "bounds_overlay")))
                         .append(space(-481)).append(overlayContent);
             }
-            body = body.append(space(480));
+            body = body.append(space(canvasWidth(session.getMenu())));
             if (row < count - 1) {
                 body = body.append(Component.newline());
             }
@@ -471,7 +478,7 @@ public final class MenuRenderer {
             int argb = popupPainting ? popupMotion.shadow(up, 58)
                     : 25 << 24 | (up & 255) << 16 | (up >> 8) << 8 | (dark ? 6 : 5);
             overlayPlace(x, Component.text(PlainTextComponentSerializer.plainText().serialize(text))
-                    .shadowColor(ShadowColor.shadowColor(argb)), textWidth(text));
+                    .shadowColor(ShadowColor.shadowColor(argb)), TextWidths.overlayWidth(text));
             return;
         }
         if (popupArea != null && new Bounds(x, y, Math.max(1, textWidth(text)), 9).overlaps(popupArea)) click = null;
@@ -479,22 +486,29 @@ public final class MenuRenderer {
     }
 
     private void overlayPlace(int x, Component content, int advance) {
-        int left = (480 - session.getMenu().getWidth()) / 2 + x;
+        int left = (canvasWidth(session.getMenu()) - session.getMenu().getWidth()) / 2 + x;
         overlayContent = overlayContent.append(space(left)).append(content.font(Key.key("coreui", "overlay")))
                 .append(space(-left - advance));
     }
 
     private void place(int x, int y, Component content, int fontAdvance, Key click) {
         y += contentTop();
-        content = TextPosition.encode(content, Math.floorMod(y, 9));
-        content = Component.empty().font(FONT).append(content);
-        int left = (480 - session.getMenu().getWidth()) / 2 + x;
-        rows.merge(Math.floorDiv(y, 9), space(left).append(withClick(content, click)).append(space(-left - fontAdvance)), Component::append);
+        int left = (canvasWidth(session.getMenu()) - session.getMenu().getWidth()) / 2 + x;
+        // Server-style font (Galmuri + vanilla ascii) shifted to this pixel of the line. Galmuri advances are
+        // fractional: pad with invisible Galmuri glyphs up to a whole pixel, then step back by whole pixels.
+        Key font = TextWidths.font(Math.floorMod(y, 9));
+        int subpixels = Math.round(TextWidths.exactWidth(content) * TextWidths.SUBPIXELS);
+        String pad = TextWidths.wholePixelPad(subpixels);
+        int whole = (subpixels + TextWidths.padSixteenths(pad)) / TextWidths.SUBPIXELS;
+        content = Component.empty().font(font).shadowColor(ShadowColor.none()).append(content);
+        Component segment = space(left).append(withClick(content, click));
+        if (!pad.isEmpty()) segment = segment.append(Component.text(pad).font(font));
+        rows.merge(Math.floorDiv(y, 9), segment.append(space(-left - whole)), Component::append);
     }
 
     private void placeAtLine(int x, int line, Component content, int fontAdvance, Key click) {
         content = Component.empty().font(FONT).append(content);
-        int left = (480 - session.getMenu().getWidth()) / 2 + x;
+        int left = (canvasWidth(session.getMenu()) - session.getMenu().getWidth()) / 2 + x;
         rows.merge(line, space(left).append(withClick(content, click)).append(space(-left - fontAdvance)), Component::append);
     }
 
@@ -507,20 +521,8 @@ public final class MenuRenderer {
                 .font(Key.key("coreui", "space"));
     }
 
-    private static int textWidth(Component component) {
-        String text = PlainTextComponentSerializer.plainText().serialize(component);
-        int width = 0;
-        for (char character : text.toCharArray()) {
-            width += switch (character) {
-                case ' ' -> 4;
-                case '!', '.', ',', ':', ';', 'i', '|', '\'' -> 2;
-                case '`', 'l' -> 3;
-                case '"', '*', 'I', '[', ']', 't' -> 4;
-                case 'f', 'k', '<', '>', '(', ')', '{', '}' -> 5;
-                case '@', '~' -> 7;
-                default -> 6;
-            };
-        }
-        return width;
+
+    private int textWidth(Component component) {
+        return TextWidths.width(component);
     }
 }

@@ -32,12 +32,27 @@ Create menus with buttons, toggles, sliders, dropdowns and custom images using a
 
 | Dependency | Version |
 | :--- | :--- |
-| Paper | **1.21.11 through 26.3** |
-| Java | **21+** |
+| Paper | **26.3** |
+| Java | **25+** |
 
 ---
 
 ## Example
+
+### Built-in demo
+
+Install this build on Paper 26.3 with Java 25 or newer, then restart the server.
+CoreUi creates `plugins/CoreUi/Pack/CoreUi.zip` and installs the bundled
+`plugins/CoreUi/Glyphs/example-arrow.png` without overwriting an existing file.
+An empty installation therefore includes one example image glyph as well as the built-in UI assets.
+
+1. Copy the generated `CoreUi.zip` into your Minecraft client's `resourcepacks` folder and enable it. For other players, distribute the pack through your server's resource-pack hosting.
+2. Run `/coreui demo` (or `/coreui`) as an operator in-game.
+3. Try the toggle, checkbox, slider, theme dropdown, reset button and click button.
+
+Use `/coreui demo light` or `/coreui demo dark` to select the starting theme.
+The permission is `coreui.demo` (default: operators). The demo starts with default values each time it is opened.
+If you rebuild the pack, update the client's ZIP as well.
 
 <img width="1333" height="872" alt="CoreUi menu example" src="https://github.com/user-attachments/assets/2924085e-00d4-43c9-b841-392f04737c4b" />
 
@@ -144,6 +159,7 @@ CoreUi generates `plugins/CoreUi/Pack/CoreUi.zip` asynchronously on startup. The
 
 | Command | Permission | Description |
 | :--- | :--- | :--- |
+| `/coreui` or `/coreui demo [light\|dark]` | `coreui.demo` | Open the built-in reference menu in-game. |
 | `/coreui reload` | `coreui.reload` | Rebuild the pack and reload custom glyphs. |
 
 The permission defaults to operators. Reloading is also available from the console.

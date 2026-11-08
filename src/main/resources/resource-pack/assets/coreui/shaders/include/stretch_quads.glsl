@@ -11,11 +11,11 @@ const float CORE_CLOCK_TICKS = 24000.0;
 
 uniform sampler2D Sampler0;
 
-CORE_LOCATION(4) out vec2 coreStretchPos;
-CORE_LOCATION(5) flat out int coreStretchIndex;
-CORE_LOCATION(6) out vec2 coreStretchSize;
-CORE_LOCATION(7) flat out float corePopupOpacity;
-CORE_LOCATION(8) flat out ivec2 coreSkinOrigin;
+CORE_LOCATION(10) out vec2 coreStretchPos;
+CORE_LOCATION(11) flat out int coreStretchIndex;
+CORE_LOCATION(12) out vec2 coreStretchSize;
+CORE_LOCATION(13) flat out float corePopupOpacity;
+CORE_LOCATION(14) flat out ivec2 coreSkinOrigin;
 
 float corePopupFade(ivec4 data, int mode) {
     float start = float((data.g >> 1) | (data.b << 7));

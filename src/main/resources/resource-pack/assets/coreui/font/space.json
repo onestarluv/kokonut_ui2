@@ -1,5 +1,5 @@
 {
   "providers": [
-    { "type": "space", "advances": { "\uE100": 1, "\uE101": -1 } }
+    { "type": "space", "advances": { "": 1, "": -1 } }
   ]
 }

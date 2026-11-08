@@ -14,8 +14,8 @@ public final class GlyphManager {
     private final AtomicBoolean rebuilding = new AtomicBoolean();
     private volatile Map<String, Glyph> glyphs = Map.of();
 
-    public GlyphManager(Path directory, Path pluginJar) {
-        packGenerator = new ResourcePackGenerator(directory, pluginJar);
+    public GlyphManager(Path directory, Path pluginJar, boolean externalTextShader) {
+        packGenerator = new ResourcePackGenerator(directory, pluginJar, externalTextShader);
     }
 
     public Glyph get(String id) {

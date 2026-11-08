@@ -2,11 +2,11 @@
 #define CORE_LOCATION(n)
 #endif
 
-CORE_LOCATION(4) in vec2 coreStretchPos;
-CORE_LOCATION(5) flat in int coreStretchIndex;
-CORE_LOCATION(6) in vec2 coreStretchSize;
-CORE_LOCATION(7) flat in float corePopupOpacity;
-CORE_LOCATION(8) flat in ivec2 coreSkinOrigin;
+CORE_LOCATION(10) in vec2 coreStretchPos;
+CORE_LOCATION(11) flat in int coreStretchIndex;
+CORE_LOCATION(12) in vec2 coreStretchSize;
+CORE_LOCATION(13) flat in float corePopupOpacity;
+CORE_LOCATION(14) flat in ivec2 coreSkinOrigin;
 
 float coreSkinAxis(float position, float size) {
     float border = min(2.0, size * 0.5);

@@ -21,6 +21,37 @@ public final class CoreMenuBuilder {
     private boolean rememberValues;
     private final List<MenuElement> elements = new ArrayList<>();
     private final Set<String> elementIds = new HashSet<>();
+    /** Widths above 480 need GUI scale 3 or lower on a 1080p screen (they exceed 480 GUI pixels at scale 4). */
+    public static final int MAX_WIDTH = 720;
+    public static final int MAX_HEIGHT = 480;
+    private boolean background = true;
+
+    /** Skips the theme panel so image glyphs can provide the whole background. */
+    public CoreMenuBuilder noBackground() {
+        background = false;
+        return this;
+    }
+
+    public HotspotBuilder hotspot(String id) {
+        return new HotspotBuilder(id);
+    }
+
+    public final class HotspotBuilder extends ElementBuilder<HotspotBuilder> {
+        private Consumer<Player> onClick = player -> {
+        };
+
+        private HotspotBuilder(String id) {
+            super(id);
+        }
+
+        public HotspotBuilder onClick(Consumer<Player> value) {
+            onClick = Objects.requireNonNull(value);
+            return this;
+        }
+
+        protected HotspotBuilder self() { return this; }
+        protected MenuElement create() { return new HotspotElement(properties(), onClick); }
+    }
 
     public CoreMenuBuilder(String id) {
         if (id == null || id.isBlank()) {
@@ -90,8 +121,8 @@ public final class CoreMenuBuilder {
     }
 
     public CoreMenuBuilder size(int width, int height) {
-        if (width < 140 || width > 480 || height < 90 || height > 320) {
-            throw new IllegalArgumentException("Menu size must be within 140x90 and 480x320");
+        if (width < 140 || width > MAX_WIDTH || height < 90 || height > MAX_HEIGHT) {
+            throw new IllegalArgumentException("Menu size must be within 140x90 and " + MAX_WIDTH + "x" + MAX_HEIGHT);
         }
         this.width = width;
         this.height = height;
@@ -178,7 +209,7 @@ public final class CoreMenuBuilder {
         }
         Component visibleHeader = headerEnabled ? Objects.requireNonNullElse(header, title) : null;
         return new CoreMenu(id, title, visibleHeader,
-                defaultPage, theme, width, height, rememberValues, elements);
+                defaultPage, theme, width, height, rememberValues, elements, background);
     }
 
     public abstract class ElementBuilder<B extends ElementBuilder<B>> {

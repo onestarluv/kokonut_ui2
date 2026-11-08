@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import net.outmoded.packer.ResourcePack;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.crebs.coreui.glyph.Glyph;
-import org.crebs.coreui.pack.unicode.UnicodeFileRegister;
 
 import javax.imageio.ImageIO;
 import java.io.*;
@@ -17,11 +16,19 @@ import java.util.zip.Deflater;
 public final class ResourcePackGenerator {
     private final Path directory;
     private final Path pluginJar;
+    private final boolean externalTextShader;
 
-    public ResourcePackGenerator(Path directory, Path pluginJar) {
+    /**
+     * @param externalTextShader true when another plugin (BetterHud) owns the 26.3 text shader and
+     *                           CoreUi's logic is injected into it, so CoreUi must not ship a competing copy.
+     */
+    public ResourcePackGenerator(Path directory, Path pluginJar, boolean externalTextShader) {
         this.directory = directory;
         this.pluginJar = pluginJar;
+        this.externalTextShader = externalTextShader;
     }
+
+    private static final String TEXT_SHADER_26_3 = "resource-pack/coreui_26_3/assets/minecraft/shaders/core/text.";
 
     public record Result(Path path, Map<String, Glyph> glyphs) {}
 
@@ -40,9 +47,18 @@ public final class ResourcePackGenerator {
         }
         ResourcePack pack = new ResourcePack();
         try (JarFile jar = new JarFile(pluginJar.toFile())) {
+            Path example = input.resolve("example-arrow.png");
+            if (Files.notExists(example)) {
+                var entry = jar.getJarEntry("resource-pack/assets/coreui/textures/glyphs/arrow_up.png");
+                if (entry == null) throw new IOException("Bundled example glyph is missing");
+                try (InputStream stream = jar.getInputStream(entry)) {
+                    Files.copy(stream, example);
+                }
+            }
             var entries = jar.entries();
             while (entries.hasMoreElements()) {
                 var entry = entries.nextElement();
+                if (externalTextShader && entry.getName().startsWith(TEXT_SHADER_26_3)) continue;
                 if (!entry.isDirectory() && entry.getName().startsWith("resource-pack/")) {
                     try (InputStream stream = jar.getInputStream(entry)) {
                         pack.writeInputStream(entry.getName().substring("resource-pack/".length()), stream);
@@ -90,6 +106,13 @@ public final class ResourcePackGenerator {
                 try (InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
                     pack.writeInputStream("assets/coreui/font/custom/" + id + ".json", stream);
                 }
+            }
+        }
+        // Label fonts follow the configured vanilla/Galmuri split (see TextWidths), so they are generated here.
+        for (int offset = 0; offset < 9; offset++) {
+            byte[] json = org.crebs.coreui.menu.render.TextWidths.fontJson(offset).getBytes(StandardCharsets.UTF_8);
+            try (InputStream stream = new ByteArrayInputStream(json)) {
+                pack.writeInputStream("assets/coreui/font/text_" + offset + ".json", stream);
             }
         }
         Path temporary = Files.createTempFile(output, "coreui-", ".zip");

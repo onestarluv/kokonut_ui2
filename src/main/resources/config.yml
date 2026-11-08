@@ -1,0 +1,6 @@
+text:
+  # Characters drawn with the vanilla Minecraft font; everything else (Hangul etc.) uses Galmuri.
+  # Keep this identical to the Galmuri "skip" in the server's minecraft:default font
+  # (Nexo/pack/assets/minecraft/font/default.json), so menu text looks exactly like chat and item names.
+  # Only printable ASCII is allowed here. After changing it, run /coreui reload and redeploy the pack.
+  vanilla-chars: "1234567890!?;:@#$%^&*()-=_+`~qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>/{},.[]'\"|\\ "

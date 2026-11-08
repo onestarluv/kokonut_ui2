@@ -1,12 +1,18 @@
 name: CoreUi
 version: '${version}'
 main: org.crebs.coreui.CoreUi
-api-version: '1.21.11'
+api-version: '26.3'
 load: POSTWORLD
+softdepend: [Kokonut-Core, Kokonut_HUD, BetterHud]
 commands:
+  메뉴2:
+    description: CoreUi로 만든 편의기능 메뉴 열기
+    usage: /메뉴2
   coreui:
-    description: Rebuilds the CoreUi resource pack
-    usage: /coreui reload
+    description: Opens the CoreUi demo or rebuilds its resource pack
+    usage: /coreui demo [light|dark] | /coreui reload
 permissions:
+  coreui.demo:
+    default: op
   coreui.reload:
     default: op

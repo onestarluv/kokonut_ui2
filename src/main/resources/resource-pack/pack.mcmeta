@@ -8,21 +8,25 @@
     "entries": [
       {
         "directory": "coreui_1_21_11",
+        "formats": [75, 83],
         "min_format": 75,
         "max_format": 83
       },
       {
         "directory": "coreui_26_1",
+        "formats": [84, 87],
         "min_format": 84,
         "max_format": 87
       },
       {
         "directory": "coreui_26_2",
+        "formats": [88, 96],
         "min_format": 88,
         "max_format": 96
       },
       {
         "directory": "coreui_26_3",
+        "formats": [97, 97],
         "min_format": 97,
         "max_format": [97, 1]
       }

@@ -21,13 +21,13 @@ void main() {
             + min(quadAxes[0], vec2(0.0)) + min(quadAxes[1], vec2(0.0));
     float screenCenter = -ProjMat[3][0] / ProjMat[0][0];
     bool white = all(greaterThan(vertexColor, vec4(0.999)));
-    bool horizontal = abs(quadSize.x - 511.0) < 0.05 && abs(quadSize.y - 1.0) < 0.05
-            && abs(quadOrigin.x - (screenCenter - 255.5)) < 20.0;
+    // Dialog body width is canvas + 31: 511 for classic menus, up to 751 for wide image menus.
+    bool horizontal = quadSize.x > 510.9 && quadSize.x < 751.1 && abs(quadSize.y - 1.0) < 0.05
+            && abs(quadOrigin.x + quadSize.x * 0.5 - screenCenter) < 20.0;
     float rowCount = (quadSize.y - 6.0) / 9.0;
     bool vertical = abs(quadSize.x - 1.0) < 0.05 && rowCount >= 3.99 && rowCount <= 60.01
     && abs(rowCount - round(rowCount)) < 0.01
-    && (abs(quadOrigin.x - (screenCenter - 255.5)) < 20.0
-    || abs(quadOrigin.x - (screenCenter + 254.5)) < 20.0);
+    && abs(abs(quadOrigin.x + 0.5 - screenCenter) - 315.5) < 80.0;
     if (vertexColor.a == 0.0 || (white && (horizontal || vertical))) discard;
     fragColor = vertexColor * ColorModulator;
 }

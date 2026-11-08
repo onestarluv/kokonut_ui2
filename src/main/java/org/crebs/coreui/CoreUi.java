@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.crebs.coreui.menu.CoreMenu;
+import org.crebs.coreui.menu.demo.DemoMenu;
 import org.crebs.coreui.menu.style.ThemeColour;
 import org.crebs.coreui.menu.element.DropdownElement;
 import org.crebs.coreui.menu.listener.MenuListener;
@@ -33,7 +34,10 @@ public final class CoreUi extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        glyphs = new GlyphManager(getDataFolder().toPath(), getFile().toPath());
+        saveDefaultConfig();
+        applyTextConfig();
+        boolean betterHud = hookBetterHud();
+        glyphs = new GlyphManager(getDataFolder().toPath(), getFile().toPath(), betterHud);
         reloadPack().whenComplete((path, error) -> {
             if (error == null) getLogger().info("Resource pack generated: " + path);
             else getLogger().log(java.util.logging.Level.SEVERE, "Resource pack generation failed", error);
@@ -47,6 +51,7 @@ public final class CoreUi extends JavaPlugin {
                     return true;
                 }
                 sender.sendMessage("Rebuilding CoreUi resource pack...");
+                applyTextConfig();
                 reloadPack().whenComplete((path, error) -> {
                     if (!isEnabled()) return;
                     getServer().getScheduler().runTask(this, () -> {
@@ -59,7 +64,70 @@ public final class CoreUi extends JavaPlugin {
                 });
                 return true;
             }
-            sender.sendMessage("Usage: /coreui reload");
+            if (args.length == 1 && args[0].equalsIgnoreCase("quest")) {
+                if (!sender.hasPermission("coreui.demo")) {
+                    sender.sendMessage("You do not have permission to open the CoreUi demo");
+                    return true;
+                }
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage("Open the prototype in-game: /coreui quest");
+                    return true;
+                }
+                if (!org.crebs.coreui.menu.demo.QuestPrototype.open(this, player)) {
+                    sender.sendMessage("프로토타입 이미지가 없어요. Glyphs/proto 폴더와 glyphs.yml을 넣고 /coreui reload 하세요.");
+                }
+                return true;
+            }
+            if (args.length == 0 || args[0].equalsIgnoreCase("demo")) {
+                if (!sender.hasPermission("coreui.demo")) {
+                    sender.sendMessage("You do not have permission to open the CoreUi demo");
+                    return true;
+                }
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage("Open the demo in-game: /coreui demo [light|dark]");
+                    return true;
+                }
+                if (args.length > 2 || args.length == 2
+                        && !args[1].equalsIgnoreCase("light") && !args[1].equalsIgnoreCase("dark")) {
+                    sender.sendMessage("Usage: /coreui demo [light|dark]");
+                    return true;
+                }
+                var example = glyphs.all().get("example-arrow");
+                if (example == null) {
+                    sender.sendMessage("Demo resources are not ready. Wait for pack generation or run /coreui reload");
+                    return true;
+                }
+                ThemeColour theme = args.length == 2 && args[1].equalsIgnoreCase("light")
+                        ? ThemeColour.LIGHT : ThemeColour.DARK;
+                open(player, DemoMenu.create(example, theme, this::close, this::setTheme));
+                sender.sendMessage("CoreUi demo opened. Apply plugins/CoreUi/Pack/CoreUi.zip to your client resource packs");
+                return true;
+            }
+            sender.sendMessage("Usage: /coreui demo [light|dark] | /coreui reload");
+            return true;
+        });
+        Objects.requireNonNull(getCommand("coreui")).setTabCompleter((sender, command, label, args) -> {
+            if (args.length == 1) {
+                List<String> suggestions = new ArrayList<>();
+                if (sender.hasPermission("coreui.demo")) { suggestions.add("demo"); suggestions.add("quest"); }
+                if (sender.hasPermission("coreui.reload")) suggestions.add("reload");
+                return suggestions.stream().filter(value -> value.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
+            }
+            if (args.length == 2 && args[0].equalsIgnoreCase("demo") && sender.hasPermission("coreui.demo")) {
+                return List.of("light", "dark").stream()
+                        .filter(value -> value.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
+            }
+            return List.of();
+        });
+        Objects.requireNonNull(getCommand("메뉴2")).setExecutor((sender, command, label, args) -> {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("플레이어만 사용할 수 있습니다.");
+                return true;
+            }
+            if (!getServer().getPluginManager().isPluginEnabled("Kokonut-Core")
+                    || !org.crebs.coreui.menu.kokonut.UtilityMenu2.open(this, player)) {
+                sender.sendMessage("Kokonut-Core 편의기능 메뉴를 찾을 수 없습니다.");
+            }
             return true;
         });
         getServer().getScheduler().runTaskTimer(this, () -> {
@@ -76,6 +144,33 @@ public final class CoreUi extends JavaPlugin {
                 }
             }
         }, 200L, 200L);
+    }
+
+    /** Reads text.vanilla-chars (must match the server default font's Galmuri "skip"); falls back to the default. */
+    private void applyTextConfig() {
+        reloadConfig();
+        String chars = getConfig().getString("text.vanilla-chars", org.crebs.coreui.menu.render.TextWidths.DEFAULT_VANILLA_CHARS);
+        try {
+            org.crebs.coreui.menu.render.TextWidths.configure(chars);
+        } catch (IllegalArgumentException exception) {
+            getLogger().warning(exception.getMessage() + " - using the default character set");
+            org.crebs.coreui.menu.render.TextWidths.configure(org.crebs.coreui.menu.render.TextWidths.DEFAULT_VANILLA_CHARS);
+        }
+    }
+
+    /** Injects CoreUi's GUI text-shader logic into BetterHud's generated shader when BetterHud is installed. */
+    private boolean hookBetterHud() {
+        for (String name : List.of("Kokonut_HUD", "BetterHud")) {
+            if (!getServer().getPluginManager().isPluginEnabled(name)) continue;
+            try {
+                org.crebs.coreui.pack.BetterHudShaderHook.register();
+                getLogger().info("Injected CoreUi shaders into " + name + "; the 26.3 text shader is left out of CoreUi.zip");
+                return true;
+            } catch (LinkageError | RuntimeException exception) {
+                getLogger().log(java.util.logging.Level.WARNING, "Could not hook " + name + " shaders", exception);
+            }
+        }
+        return false;
     }
 
     public void open(Player player, CoreMenu menu) {
@@ -177,7 +272,7 @@ public final class CoreUi extends JavaPlugin {
         }
         session.press(interaction.elementId(), interaction.part());
         if (session.getMenu().getElements().stream().anyMatch(element ->
-                element.id().equals(interaction.elementId()) && element instanceof DropdownElement)) {
+                element.id().equals(interaction.elementId()) && (element instanceof DropdownElement || element instanceof org.crebs.coreui.menu.element.HotspotElement))) {
             release(player, session, interaction);
             return;
         }
