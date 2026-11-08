@@ -35,7 +35,7 @@ public final class MainMenu {
      * unclaimed mail count from Kokonut-Mail (null when unknown). The dex numbers are kept for callers and checks.
      */
     record Info(String name, Component title, String place, Long gold, Long kokonut, Long mail,
-                int dexRegistered, int dexTotal, int rewards, PlayerHeadObjectContents head) {}
+                int dexRegistered, int dexTotal, int rewards, PlayerHeadObjectContents head, int[] face) {}
 
     /** {@code icon} is a full glyph id: hand-drawn art ({@code menu/icon/<name>_32}) or a vanilla icon ({@code menu/item/<key>}). */
     record Button(String id, String label, String icon, Consumer<Player> action) {}
@@ -47,7 +47,8 @@ public final class MainMenu {
     public static boolean open(CoreUi coreUi, Player player) {
         var glyphs = coreUi.getGlyphs().all();
         if (!glyphs.containsKey("menu/ui/panel_116_0") || !glyphs.containsKey("menu/icon/deco_32") || !glyphs.containsKey("menu/icon/setting_32")
-                || !glyphs.containsKey("menu/ui/profile_148") || !glyphs.containsKey("menu/ui/tag_128")) return false;
+                || !glyphs.containsKey("menu/ui/profile_148") || !glyphs.containsKey("menu/ui/tag_128")
+                || !glyphs.containsKey("menu/ui/px_2") || !glyphs.containsKey("menu/ui/head_frame_20")) return false;
         coreUi.open(player, build(coreUi, coreUi.getGlyphs().all(), info(coreUi, player)));
         return true;
     }
@@ -71,7 +72,8 @@ public final class MainMenu {
             if (count.isPresent()) mail = count.getAsLong();
         }
         DexCatalog dex = DexCatalog.SAMPLE;
-        return new Info(name, title, player.getWorld().getName(), gold, kokonut, mail, dex.registered(), dex.total(), 0, head(player));
+        return new Info(name, title, player.getWorld().getName(), gold, kokonut, mail, dex.registered(), dex.total(), 0, head(player),
+                coreUi.getSkinFaces().face(player));
     }
 
     /** The player's own skin face; the profile's signed textures are included so the client can draw it right away. */
@@ -143,12 +145,14 @@ public final class MainMenu {
         // Profile row: the player's skin face (8x8 at y 36, a line boundary), name, title (or world), gold and kokonut.
         // A backing in the chip colour first (line 3), so the head frame, name and title paint over it.
         c.image("menu/ui/profile_148", 12, 32);
-        c.image("menu/ui/head_frame", 14, 34);
-        if (info.head() != null) c.b.playerHead("head", info.head()).position(16, 36).add();
-        else c.image("menu/icon/kokonut", 16, 34);
-        c.text(info.name(), 32, 33, INK);
-        if (info.title() != null) c.title(info.title(), 30, 44, 128);
-        else c.text("위치 · " + info.place(), 32, 44, DIM);
+        // Face at 16 px (2x) from the skin; until the skin is loaded, the client's 8x8 head object (y on a 9 px line).
+        c.image("menu/ui/head_frame_20", 13, 33);
+        if (info.face() != null) c.face(info.face(), 15, 35, 2);
+        else if (info.head() != null) c.b.playerHead("head", info.head()).position(19, 36).add();
+        else c.image("menu/icon/kokonut", 15, 35);
+        c.text(info.name(), 36, 33, INK);
+        if (info.title() != null) c.title(info.title(), 34, 44, 124);
+        else c.text("위치 · " + info.place(), 36, 44, DIM);
         c.chip(164, 34, "menu/icon/gold", info.gold(), "골드");
         c.chip(238, 34, "menu/icon/kokonut", info.kokonut(), "코코넛");
 
@@ -217,6 +221,15 @@ public final class MainMenu {
         private static boolean bold(Component c) {
             return c.decoration(net.kyori.adventure.text.format.TextDecoration.BOLD) == net.kyori.adventure.text.format.TextDecoration.State.TRUE
                     || c.children().stream().anyMatch(Canvas::bold);
+        }
+
+        /** A face from {@link org.crebs.coreui.skin.SkinFaces}: one tinted {@code menu/ui/px_<scale>} dot per pixel. */
+        void face(int[] colours, int x, int y, int scale) {
+            Glyph dot = Objects.requireNonNull(g.get("menu/ui/px_" + scale), "missing glyph menu/ui/px_" + scale);
+            for (int i = 0; i < 64; i++) {
+                b.glyph("img" + ids++, dot).position(x + (i % 8) * scale, y + (i / 8) * scale)
+                        .tint(TextColor.color(colours[i])).add();
+            }
         }
 
         void right(String value, int rightX, int y, TextColor color) {

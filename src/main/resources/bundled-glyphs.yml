@@ -200,6 +200,8 @@ glyphs:
     ascent: 8
   menu/ui/head_frame:
     ascent: 8
+  menu/ui/head_frame_20:
+    ascent: 8
   menu/ui/panel_116_0:
     ascent: 8
   menu/ui/panel_116_1:
@@ -251,6 +253,8 @@ glyphs:
   menu/ui/plate_96:
     ascent: 8
   menu/ui/profile_148:
+    ascent: 8
+  menu/ui/px_2:
     ascent: 8
   menu/ui/tab:
     ascent: 8

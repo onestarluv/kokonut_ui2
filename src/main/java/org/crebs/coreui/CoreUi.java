@@ -23,6 +23,12 @@ public final class CoreUi extends JavaPlugin {
     private final Map<UUID, Map<String, MenuValues>> rememberedValues = new HashMap<>();
     private final MenuRenderer renderer = new MenuRenderer();
     private GlyphManager glyphs;
+    private org.crebs.coreui.skin.SkinFaces skins;
+
+    /** Players' faces from their skins, for menus that draw the face larger than the 8x8 head object. */
+    public org.crebs.coreui.skin.SkinFaces getSkinFaces() {
+        return Objects.requireNonNull(skins, "CoreUi is not enabled");
+    }
 
     @Override public void onLoad() {
         try { LegacyPluginData.migrate(getDataFolder().toPath(), "CoreUi"); }
@@ -48,6 +54,9 @@ public final class CoreUi extends JavaPlugin {
             else getLogger().log(java.util.logging.Level.SEVERE, "Resource pack generation failed", error);
         });
         getServer().getPluginManager().registerEvents(new MenuListener(this), this);
+        skins = new org.crebs.coreui.skin.SkinFaces(this);
+        getServer().getPluginManager().registerEvents(skins, this);
+        for (Player online : getServer().getOnlinePlayers()) skins.face(online);
         if (getServer().getPluginManager().isPluginEnabled("Kokonut-Mail")) {
             try {
                 org.crebs.coreui.menu.kokonut.MailBridge.registerView(this);

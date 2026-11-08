@@ -401,6 +401,10 @@ def title_glyphs():
         tag.save(f"menu/ui/tag_{w}")
     # Main menu profile backing (head, name, title), the colour of the currency chips.
     Img(148, 22, hexc("#E0CFA4")).save("menu/ui/profile_148")
+    # Player faces drawn from the skin (SkinFaces): one white 2x2 dot per face pixel, tinted with the pixel colour,
+    # and a 20x20 frame for the 16 px face. The client's own head object is fixed at 8x8.
+    Img(2, 2, (255, 255, 255, 255)).save("menu/ui/px_2")
+    bevel(20, 20, SLOT, INK, SLOT_DARK, SLOT_LIGHT).save("menu/ui/head_frame_20")
 
 
 def write_defaults():

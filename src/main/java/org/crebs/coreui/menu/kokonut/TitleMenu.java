@@ -65,7 +65,7 @@ public final class TitleMenu {
     }
 
     /** What one frame shows. {@code shown} is {@code owned} after the search; {@code equipped} may be null. */
-    record View(String player, net.kyori.adventure.text.object.PlayerHeadObjectContents head, boolean ready, boolean busy,
+    record View(String player, net.kyori.adventure.text.object.PlayerHeadObjectContents head, int[] face, boolean ready, boolean busy,
                 List<Title> owned, List<Title> shown, Long equipped, Title selected, int page, String query) {
         int pages() {
             return Math.max(1, (shown.size() + ROWS - 1) / ROWS);
@@ -95,7 +95,7 @@ public final class TitleMenu {
     /** {@code /칭호} and the main menu: false (Core's chest GUI) while the glyphs are not loaded. */
     public static boolean open(CoreUi coreUi, TitleCatalog catalog, Player player) {
         var g = coreUi.getGlyphs().all();
-        if (!g.containsKey("menu/ui/field_176") || !g.containsKey("menu/ui/plate_200") || !g.containsKey("menu/ui/tag_200") || !g.containsKey("dex/ui/page_0_0")) return false;
+        if (!g.containsKey("menu/ui/field_176") || !g.containsKey("menu/ui/plate_200") || !g.containsKey("menu/ui/tag_200") || !g.containsKey("menu/ui/px_2") || !g.containsKey("dex/ui/page_0_0")) return false;
         player.playSound(player, Sound.ITEM_BOOK_PAGE_TURN, SoundCategory.MASTER, 0.6f, 1f);
         show(coreUi, catalog, player, new State("", 0, null));
         return true;
@@ -110,7 +110,7 @@ public final class TitleMenu {
         int pages = Math.max(1, (shown.size() + ROWS - 1) / ROWS);
         int page = Math.clamp(state.page(), 0, pages - 1);
         Title selected = pick(shown, page, state.selected(), equipped);
-        View view = new View(displayName(player), MainMenu.head(player), catalog.ready(player), catalog.busy(player), owned, shown, equipped, selected, page, state.query());
+        View view = new View(displayName(player), MainMenu.head(player), coreUi.getSkinFaces().face(player), catalog.ready(player), catalog.busy(player), owned, shown, equipped, selected, page, state.query());
         State now = new State(state.query(), page, selected == null ? null : selected.id());
         coreUi.open(player, build(coreUi.getGlyphs().all(), view, new Actions() {
             public void select(Player p, Title title) { show(coreUi, catalog, p, new State(now.query(), now.page(), title.id())); }
@@ -245,9 +245,11 @@ public final class TitleMenu {
         c.text("#" + s.id(), RIGHT + 5, TOP + 4, PAPER);
         if (on) c.right("장착 중", RIGHT + 195, TOP + 4, STAMP);
         int cx = RIGHT + PAGE / 2;
-        c.plated(s.name(), s.plain(), cx, 61, WHITE);
-        c.plated(Component.text(v.player()), v.player(), cx, 74, WHITE);
-        if (v.head() != null) c.b.playerHead("head", v.head()).position(cx - 4, 90).add();
+        c.plated(s.name(), s.plain(), cx, 55, WHITE);
+        c.plated(Component.text(v.player()), v.player(), cx, 68, WHITE);
+        // Face at 16 px (2x) standing on the ground line (y 97); the 8x8 head object until the skin is loaded.
+        if (v.face() != null) c.face(v.face(), cx - 8, 81, 2);
+        else if (v.head() != null) c.b.playerHead("head", v.head()).position(cx - 4, 81).add();
 
         c.tagged(s.name(), s.plain(), RIGHT, 125, PAGE);
         Title current = v.equippedTitle();
@@ -395,6 +397,15 @@ public final class TitleMenu {
             int plate = Math.min(200, Math.max(24, (width + 6 + 7) / 8 * 8));
             image("menu/ui/plate_" + plate, cx - plate / 2, y);
             rich(value, plain, cx - width / 2, y + 2, max, color);
+        }
+
+        /** A face from {@link org.crebs.coreui.skin.SkinFaces}: one tinted {@code menu/ui/px_<scale>} dot per pixel. */
+        void face(int[] colours, int x, int y, int scale) {
+            Glyph dot = Objects.requireNonNull(g.get("menu/ui/px_" + scale), "missing glyph menu/ui/px_" + scale);
+            for (int i = 0; i < 64; i++) {
+                b.glyph("img" + ids++, dot).position(x + (i % 8) * scale, y + (i / 8) * scale)
+                        .tint(TextColor.color(colours[i])).add();
+            }
         }
 
         static String cut(String value, int max) {
