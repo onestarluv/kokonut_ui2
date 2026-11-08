@@ -296,3 +296,5 @@ Light and dark menus share one text font. Uncoloured text uses the theme's defau
 - [Packer](https://github.com/DRAGNIL68/Packer) by **DRAGNIL68** is used to generate the resource-pack ZIP.
 
 Shift+F와 `/메뉴`(`/ego`)는 Kokonut_UI 메인메뉴를 엽니다. 이전 편의기능 UI와 `/메뉴2`는 제거했습니다. 클라이언트 모드는 편의기능 전용 화면을 제공하지 않습니다.
+
+우편함은 Mail의 제한된 조회 캐시를 이용하며, 우편 선택 및 첨부 페이지 이동 시 현재 목록을 재사용합니다. 화면 이동·닫기·새 요청 이후 도착한 이전 응답은 무시합니다.

@@ -213,6 +213,7 @@ public final class CoreUi extends JavaPlugin {
     }
 
     public void open(Player player, CoreMenu menu) {
+        org.crebs.coreui.menu.kokonut.MailRequests.invalidate(player);
         requireMainThread();
         remember(player.getUniqueId());
         MenuValues saved = menu.remembersValues() ? rememberedValues.getOrDefault(player.getUniqueId(), Map.of()).getOrDefault(menu.getId(), MenuValues.EMPTY) : MenuValues.EMPTY;
@@ -272,12 +273,14 @@ public final class CoreUi extends JavaPlugin {
     }
 
     public void close(Player player) {
+        org.crebs.coreui.menu.kokonut.MailRequests.invalidate(player);
         requireMainThread();
         removeSession(player);
         player.closeDialog();
     }
 
     public void removeSession(Player player) {
+        org.crebs.coreui.menu.kokonut.MailRequests.invalidate(player);
         requireMainThread();
         remember(player.getUniqueId());
         sessions.remove(player.getUniqueId());

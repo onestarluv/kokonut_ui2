@@ -42,6 +42,7 @@ public final class MailMenu {
     private static final DateTimeFormatter SHORT = DateTimeFormatter.ofPattern("MM.dd HH:mm").withZone(ZoneId.of("Asia/Seoul"));
     private static final DateTimeFormatter LONG = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm").withZone(ZoneId.of("Asia/Seoul"));
     /** Players with a claim in flight; their clicks are ignored until it finishes. */
+    private static boolean current(Player player,Object ticket) { return player.isOnline() && MailRequests.current(player,ticket); }
     private static final Set<UUID> BUSY = new HashSet<>();
 
     /** An item as the screen needs it: vanilla icon key, stack size and the client-rendered tooltip. */
@@ -83,18 +84,28 @@ public final class MailMenu {
 
     /** Fetches the page (and the selected mail's attachments), then draws. Futures complete on the server thread. */
     private static void load(CoreUi coreUi, MailboxService mail, Player player, int page, UUID selected, int attachPage) {
+        Object ticket=MailRequests.begin(player);
         mail.page(player.getUniqueId(), page, ROWS).whenComplete((loaded, error) -> {
+            if(!current(player,ticket)) return;
             if (error != null || loaded == null) { failed(player); return; }
-            MailEntry pick = loaded.entries().stream().filter(e -> e.id().equals(selected)).findFirst()
-                    .orElse(loaded.entries().isEmpty() ? null : loaded.entries().getFirst());
-            if (pick == null) { show(coreUi, mail, player, View.of(loaded, null, 0, List.of())); return; }
-            int pages = Math.max(1, (pick.attachments() + GRID - 1) / GRID);
-            int ap = Math.clamp(pick.id().equals(selected) ? attachPage : 0, 0, pages - 1);
-            mail.attachments(player.getUniqueId(), pick.id(), ap * GRID, GRID).whenComplete((items, failure) -> {
-                if (failure != null || items == null) { failed(player); return; }
-                show(coreUi, mail, player, View.of(loaded, pick, ap, items));
-            });
+            detail(coreUi,mail,player,loaded,selected,attachPage,ticket);
         });
+    }
+    private static void detail(CoreUi coreUi,MailboxService mail,Player player,MailPage loaded,UUID selected,int attachPage,Object ticket) {
+        MailEntry pick=loaded.entries().stream().filter(e->e.id().equals(selected)).findFirst()
+                .orElse(loaded.entries().isEmpty()?null:loaded.entries().getFirst());
+        if(pick==null) { show(coreUi,mail,player,View.of(loaded,null,0,List.of())); return; }
+        int pages=Math.max(1,(pick.attachments()+GRID-1)/GRID);
+        int ap=Math.clamp(pick.id().equals(selected)?attachPage:0,0,pages-1);
+        mail.attachments(player.getUniqueId(),pick.id(),ap*GRID,GRID).whenComplete((items,error)-> {
+            if(!current(player,ticket)) return;
+            if(error!=null || items==null) { failed(player); return; }
+            show(coreUi,mail,player,View.of(loaded,pick,ap,items));
+        });
+    }
+    private static void select(CoreUi coreUi,MailboxService mail,Player player,MailPage page,UUID selected,int attachPage) {
+        Object ticket=MailRequests.begin(player);
+        detail(coreUi,mail,player,page,selected,attachPage,ticket);
     }
 
     private static void failed(Player player) {
@@ -104,24 +115,26 @@ public final class MailMenu {
     private static void show(CoreUi coreUi, MailboxService mail, Player player, View view) {
         if (!player.isOnline()) return;
         coreUi.open(player, build(coreUi.getGlyphs().all(), view, new Actions() {
-            public void select(Player p, MailEntry entry) { if (!BUSY.contains(p.getUniqueId())) load(coreUi, mail, p, view.page().page(), entry.id(), 0); }
+            public void select(Player p, MailEntry entry) { if (!BUSY.contains(p.getUniqueId())) MailMenu.select(coreUi, mail, p, view.page(), entry.id(), 0); }
             public void page(Player p, int page) { if (!BUSY.contains(p.getUniqueId())) load(coreUi, mail, p, page, null, 0); }
-            public void attachPage(Player p, int page) { if (!BUSY.contains(p.getUniqueId())) load(coreUi, mail, p, view.page().page(), view.selected().id(), page); }
+            public void attachPage(Player p, int page) { if (!BUSY.contains(p.getUniqueId())) MailMenu.select(coreUi, mail, p, view.page(), view.selected().id(), page); }
             public void claim(Player p, MailEntry entry) {
                 if (!BUSY.add(p.getUniqueId())) return;
+                Object ticket=MailRequests.begin(p);
                 mail.claim(p, entry.id()).whenComplete((result, error) -> {
                     BUSY.remove(p.getUniqueId());
                     if (error == null) Messages.send(p, mail.describe(result));
                     claimSound(p, error == null && result.status() == MailResult.Status.CLAIMED);
-                    if (p.isOnline()) load(coreUi, mail, p, view.page().page(), null, 0);
+                    if (current(p,ticket)) load(coreUi, mail, p, view.page().page(), null, 0);
                 });
             }
             public void claimAll(Player p) {
                 if (!BUSY.add(p.getUniqueId())) return;
+                Object ticket=MailRequests.begin(p);
                 mail.claimAll(p).whenComplete((count, error) -> {
                     BUSY.remove(p.getUniqueId());
                     claimSound(p, error == null && count != null && count > 0);
-                    if (p.isOnline()) load(coreUi, mail, p, 0, null, 0);
+                    if (current(p,ticket)) load(coreUi, mail, p, 0, null, 0);
                 });
             }
             public void close(Player p) { coreUi.close(p); }
