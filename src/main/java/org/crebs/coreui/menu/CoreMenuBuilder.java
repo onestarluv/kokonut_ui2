@@ -49,8 +49,16 @@ public final class CoreMenuBuilder {
             return this;
         }
 
+        private net.kyori.adventure.text.event.HoverEventSource<?> hover;
+
+        /** Tooltip shown while the pointer is over the area (e.g. {@code itemStack.asHoverEvent()}). */
+        public HotspotBuilder hover(net.kyori.adventure.text.event.HoverEventSource<?> value) {
+            hover = Objects.requireNonNull(value);
+            return this;
+        }
+
         protected HotspotBuilder self() { return this; }
-        protected MenuElement create() { return new HotspotElement(properties(), onClick); }
+        protected MenuElement create() { return new HotspotElement(properties(), onClick, hover); }
     }
 
     public CoreMenuBuilder(String id) {
@@ -74,8 +82,16 @@ public final class CoreMenuBuilder {
             height = glyph.height();
         }
 
+        private net.kyori.adventure.text.format.TextColor tint;
+
+        /** Multiplies the image colours, e.g. a dark colour for a silhouette. */
+        public GlyphBuilder tint(net.kyori.adventure.text.format.TextColor value) {
+            tint = Objects.requireNonNull(value);
+            return this;
+        }
+
         protected GlyphBuilder self() { return this; }
-        protected MenuElement create() { return new GlyphElement(properties(), glyph); }
+        protected MenuElement create() { return new GlyphElement(properties(), glyph, tint); }
     }
 
     public CoreMenuBuilder title(Component value) {

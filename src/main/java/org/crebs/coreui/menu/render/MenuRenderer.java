@@ -121,7 +121,9 @@ public final class MenuRenderer {
                 case GlyphElement image -> {
                     var glyph = image.glyph();
                     int y = image.bounds().y() + contentTop() + glyph.ascent() - 8;
-                    placeAtLine(image.bounds().x(), Math.floorDiv(y, 9), glyph.component(Math.floorMod(y, 9)), glyph.advance(), null);
+                    Component sprite = glyph.component(Math.floorMod(y, 9));
+                    if (image.tint() != null) sprite = sprite.color(image.tint());
+                    placeAtLine(image.bounds().x(), Math.floorDiv(y, 9), sprite, glyph.advance(), null);
                 }
                 case LabelElement label -> label(label.bounds().x(), label.bounds().y(), label.properties().label(), secondary, null);
                 case ButtonElement button -> button(button);
@@ -131,7 +133,7 @@ public final class MenuRenderer {
                 case DisplayElement display -> display(display);
                 case HotspotElement hotspot -> {
                     if (popupArea == null || !hotspot.bounds().overlaps(popupArea))
-                        hitBox(hotspot.bounds(), session.registerClick(hotspot, hotspot.onClick()));
+                        hitBox(hotspot.bounds(), session.registerClick(hotspot, hotspot.onClick()), hotspot.hover());
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + element);
             }
@@ -425,12 +427,17 @@ public final class MenuRenderer {
         }
     }
 
-    private record HitBox(Bounds bounds, Key click, boolean popup, boolean header) {
+    private record HitBox(Bounds bounds, Key click, boolean popup, boolean header,
+                          net.kyori.adventure.text.event.HoverEventSource<?> hover) {
     }
 
     private void hitBox(Bounds bounds, Key click) {
+        hitBox(bounds, click, null);
+    }
+
+    private void hitBox(Bounds bounds, Key click, net.kyori.adventure.text.event.HoverEventSource<?> hover) {
         if (click == null) return;
-        hitBoxes.add(new HitBox(bounds, click, overlay, paintingHeader));
+        hitBoxes.add(new HitBox(bounds, click, overlay, paintingHeader, hover));
     }
 
     private void renderHitBoxes() {
@@ -452,6 +459,7 @@ public final class MenuRenderer {
                         remaining -= span;
                     }
                 }
+                if (hit.hover() != null) content = content.hoverEvent(hit.hover());
                 placeAtLine(b.x(), Math.floorDiv(baseline, 9), content, b.width(), hit.click());
             }
             }

@@ -29,6 +29,54 @@ public final class ResourcePackGenerator {
     }
 
     private static final String TEXT_SHADER_26_3 = "resource-pack/coreui_26_3/assets/minecraft/shaders/core/text.";
+    /** PNGs shipped in the JAR (e.g. the item dex) are copied into Glyphs/ once; existing files are never overwritten. */
+    private static final String BUNDLED_GLYPHS = "bundled-glyphs/";
+
+    /**
+     * One font per glyph with a provider per allowed offset (normally all nine, each shifted one pixel down), so a
+     * glyph can start anywhere in a 9px line. {@code offsetMask} bit n = offset n is available.
+     */
+    private static void writeFont(ResourcePack pack, Gson gson, String id, String texture, int height, int ascent, int offsetMask) throws IOException {
+        List<Map<String, Object>> providers = new ArrayList<>();
+        for (int offset = 0; offset < 9; offset++) {
+            if ((offsetMask >> offset & 1) == 0) continue;
+            providers.add(Map.of("type", "bitmap", "file", texture, "height", height, "ascent", ascent - offset,
+                    "chars", List.of(String.valueOf((char) ('' + offset)))));
+        }
+        byte[] json = gson.toJson(Map.of("providers", providers)).getBytes(StandardCharsets.UTF_8);
+        try (InputStream stream = new ByteArrayInputStream(json)) {
+            pack.writeInputStream("assets/coreui/font/custom/" + id + ".json", stream);
+        }
+    }
+
+    private YamlConfiguration bundledYaml(String name) throws IOException {
+        YamlConfiguration yaml = new YamlConfiguration();
+        try (JarFile jar = new JarFile(pluginJar.toFile())) {
+            var entry = jar.getJarEntry(name);
+            if (entry == null) return yaml;
+            try (var reader = new InputStreamReader(jar.getInputStream(entry), StandardCharsets.UTF_8)) {
+                yaml.load(reader);
+            } catch (org.bukkit.configuration.InvalidConfigurationException exception) {
+                throw new IOException("Invalid " + name, exception);
+            }
+        }
+        return yaml;
+    }
+
+    private static void installBundledGlyphs(JarFile jar, Path input) throws IOException {
+        Path root = input.toAbsolutePath().normalize();
+        var entries = jar.entries();
+        while (entries.hasMoreElements()) {
+            var entry = entries.nextElement();
+            if (entry.isDirectory() || !entry.getName().startsWith(BUNDLED_GLYPHS)) continue;
+            Path target = root.resolve(entry.getName().substring(BUNDLED_GLYPHS.length())).normalize();
+            if (!target.startsWith(root) || Files.exists(target)) continue;
+            Files.createDirectories(target.getParent());
+            try (InputStream stream = jar.getInputStream(entry)) {
+                Files.copy(stream, target);
+            }
+        }
+    }
 
     public record Result(Path path, Map<String, Glyph> glyphs) {}
 
@@ -46,6 +94,9 @@ public final class ResourcePackGenerator {
             throw new IOException("Invalid glyphs.yml", exception);
         }
         ResourcePack pack = new ResourcePack();
+        // Bundled glyph sets ship their own height/ascent defaults; entries in glyphs.yml still win.
+        YamlConfiguration defaults = bundledYaml("bundled-glyphs.yml");
+        List<YamlConfiguration> vanillaTables = List.of(bundledYaml("bundled-vanilla-glyphs.yml"), bundledYaml("bundled-vanilla-items.yml"));
         try (JarFile jar = new JarFile(pluginJar.toFile())) {
             Path example = input.resolve("example-arrow.png");
             if (Files.notExists(example)) {
@@ -55,6 +106,7 @@ public final class ResourcePackGenerator {
                     Files.copy(stream, example);
                 }
             }
+            installBundledGlyphs(jar, input);
             var entries = jar.entries();
             while (entries.hasMoreElements()) {
                 var entry = entries.nextElement();
@@ -79,8 +131,9 @@ public final class ResourcePackGenerator {
                 if (!id.matches("[a-z0-9_/-]+")) throw new IOException("Glyph names must use lowercase letters, numbers, _, - or /: " + relative);
                 var image = ImageIO.read(file.toFile());
                 if (image == null) throw new IOException("Invalid PNG: " + relative);
-                int height = config.getInt("glyphs." + id + ".height", image.getHeight());
-                int ascent = config.getInt("glyphs." + id + ".ascent", height);
+                String key = "glyphs." + id;
+                int height = config.getInt(key + ".height", defaults.getInt(key + ".height", image.getHeight()));
+                int ascent = config.getInt(key + ".ascent", defaults.getInt(key + ".ascent", height));
                 if (height < 1 || height > 256 || ascent < -256 || ascent > height) throw new IOException("Invalid height/ascent for glyph: " + id);
                 int width = (int) Math.round((double) image.getWidth() * height / image.getHeight());
                 int right = 0;
@@ -96,16 +149,32 @@ public final class ResourcePackGenerator {
                 Glyph glyph = new Glyph(id, width, height, ascent, advance);
                 loaded.put(id, glyph);
                 pack.write("assets/coreui/textures/custom/" + relative, file);
-                List<Map<String, Object>> providers = new ArrayList<>();
-                for (int offset = 0; offset < 9; offset++) {
-                    providers.add(Map.of("type", "bitmap", "file", "coreui:custom/" + relative,
-                            "height", height, "ascent", ascent - offset,
-                            "chars", List.of(String.valueOf((char) ('\uE000' + offset)))));
+                writeFont(pack, gson, id, "coreui:custom/" + relative, height, ascent, Glyph.ALL_OFFSETS);
+            }
+        }
+        // Glyphs that draw the client's own textures (e.g. vanilla item icons): only a font is written, sizes come
+        // from bundled-vanilla-glyphs.yml (tools/VanillaGlyphs.java) and bundled-vanilla-items.yml (one icon per
+        // vanilla item, tools/VanillaItemIcons.java). A PNG with the same id wins. "offsets" limits the providers.
+        for (YamlConfiguration vanilla : vanillaTables) {
+            var vanillaSection = vanilla.getConfigurationSection("vanilla");
+            if (vanillaSection == null) continue;
+            for (String id : vanillaSection.getKeys(false)) {
+                if (loaded.containsKey(id)) continue;
+                var entry = vanillaSection.getConfigurationSection(id);
+                if (entry == null || !id.matches("[a-z0-9_/-]+")) throw new IOException("Invalid vanilla glyph: " + id);
+                String texture = Objects.requireNonNull(entry.getString("texture"), "texture of " + id);
+                int height = entry.getInt("height"), ascent = entry.getInt("ascent", height);
+                if (height < 1 || height > 256 || ascent < -256 || ascent > height) throw new IOException("Invalid height/ascent for glyph: " + id);
+                int mask = Glyph.ALL_OFFSETS;
+                if (entry.isList("offsets")) {
+                    mask = 0;
+                    for (int offset : entry.getIntegerList("offsets")) {
+                        if (offset < 0 || offset > 8) throw new IOException("Invalid offset for glyph: " + id);
+                        mask |= 1 << offset;
+                    }
                 }
-                String json = gson.toJson(Map.of("providers", providers));
-                try (InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
-                    pack.writeInputStream("assets/coreui/font/custom/" + id + ".json", stream);
-                }
+                loaded.put(id, new Glyph(id, entry.getInt("width", height), height, ascent, entry.getInt("advance", height + 1), mask));
+                writeFont(pack, gson, id, texture, height, ascent, mask);
             }
         }
         // Label fonts follow the configured vanilla/Galmuri split (see TextWidths), so they are generated here.

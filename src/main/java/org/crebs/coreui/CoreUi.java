@@ -43,6 +43,14 @@ public final class CoreUi extends JavaPlugin {
             else getLogger().log(java.util.logging.Level.SEVERE, "Resource pack generation failed", error);
         });
         getServer().getPluginManager().registerEvents(new MenuListener(this), this);
+        if (getServer().getPluginManager().isPluginEnabled("Kokonut-Mail")) {
+            try {
+                org.crebs.coreui.menu.kokonut.MailBridge.registerView(this);
+                getLogger().info("Kokonut-Mail mailbox now opens as a CoreUi dialog");
+            } catch (LinkageError olderMailPlugin) {
+                getLogger().warning("Kokonut-Mail is too old for the dialog mailbox; it keeps its chest GUI");
+            }
+        }
         getLogger().info("CoreUI menus online");
         Objects.requireNonNull(getCommand("coreui")).setExecutor((sender, command, label, args) -> {
             if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
@@ -127,6 +135,26 @@ public final class CoreUi extends JavaPlugin {
             if (!getServer().getPluginManager().isPluginEnabled("Kokonut-Core")
                     || !org.crebs.coreui.menu.kokonut.UtilityMenu2.open(this, player)) {
                 sender.sendMessage("Kokonut-Core 편의기능 메뉴를 찾을 수 없습니다.");
+            }
+            return true;
+        });
+        Objects.requireNonNull(getCommand("메인메뉴")).setExecutor((sender, command, label, args) -> {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("플레이어만 사용할 수 있습니다.");
+                return true;
+            }
+            if (!org.crebs.coreui.menu.kokonut.MainMenu.open(this, player)) {
+                sender.sendMessage("메뉴 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
+            }
+            return true;
+        });
+        Objects.requireNonNull(getCommand("도감")).setExecutor((sender, command, label, args) -> {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("플레이어만 사용할 수 있습니다.");
+                return true;
+            }
+            if (!org.crebs.coreui.menu.dex.ItemDexMenu.open(this, player)) {
+                sender.sendMessage("도감 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
             }
             return true;
         });
@@ -290,6 +318,8 @@ public final class CoreUi extends JavaPlugin {
         session.release();
         try {
             session.renderTick(player.getWorld().getGameTime());
+            // Every menu control (buttons, tabs, hotspots) clicks audibly, only for the player who pressed it.
+            player.playSound(player, org.bukkit.Sound.UI_BUTTON_CLICK, org.bukkit.SoundCategory.MASTER, 0.4f, 1f);
             interaction.callback().accept(player);
             if (sessions.get(player.getUniqueId()) == session && player.isOnline()) {
                 refresh(player);
