@@ -135,8 +135,9 @@ public final class MenuRenderer {
                 case DropdownElement dropdown -> dropdown(dropdown);
                 case DisplayElement display -> display(display);
                 case HotspotElement hotspot -> {
-                    if (popupArea == null || !hotspot.bounds().overlaps(popupArea))
-                        hitBox(hotspot.bounds(), session.registerClick(hotspot, hotspot.onClick()), hotspot.hover());
+                    if (popupArea != null && hotspot.bounds().overlaps(popupArea)) break;
+                    if (hotspot.url() != null) hitBoxes.add(new HitBox(hotspot.bounds(), null, overlay, paintingHeader, hotspot.hover(), hotspot.url()));
+                    else hitBox(hotspot.bounds(), session.registerClick(hotspot, hotspot.onClick()), hotspot.hover());
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + element);
             }
@@ -430,8 +431,9 @@ public final class MenuRenderer {
         }
     }
 
+    /** {@code url}: a link opened by the client instead of a server click ({@code click} is then null). */
     private record HitBox(Bounds bounds, Key click, boolean popup, boolean header,
-                          net.kyori.adventure.text.event.HoverEventSource<?> hover) {
+                          net.kyori.adventure.text.event.HoverEventSource<?> hover, String url) {
     }
 
     private void hitBox(Bounds bounds, Key click) {
@@ -440,7 +442,7 @@ public final class MenuRenderer {
 
     private void hitBox(Bounds bounds, Key click, net.kyori.adventure.text.event.HoverEventSource<?> hover) {
         if (click == null) return;
-        hitBoxes.add(new HitBox(bounds, click, overlay, paintingHeader, hover));
+        hitBoxes.add(new HitBox(bounds, click, overlay, paintingHeader, hover, null));
     }
 
     private void renderHitBoxes() {
@@ -463,6 +465,7 @@ public final class MenuRenderer {
                     }
                 }
                 if (hit.hover() != null) content = content.hoverEvent(hit.hover());
+                if (hit.url() != null) content = content.clickEvent(ClickEvent.openUrl(hit.url()));
                 placeAtLine(b.x(), Math.floorDiv(baseline, 9), content, b.width(), hit.click());
             }
             }

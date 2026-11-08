@@ -4,3 +4,11 @@ text:
   # (Nexo/pack/assets/minecraft/font/default.json), so menu text looks exactly like chat and item names.
   # Only printable ASCII is allowed here. After changing it, run /coreui reload and redeploy the pack.
   vanilla-chars: "1234567890!?;:@#$%^&*()-=_+`~qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>/{},.[]'\"|\\ "
+
+# Main menu link buttons (wiki, minelist, discord). Clicking opens the address in the player's browser after the
+# client's own confirmation screen. Leave one empty to show "not set yet" instead. Only http(s) addresses.
+# Existing servers keep their config.yml: add this section there, the defaults below apply until then.
+links:
+  wiki: "https://wiki.egoverse.kr"
+  minelist: ""
+  discord: ""

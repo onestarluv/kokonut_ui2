@@ -294,7 +294,7 @@ def main():
     for s in ("normal", "selected", "locked"):
         slot(s).save(f"ui/slot_{s}")
     close().save("ui/close")
-    for kind, widths in {"paper": (20, 36, 52, 100), "dark": (36,), "green": (46, 60, 100), "off": (46, 60, 100)}.items():
+    for kind, widths in {"paper": (20, 24, 36, 52, 100), "dark": (36,), "green": (46, 60, 100), "off": (46, 60, 100)}.items():
         for w in widths:
             button(kind, w).save(f"ui/btn_{kind}_{w}")
     for key, color in CATS:

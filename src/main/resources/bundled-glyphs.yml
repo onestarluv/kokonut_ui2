@@ -34,6 +34,8 @@ glyphs:
     ascent: 8
   dex/ui/btn_paper_20:
     ascent: 8
+  dex/ui/btn_paper_24:
+    ascent: 8
   dex/ui/btn_paper_36:
     ascent: 8
   dex/ui/btn_paper_52:
@@ -148,6 +150,11 @@ glyphs:
   menu/icon/deco_32:
     height: 32
     ascent: 8
+  menu/icon/discord:
+    ascent: 8
+  menu/icon/discord_32:
+    height: 32
+    ascent: 8
   menu/icon/ego:
     ascent: 8
   menu/icon/ego_32:
@@ -161,6 +168,11 @@ glyphs:
   menu/icon/kokonut:
     ascent: 8
   menu/icon/kokonut_32:
+    height: 32
+    ascent: 8
+  menu/icon/minelist:
+    ascent: 8
+  menu/icon/minelist_32:
     height: 32
     ascent: 8
   menu/icon/post:
@@ -186,6 +198,11 @@ glyphs:
   menu/icon/warp:
     ascent: 8
   menu/icon/warp_32:
+    height: 32
+    ascent: 8
+  menu/icon/wiki:
+    ascent: 8
+  menu/icon/wiki_32:
     height: 32
     ascent: 8
   menu/ui/badge_12:

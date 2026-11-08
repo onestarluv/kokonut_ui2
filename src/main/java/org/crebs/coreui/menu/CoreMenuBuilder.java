@@ -57,8 +57,16 @@ public final class CoreMenuBuilder {
             return this;
         }
 
+        private String url;
+
+        /** Opens this http(s) link in the client (with its confirmation screen) instead of calling the server. */
+        public HotspotBuilder url(String value) {
+            url = Objects.requireNonNull(value);
+            return this;
+        }
+
         protected HotspotBuilder self() { return this; }
-        protected MenuElement create() { return new HotspotElement(properties(), onClick, hover); }
+        protected MenuElement create() { return new HotspotElement(properties(), onClick, hover, url); }
     }
 
     public CoreMenuBuilder(String id) {

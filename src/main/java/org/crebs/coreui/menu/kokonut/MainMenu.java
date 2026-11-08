@@ -31,11 +31,17 @@ public final class MainMenu {
             WHITE = TextColor.color(0xFFFFFF);
 
     /**
-     * What the profile row shows; {@code null} balances mean "still loading / unavailable" and {@code mail} is the
-     * unclaimed mail count from Kokonut-Mail (null when unknown). The dex numbers are kept for callers and checks.
+     * What the profile row shows; {@code mail} is the unclaimed mail count from Kokonut-Mail (null when unknown).
+     * The dex numbers are kept for callers and checks.
      */
-    record Info(String name, Component title, String place, Long gold, Long kokonut, Long mail,
-                int dexRegistered, int dexTotal, int rewards, PlayerHeadObjectContents head, int[] face) {}
+    record Info(String name, Component title, String place, Long mail, int dexRegistered, int dexTotal, int rewards,
+                PlayerHeadObjectContents head, int[] face, List<Link> links) {}
+
+    /** A link button: {@code url} from config.yml {@code links.<id>}, null when it is not set. */
+    record Link(String id, String label, String icon, String url) {}
+
+    /** Link buttons right of the profile, in this order. */
+    private static final String[][] LINKS = {{"wiki", "위키"}, {"minelist", "마인리스트"}, {"discord", "디스코드"}};
 
     /** {@code icon} is a full glyph id: hand-drawn art ({@code menu/icon/<name>_32}) or a vanilla icon ({@code menu/item/<key>}). */
     record Button(String id, String label, String icon, Consumer<Player> action) {}
@@ -48,22 +54,18 @@ public final class MainMenu {
         var glyphs = coreUi.getGlyphs().all();
         if (!glyphs.containsKey("menu/ui/panel_116_0") || !glyphs.containsKey("menu/icon/deco_32") || !glyphs.containsKey("menu/icon/setting_32")
                 || !glyphs.containsKey("menu/ui/profile_148") || !glyphs.containsKey("menu/ui/tag_128")
-                || !glyphs.containsKey("menu/ui/px_2") || !glyphs.containsKey("menu/ui/head_frame_20")) return false;
+                || !glyphs.containsKey("menu/ui/px_2") || !glyphs.containsKey("menu/ui/head_frame_20")
+                || !glyphs.containsKey("menu/icon/wiki") || !glyphs.containsKey("menu/icon/minelist")
+                || !glyphs.containsKey("menu/icon/discord") || !glyphs.containsKey("dex/ui/btn_paper_24")) return false;
         coreUi.open(player, build(coreUi, coreUi.getGlyphs().all(), info(coreUi, player)));
         return true;
     }
 
     private static Info info(CoreUi coreUi, Player player) {
-        Long gold = null, kokonut = null;
         Component title = null;
         String name = player.getName();
         if (coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Core")) {
             name = CoreBalance.displayName(player);
-            var balance = CoreBalance.of(player.getUniqueId());
-            if (balance.isPresent()) {
-                gold = balance.get().gold();
-                kokonut = balance.get().kokonut();
-            }
             title = CoreBalance.title(coreUi.getServer(), player.getUniqueId()).orElse(null);
         }
         Long mail = null;
@@ -72,8 +74,19 @@ public final class MainMenu {
             if (count.isPresent()) mail = count.getAsLong();
         }
         DexCatalog dex = DexCatalog.SAMPLE;
-        return new Info(name, title, player.getWorld().getName(), gold, kokonut, mail, dex.registered(), dex.total(), 0, head(player),
-                coreUi.getSkinFaces().face(player));
+        return new Info(name, title, player.getWorld().getName(), mail, dex.registered(), dex.total(), 0, head(player),
+                coreUi.getSkinFaces().face(player), links(coreUi));
+    }
+
+    /** {@code links.<id>} from config.yml; anything but an http(s) address counts as not set. */
+    private static List<Link> links(CoreUi coreUi) {
+        List<Link> links = new ArrayList<>();
+        for (String[] link : LINKS) {
+            String url = coreUi.getConfig().getString("links." + link[0], "").strip();
+            boolean web = url.startsWith("https://") || url.startsWith("http://");
+            links.add(new Link(link[0], link[1], "menu/icon/" + link[0], web ? url : null));
+        }
+        return links;
     }
 
     /** The player's own skin face; the profile's signed textures are included so the client can draw it right away. */
@@ -142,19 +155,30 @@ public final class MainMenu {
         c.image("menu/ui/panel_116_1", 160, PANEL_Y);
         c.image("menu/ui/tab_join", 13, PANEL_Y);
 
-        // Profile row: the player's skin face (8x8 at y 36, a line boundary), name, title (or world), gold and kokonut.
-        // A backing in the chip colour first (line 3), so the head frame, name and title paint over it.
+        // Profile row: face, title (or world) on top, nickname below. A backing in the chip colour first (line 3),
+        // so the head frame, title and name paint over it.
         c.image("menu/ui/profile_148", 12, 32);
         // Face at 16 px (2x) from the skin; until the skin is loaded, the client's 8x8 head object (y on a 9 px line).
         c.image("menu/ui/head_frame_20", 13, 33);
         if (info.face() != null) c.face(info.face(), 15, 35, 2);
         else if (info.head() != null) c.b.playerHead("head", info.head()).position(19, 36).add();
         else c.image("menu/icon/kokonut", 15, 35);
-        c.text(info.name(), 36, 33, INK);
-        if (info.title() != null) c.title(info.title(), 34, 44, 124);
-        else c.text("위치 · " + info.place(), 36, 44, DIM);
-        c.chip(164, 34, "menu/icon/gold", info.gold(), "골드");
-        c.chip(238, 34, "menu/icon/kokonut", info.kokonut(), "코코넛");
+        // Title backing at y 33..43 (inside the profile backing), nickname at y 45.
+        if (info.title() != null) c.title(info.title(), 34, 35, 124);
+        else c.text("위치 · " + info.place(), 36, 35, DIM);
+        c.text(info.name(), 36, 45, INK);
+
+        // Link buttons (wiki, minelist, discord): icon only, the name in the tooltip; right-aligned to the divider.
+        for (int i = 0; i < info.links().size(); i++) {
+            Link link = info.links().get(i);
+            int x = 306 - (info.links().size() - i) * 28 + 4;
+            c.image("dex/ui/btn_paper_24", x, 33);
+            c.image(link.icon(), x + 4, 35);
+            var tooltip = net.kyori.adventure.text.event.HoverEvent.showText(Component.text(link.label(), WHITE));
+            var spot = c.b.hotspot("link" + c.ids++).position(x, 33).size(24, 20).hover(tooltip);
+            if (link.url() != null) spot.url(link.url()).add();
+            else spot.onClick(p -> Messages.send(p, link.label() + " 주소가 아직 준비되지 않았어요.")).add();
+        }
 
         // One row of seven buttons: icon and name.
         List<Button> buttons = buttons(coreUi, info);
@@ -238,15 +262,6 @@ public final class MainMenu {
 
         void centered(String value, int x, int width, int y, TextColor color) {
             text(value, x + (width - TextWidths.width(Component.text(value))) / 2, y, color);
-        }
-
-        /** Currency chip: icon + amount, "…" while Core's snapshot is loading or Core is absent. */
-        void chip(int x, int y, String icon, Long amount, String unit) {
-            image("menu/ui/chip_70", x, y);
-            image(icon, x + 1, y);
-            String value = amount == null ? "…" : String.format("%,d", amount);
-            right(value, x + 66, y + 4, GOLD);
-            b.hotspot("tip" + ids++).position(x, y).size(70, 16).onClick(p -> Messages.send(p, unit + " " + value)).add();
         }
 
         /** 100 px bar with power-of-two fill pieces from the dex kit. */
