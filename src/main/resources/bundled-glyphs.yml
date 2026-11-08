@@ -250,9 +250,57 @@ glyphs:
     ascent: 8
   menu/ui/plate_96:
     ascent: 8
+  menu/ui/profile_148:
+    ascent: 8
   menu/ui/tab:
     ascent: 8
   menu/ui/tab_join:
+    ascent: 8
+  menu/ui/tag_104:
+    ascent: 8
+  menu/ui/tag_112:
+    ascent: 8
+  menu/ui/tag_120:
+    ascent: 8
+  menu/ui/tag_128:
+    ascent: 8
+  menu/ui/tag_136:
+    ascent: 8
+  menu/ui/tag_144:
+    ascent: 8
+  menu/ui/tag_152:
+    ascent: 8
+  menu/ui/tag_160:
+    ascent: 8
+  menu/ui/tag_168:
+    ascent: 8
+  menu/ui/tag_176:
+    ascent: 8
+  menu/ui/tag_184:
+    ascent: 8
+  menu/ui/tag_192:
+    ascent: 8
+  menu/ui/tag_200:
+    ascent: 8
+  menu/ui/tag_24:
+    ascent: 8
+  menu/ui/tag_32:
+    ascent: 8
+  menu/ui/tag_40:
+    ascent: 8
+  menu/ui/tag_48:
+    ascent: 8
+  menu/ui/tag_56:
+    ascent: 8
+  menu/ui/tag_64:
+    ascent: 8
+  menu/ui/tag_72:
+    ascent: 8
+  menu/ui/tag_80:
+    ascent: 8
+  menu/ui/tag_88:
+    ascent: 8
+  menu/ui/tag_96:
     ascent: 8
   menu/ui/unknown_item:
     ascent: 8

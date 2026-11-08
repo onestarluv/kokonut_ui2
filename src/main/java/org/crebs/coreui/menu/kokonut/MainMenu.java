@@ -46,7 +46,8 @@ public final class MainMenu {
     /** Returns false while the menu glyphs are not loaded. */
     public static boolean open(CoreUi coreUi, Player player) {
         var glyphs = coreUi.getGlyphs().all();
-        if (!glyphs.containsKey("menu/ui/panel_116_0") || !glyphs.containsKey("menu/icon/deco_32") || !glyphs.containsKey("menu/icon/setting_32")) return false;
+        if (!glyphs.containsKey("menu/ui/panel_116_0") || !glyphs.containsKey("menu/icon/deco_32") || !glyphs.containsKey("menu/icon/setting_32")
+                || !glyphs.containsKey("menu/ui/profile_148") || !glyphs.containsKey("menu/ui/tag_128")) return false;
         coreUi.open(player, build(coreUi, coreUi.getGlyphs().all(), info(coreUi, player)));
         return true;
     }
@@ -138,11 +139,13 @@ public final class MainMenu {
         c.image("menu/ui/tab_join", 13, PANEL_Y);
 
         // Profile row: the player's skin face (8x8 at y 36, a line boundary), name, title (or world), gold and kokonut.
+        // A backing in the chip colour first (line 3), so the head frame, name and title paint over it.
+        c.image("menu/ui/profile_148", 12, 32);
         c.image("menu/ui/head_frame", 14, 34);
         if (info.head() != null) c.b.playerHead("head", info.head()).position(16, 36).add();
         else c.image("menu/icon/kokonut", 16, 34);
         c.text(info.name(), 32, 33, INK);
-        if (info.title() != null) c.label(info.title().colorIfAbsent(PURPLE), 32, 44);
+        if (info.title() != null) c.title(info.title(), 30, 44, 128);
         else c.text("위치 · " + info.place(), 32, 44, DIM);
         c.chip(164, 34, "menu/icon/gold", info.gold(), "골드");
         c.chip(238, 34, "menu/icon/kokonut", info.kokonut(), "코코넛");
@@ -194,6 +197,24 @@ public final class MainMenu {
         void label(Component text, int x, int y) {
             b.label("txt" + ids++, text).position(x, y)
                     .size(Math.max(1, Math.min(TextWidths.width(text), WIDTH - x)), 9).add();
+        }
+
+        /**
+         * The equipped title on the dark backing of the title screen ({@code menu/ui/tag_<w>}, drawn at y - 2): titles
+         * use chat colours meant for a dark background. Bold adds about a pixel per character to the measured width.
+         */
+        void title(Component title, int x, int y, int max) {
+            String plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(title);
+            int width = TextWidths.width(title) + (bold(title) ? plain.codePointCount(0, plain.length()) : 0);
+            int tag = Math.min(max / 8 * 8, Math.max(24, (width + 6 + 7) / 8 * 8));
+            image("menu/ui/tag_" + tag, x, y - 2);
+            b.label("txt" + ids++, title.colorIfAbsent(WHITE)).position(x + 3, y)
+                    .size(Math.max(1, Math.min(width, tag - 6)), 9).add();
+        }
+
+        private static boolean bold(Component c) {
+            return c.decoration(net.kyori.adventure.text.format.TextDecoration.BOLD) == net.kyori.adventure.text.format.TextDecoration.State.TRUE
+                    || c.children().stream().anyMatch(Canvas::bold);
         }
 
         void right(String value, int rightX, int y, TextColor color) {

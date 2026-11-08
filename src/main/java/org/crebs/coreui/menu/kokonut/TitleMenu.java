@@ -95,7 +95,7 @@ public final class TitleMenu {
     /** {@code /칭호} and the main menu: false (Core's chest GUI) while the glyphs are not loaded. */
     public static boolean open(CoreUi coreUi, TitleCatalog catalog, Player player) {
         var g = coreUi.getGlyphs().all();
-        if (!g.containsKey("menu/ui/field_176") || !g.containsKey("menu/ui/plate_200") || !g.containsKey("dex/ui/page_0_0")) return false;
+        if (!g.containsKey("menu/ui/field_176") || !g.containsKey("menu/ui/plate_200") || !g.containsKey("menu/ui/tag_200") || !g.containsKey("dex/ui/page_0_0")) return false;
         player.playSound(player, Sound.ITEM_BOOK_PAGE_TURN, SoundCategory.MASTER, 0.6f, 1f);
         show(coreUi, catalog, player, new State("", 0, null));
         return true;
@@ -231,8 +231,9 @@ public final class TitleMenu {
             boolean on = v.equipped() != null && v.equipped() == t.id();
             c.image(selected ? "dex/ui/slot_selected" : "dex/ui/slot_normal", LEFT, y);
             c.item(on ? "name_tag" : "paper", LEFT + 2, y + 2);
-            c.rich(t.name(), t.plain(), LEFT + 25, y + 1, PAGE - 25, INK);
-            c.text("#" + t.id() + (on ? " · 장착 중" : ""), LEFT + 25, y + 11, on ? GREEN : DIM);
+            // Backing at y (the row's own text line, also for the row at y = 153), name at y + 2, number below.
+            c.tagged(t.name(), t.plain(), LEFT + 24, y + 2, PAGE - 24);
+            c.text("#" + t.id() + (on ? " · 장착 중" : ""), LEFT + 25, y + 12, on ? GREEN : DIM);
             c.click(LEFT, y, PAGE, 20, p -> act.select(p, t), tooltip(t));
         }
         // Pager where the dex has its pager.
@@ -257,7 +258,7 @@ public final class TitleMenu {
         c.plated(Component.text(v.player()), v.player(), cx, 74, WHITE);
         if (v.head() != null) c.b.playerHead("head", v.head()).position(cx - 4, 90).add();
 
-        c.rich(s.name(), s.plain(), RIGHT, 125, PAGE, INK);
+        c.tagged(s.name(), s.plain(), RIGHT, 125, PAGE);
         Title current = v.equippedTitle();
         c.text("번호", RIGHT, 141, DIM);
         c.text("#" + s.id(), RIGHT + 48, 141, INK);
@@ -265,7 +266,7 @@ public final class TitleMenu {
         c.text(on ? "장착 중" : "보유 중", RIGHT + 48, 153, on ? GREEN : INK);
         c.text("현재 장착", RIGHT, 165, DIM);
         if (current == null) c.text("없음", RIGHT + 48, 165, INK);
-        else c.rich(current.name(), current.plain(), RIGHT + 48, 165, PAGE - 48, INK);
+        else c.tagged(current.name(), current.plain(), RIGHT + 48, 165, PAGE - 48);
 
         if (s.lines().isEmpty()) c.text("설명이 없어요", RIGHT, 179, DIM);
         for (int i = 0; i < s.lines().size() && i < DESC_LINES; i++) {
@@ -383,6 +384,20 @@ public final class TitleMenu {
          * Text centred on {@code cx} over a vanilla-style name plate ({@code menu/ui/plate_<w>}, 25 % black, 11 px).
          * The plate's top is on an earlier text line than the text (text at y + 2), so the text paints over it.
          */
+        /**
+         * A title name at ({@code x}, {@code y}) on a dark backing ({@code menu/ui/tag_<w>}, 11 px, drawn at y - 2):
+         * titles use chat colours meant for a dark background, so light ones vanish on parchment without it.
+         * The backing's top is never on a later text line than the text, so the text paints over it. Returns its width.
+         */
+        int tagged(Component value, String plain, int x, int y, int max) {
+            int width = Math.min(max - 6, TextWidths.width(value) + (bold(value) ? plain.codePointCount(0, plain.length()) : 0));
+            int tag = Math.min(200, Math.max(24, (width + 6 + 7) / 8 * 8));
+            if (tag > max) tag = Math.max(24, max / 8 * 8);
+            image("menu/ui/tag_" + tag, x, y - 2);
+            rich(value, plain, x + 3, y, tag - 6, WHITE);
+            return tag;
+        }
+
         void plated(Component value, String plain, int cx, int y, TextColor color) {
             int max = 192;
             int width = Math.min(max, TextWidths.width(value) + (bold(value) ? plain.codePointCount(0, plain.length()) : 0));

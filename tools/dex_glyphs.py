@@ -393,6 +393,14 @@ def title_glyphs():
     field.save("menu/ui/field_176")
     for w in range(24, 201, 8):
         Img(w, 11, (0, 0, 0, 64)).save(f"menu/ui/plate_{w}")
+    # Dark backing behind title names (the search field's leather ink): titles use chat colours chosen for a dark
+    # chat background, so yellow or pink titles vanish on parchment without it.
+    for w in range(24, 201, 8):
+        tag = Img(w, 11, INK)
+        tag.rect(0, 10, w, 1, OUTLINE)
+        tag.save(f"menu/ui/tag_{w}")
+    # Main menu profile backing (head, name, title), the colour of the currency chips.
+    Img(148, 22, hexc("#E0CFA4")).save("menu/ui/profile_148")
 
 
 def write_defaults():
