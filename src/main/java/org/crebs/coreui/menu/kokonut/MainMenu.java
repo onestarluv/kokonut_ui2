@@ -44,7 +44,8 @@ public final class MainMenu {
 
     /** Returns false while the menu glyphs are not loaded. */
     public static boolean open(CoreUi coreUi, Player player) {
-        if (!coreUi.getGlyphs().all().containsKey("menu/ui/panel_116_0")) return false;
+        var glyphs = coreUi.getGlyphs().all();
+        if (!glyphs.containsKey("menu/ui/panel_116_0") || !glyphs.containsKey("menu/icon/deco_32") || !glyphs.containsKey("menu/icon/setting_32")) return false;
         coreUi.open(player, build(coreUi, coreUi.getGlyphs().all(), info(coreUi, player)));
         return true;
     }
@@ -89,7 +90,7 @@ public final class MainMenu {
                 new Button("dex", "도감", "menu/icon/collect_32", p -> {
                     if (!ItemDexMenu.open(coreUi, p)) p.sendMessage(Component.text("[메뉴] 도감을 아직 불러오지 못했어요.", RED));
                 }),
-                new Button("style", "꾸미기", "menu/item/armor_stand", p -> {
+                new Button("style", "꾸미기", "menu/icon/deco_32", p -> {
                     // 꾸미기 = titles for now (Kokonut-Core); later it can become a hub for titles and cosmetics.
                     if (!coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Core")
                             || !CoreViews.openTitles(coreUi, p)) soon(p, "꾸미기");
@@ -105,7 +106,7 @@ public final class MainMenu {
                     coreUi.close(p);
                     if (!MailBridge.open(p)) p.sendMessage(Component.text("[메뉴] 우편함이 아직 준비되지 않았어요.", RED));
                 }),
-                new Button("settings", "설정", "menu/item/comparator", p -> soon(p, "설정")));
+                new Button("settings", "설정", "menu/icon/setting_32", p -> soon(p, "설정")));
     }
 
     /** Closes the menu and runs another plugin's command (e.g. /장신구 opens the accessory inventory). */

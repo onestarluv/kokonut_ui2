@@ -143,6 +143,11 @@ glyphs:
   menu/icon/collect_32:
     height: 32
     ascent: 8
+  menu/icon/deco:
+    ascent: 8
+  menu/icon/deco_32:
+    height: 32
+    ascent: 8
   menu/icon/ego:
     ascent: 8
   menu/icon/ego_32:
@@ -166,6 +171,11 @@ glyphs:
   menu/icon/quest:
     ascent: 8
   menu/icon/quest_32:
+    height: 32
+    ascent: 8
+  menu/icon/setting:
+    ascent: 8
+  menu/icon/setting_32:
     height: 32
     ascent: 8
   menu/icon/silver:
