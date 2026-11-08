@@ -55,7 +55,9 @@ public final class MainMenu {
     private static Info info(CoreUi coreUi, Player player) {
         Long gold = null, kokonut = null;
         Component title = null;
+        String name = player.getName();
         if (coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Core")) {
+            name = CoreBalance.displayName(player);
             var balance = CoreBalance.of(player.getUniqueId());
             if (balance.isPresent()) {
                 gold = balance.get().gold();
@@ -69,7 +71,7 @@ public final class MainMenu {
             if (count.isPresent()) mail = count.getAsLong();
         }
         DexCatalog dex = DexCatalog.SAMPLE;
-        return new Info(player.getName(), title, player.getWorld().getName(), gold, kokonut, mail, dex.registered(), dex.total(), 0, head(player));
+        return new Info(name, title, player.getWorld().getName(), gold, kokonut, mail, dex.registered(), dex.total(), 0, head(player));
     }
 
     /** The player's own skin face; the profile's signed textures are included so the client can draw it right away. */

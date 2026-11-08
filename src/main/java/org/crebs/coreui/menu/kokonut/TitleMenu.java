@@ -144,18 +144,9 @@ public final class TitleMenu {
         if (stillOpen(coreUi, player)) show(coreUi, catalog, player, state);
     }
 
-    /**
-     * What other players see: the server nickname (/닉네임) when set, else the Minecraft name. Core's cache never
-     * blocks; while the first lookup is in flight the Minecraft name is shown and the next redraw picks the nickname up.
-     */
+    /** The server nickname when set, else the Minecraft name (see {@link CoreBalance#displayName}). */
     static String displayName(Player player) {
-        try {
-            Optional<String> nickname = kr.gomsv.kokonutCore.api.util.ServerNicknameUtil.cachedNickname(player.getUniqueId());
-            if (nickname != null && nickname.isPresent() && !nickname.get().isBlank()) return nickname.get();
-        } catch (LinkageError olderCore) {
-            // An older Kokonut-Core without the cache: keep the Minecraft name.
-        }
-        return player.getName();
+        return CoreBalance.displayName(player);
     }
 
     private static boolean stillOpen(CoreUi coreUi, Player player) {

@@ -17,6 +17,20 @@ public final class CoreBalance {
     private CoreBalance() {
     }
 
+    /**
+     * What other players see: the server nickname (/닉네임) when set, else the Minecraft name. Core's cache never
+     * blocks; while the first lookup is in flight the Minecraft name is shown and the next redraw picks the nickname up.
+     */
+    public static String displayName(org.bukkit.entity.Player player) {
+        try {
+            Optional<String> nickname = kr.gomsv.kokonutCore.api.util.ServerNicknameUtil.cachedNickname(player.getUniqueId());
+            if (nickname != null && nickname.isPresent() && !nickname.get().isBlank()) return nickname.get();
+        } catch (LinkageError olderCore) {
+            // An older Kokonut-Core without the cache: keep the Minecraft name.
+        }
+        return player.getName();
+    }
+
     public static Optional<Balance> of(UUID player) {
         return CurrencyUtil.snapshot(player).map(account -> new Balance(account.gold(), account.kokonut()));
     }
