@@ -68,6 +68,25 @@ public final class CoreMenuBuilder {
         this.id = id;
     }
 
+    /** The skin face of a player (8×8, see {@link PlayerHeadElement}); position it at a y on a 9 px line boundary. */
+    public PlayerHeadBuilder playerHead(String id, net.kyori.adventure.text.object.PlayerHeadObjectContents head) {
+        return new PlayerHeadBuilder(id, head);
+    }
+
+    public final class PlayerHeadBuilder extends ElementBuilder<PlayerHeadBuilder> {
+        private final net.kyori.adventure.text.object.PlayerHeadObjectContents head;
+
+        private PlayerHeadBuilder(String id, net.kyori.adventure.text.object.PlayerHeadObjectContents head) {
+            super(id);
+            this.head = Objects.requireNonNull(head);
+            width = PlayerHeadElement.SIZE;
+            height = PlayerHeadElement.SIZE;
+        }
+
+        protected PlayerHeadBuilder self() { return this; }
+        protected MenuElement create() { return new PlayerHeadElement(properties(), head); }
+    }
+
     public GlyphBuilder glyph(String id, org.crebs.coreui.glyph.Glyph glyph) {
         return new GlyphBuilder(id, glyph);
     }

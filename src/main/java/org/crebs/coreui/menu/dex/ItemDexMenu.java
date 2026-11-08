@@ -20,13 +20,13 @@ import java.util.function.Consumer;
  * All sizes are GUI pixels; the book is 456×272 with tabs above it and bookmarks on its right edge.
  */
 public final class ItemDexMenu {
-    static final int WIDTH = 480, HEIGHT = 306;
+    static final int WIDTH = 480, HEIGHT = 292;
     private static final int BOOK_Y = 20, TOP = 31, LEFT = 15, RIGHT = 240, PAGE = 200;
     private static final int GRID_COLS = 8, GRID_ROWS = 4, PER_PAGE = GRID_COLS * GRID_ROWS, BUTTON_Y = 258;
     private static final TextColor INK = TextColor.color(0x3B2A1A), DIM = TextColor.color(0x7A6446),
             BODY = TextColor.color(0x5A4630), GREEN = TextColor.color(0x3E7A22), GOLD = TextColor.color(0xA8740A),
             RED = TextColor.color(0xA83A2A), PURPLE = TextColor.color(0x7A4FB0), PAPER = TextColor.color(0xF6ECD0),
-            WHITE = TextColor.color(0xFFFFFF), STAMP = TextColor.color(0xFFD86A), FOOTER = TextColor.color(0xE8E8E8),
+            WHITE = TextColor.color(0xFFFFFF), STAMP = TextColor.color(0xFFD86A),
             SILHOUETTE = TextColor.color(0x3A2A1A);
 
     public enum View { DEX, REWARD, STATS }
@@ -140,12 +140,6 @@ public final class ItemDexMenu {
                 image("item/" + marks[i][1], 454 + width - 19, y + 2);
                 click(454, y, width, 20, p -> go(p, state.with(view)));
             }
-            String footer = switch (state.view()) {
-                case DEX -> "슬롯을 누르면 상세가 열려요  ·  ESC 닫기";
-                case REWARD -> "받을 수 있는 보상 " + claimable() + "개  ·  ESC 닫기";
-                case STATS -> "통계는 매일 0시에 갱신돼요  ·  ESC 닫기";
-            };
-            centered(footer, 0, WIDTH, 296, FOOTER);
         }
 
         // ------------------------------------------------------------ dex

@@ -1,13 +1,14 @@
-name: CoreUi
+name: Kokonut_UI
+author: pingpong
+description: 에고버스 플러그인
+website: https://wiki.egoverse.kr
+provides: [CoreUi]
 version: '${version}'
 main: org.crebs.coreui.CoreUi
 api-version: '26.3'
 load: POSTWORLD
 softdepend: [Kokonut-Core, Kokonut-Mail, Kokonut_HUD, BetterHud]
 commands:
-  메뉴2:
-    description: CoreUi로 만든 편의기능 메뉴 열기
-    usage: /메뉴2
   메인메뉴:
     description: 메인 메뉴 열기 (이동·도감·꾸미기·우편함·설정)
     usage: /메인메뉴

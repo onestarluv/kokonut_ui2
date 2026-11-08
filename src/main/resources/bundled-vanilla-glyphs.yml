@@ -277,3 +277,9 @@ vanilla:
     height: 16
     ascent: 8
     advance: 15
+  menu/item/totem_of_undying:
+    texture: minecraft:item/totem_of_undying.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31

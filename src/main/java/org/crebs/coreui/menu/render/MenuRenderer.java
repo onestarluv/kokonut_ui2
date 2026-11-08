@@ -126,6 +126,9 @@ public final class MenuRenderer {
                     placeAtLine(image.bounds().x(), Math.floorDiv(y, 9), sprite, glyph.advance(), null);
                 }
                 case LabelElement label -> label(label.bounds().x(), label.bounds().y(), label.properties().label(), secondary, null);
+                // The client draws the face on the text line itself (no font shift applies), always 8 px wide.
+                case PlayerHeadElement head -> placeAtLine(head.bounds().x(), Math.floorDiv(head.bounds().y() + contentTop(), 9),
+                        Component.object(head.head()), PlayerHeadElement.SIZE, null);
                 case ButtonElement button -> button(button);
                 case ToggleElement toggle -> toggle(toggle);
                 case SliderElement slider -> slider(slider);

@@ -1,6 +1,10 @@
 <div align="center">
 
-# CoreUi
+# Kokonut_UI
+
+플러그인 ID와 JAR 기본 이름은 `Kokonut_UI`입니다. 작성자·설명·사이트는 Core와 같은 `pingpong`·`에고버스 플러그인`·`https://wiki.egoverse.kr`로 통일했습니다. `CoreUi`는 `provides` 호환 별칭으로 유지하며 기존 Java API·명령·권한·팩 이름 `CoreUi.zip`은 유지합니다.
+
+첫 로드 시 `plugins/CoreUi` 데이터를 `plugins/Kokonut_UI`로 이전하며, 두 폴더에 모두 자료가 있으면 덮어쓰지 않고 오류를 알립니다. 교체할 때 기존 `CoreUi-*.jar`와 새 JAR를 함께 설치하지 마세요.
 
 **An Ore UI-style menu library for Paper plugins.**
 
@@ -168,17 +172,18 @@ The ZIP contains shared assets and shader overlays for `1.21.11`, `26.1.x`, `26.
 
 ## Main Menu (`/메인메뉴`)
 
-`org.crebs.coreui.menu.kokonut.MainMenu`: 이동 · 도감 · 꾸미기 · 우편함 · 설정 in the dex's book style (320×224 GUI px).
-Permission `coreui.mainmenu` (operators while it is a prototype). `/메뉴` stays Kokonut-Core's utility menu.
+`org.crebs.coreui.menu.kokonut.MainMenu`: one row of seven compact buttons (icon + name) in the dex's book style
+(320×152 GUI px): 이동 · 도감 · 꾸미기 · 장신구 · 퀘스트 · 우편함 · 설정. Permission `coreui.mainmenu` (operators while it
+is a prototype). `/메뉴` stays Kokonut-Core's utility menu.
 
-- 도감 opens `/도감`; 우편함 opens Kokonut-Mail's `MailboxService.open` (softdepend, compile-only `kokonutMailJar`).
-  이동 · 꾸미기 · 설정 only reply "준비 중" for now. The 우편함 card shows a red badge with
-  `MailboxService.unclaimedCount` (memory only, may lag up to Kokonut-Mail's 20 s poll; hidden when unknown or with an
-  older Kokonut-Mail that lacks the method).
-- Gold and kokonut come from Kokonut-Core's `CurrencyUtil.snapshot` (shows `…` while loading or without Core).
-  The second profile line shows the equipped title from Core's `TitleLookup` service, or the world name without one.
-  Dex progress and the reward count still come from the dex sample data.
-- Images: `bundled-glyphs/menu/ui/*` (panel, tab, card, well, chips); icons are vanilla items `menu/item/<key>` (32 px).
+- 도감 opens `/도감`; 장신구 runs `/장신구` (Kokonut-Accessories); 우편함 opens Kokonut-Mail's mailbox.
+  이동 · 꾸미기 · 퀘스트 · 설정 only reply "준비 중" for now. The 우편함 card shows a red badge with
+  `MailboxService.unclaimedCount` (memory only, may lag up to Kokonut-Mail's 20 s poll; hidden when unknown).
+- Profile row: name, the equipped title from Core's `TitleLookup` (or the world), gold and kokonut from Core's
+  `CurrencyUtil.snapshot` (`…` while loading or without Core).
+- Icons: hand-drawn `art/icons` (ego, warp, collect, quest, post, gold, kokonut; same files as the Nexo `icon_*`
+  items) as `menu/icon/<name>` (16 px) and `menu/icon/<name>_32`; vanilla `menu/item/<key>` (32 px) for the rest.
+- Images: `bundled-glyphs/menu/ui/*` (panel_116, tab, card_40, well, chip, badge).
 
 ## Mailbox (`/우편함`)
 
@@ -289,3 +294,5 @@ Light and dark menus share one text font. Uncoloured text uses the theme's defau
 ## Credits
 
 - [Packer](https://github.com/DRAGNIL68/Packer) by **DRAGNIL68** is used to generate the resource-pack ZIP.
+
+Shift+F와 `/메뉴`(`/ego`)는 Kokonut_UI 메인메뉴를 엽니다. 이전 편의기능 UI와 `/메뉴2`는 제거했습니다. 클라이언트 모드는 편의기능 전용 화면을 제공하지 않습니다.

@@ -182,15 +182,63 @@ glyphs:
     ascent: 8
   menu/ui/badge_18:
     ascent: 8
-  menu/ui/card:
-    ascent: 8
-  menu/ui/chip_146:
+  menu/ui/card_40:
     ascent: 8
   menu/ui/chip_70:
     ascent: 8
-  menu/ui/panel_0:
+  menu/ui/field_176:
     ascent: 8
-  menu/ui/panel_1:
+  menu/ui/head_frame:
+    ascent: 8
+  menu/ui/panel_116_0:
+    ascent: 8
+  menu/ui/panel_116_1:
+    ascent: 8
+  menu/ui/plate_104:
+    ascent: 8
+  menu/ui/plate_112:
+    ascent: 8
+  menu/ui/plate_120:
+    ascent: 8
+  menu/ui/plate_128:
+    ascent: 8
+  menu/ui/plate_136:
+    ascent: 8
+  menu/ui/plate_144:
+    ascent: 8
+  menu/ui/plate_152:
+    ascent: 8
+  menu/ui/plate_160:
+    ascent: 8
+  menu/ui/plate_168:
+    ascent: 8
+  menu/ui/plate_176:
+    ascent: 8
+  menu/ui/plate_184:
+    ascent: 8
+  menu/ui/plate_192:
+    ascent: 8
+  menu/ui/plate_200:
+    ascent: 8
+  menu/ui/plate_24:
+    ascent: 8
+  menu/ui/plate_32:
+    ascent: 8
+  menu/ui/plate_40:
+    ascent: 8
+  menu/ui/plate_48:
+    ascent: 8
+  menu/ui/plate_56:
+    ascent: 8
+  menu/ui/plate_64:
+    ascent: 8
+  menu/ui/plate_72:
+    ascent: 8
+  menu/ui/plate_80:
+    ascent: 8
+  menu/ui/plate_88:
+    ascent: 8
+  menu/ui/plate_96:
     ascent: 8
   menu/ui/tab:
     ascent: 8

@@ -24,6 +24,11 @@ public final class CoreUi extends JavaPlugin {
     private final MenuRenderer renderer = new MenuRenderer();
     private GlyphManager glyphs;
 
+    @Override public void onLoad() {
+        try { LegacyPluginData.migrate(getDataFolder().toPath(), "CoreUi"); }
+        catch (java.io.IOException failure) { throw new IllegalStateException("기존 CoreUi 설정·팩 데이터 이전 실패", failure); }
+    }
+
     public GlyphManager getGlyphs() {
         return Objects.requireNonNull(glyphs, "CoreUi is not enabled");
     }
@@ -49,6 +54,14 @@ public final class CoreUi extends JavaPlugin {
                 getLogger().info("Kokonut-Mail mailbox now opens as a CoreUi dialog");
             } catch (LinkageError olderMailPlugin) {
                 getLogger().warning("Kokonut-Mail is too old for the dialog mailbox; it keeps its chest GUI");
+            }
+        }
+        if (getServer().getPluginManager().isPluginEnabled("Kokonut-Core")) {
+            try {
+                org.crebs.coreui.menu.kokonut.CoreViews.register(this);
+                getLogger().info("Kokonut-Core /칭호 and Shift+F now open CoreUi screens (title screen, main menu)");
+            } catch (LinkageError olderCore) {
+                getLogger().warning("Kokonut-Core is too old for CoreUi title/main menu views; it keeps its chest GUIs");
             }
         }
         getLogger().info("CoreUI menus online");
@@ -126,17 +139,6 @@ public final class CoreUi extends JavaPlugin {
                         .filter(value -> value.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
             }
             return List.of();
-        });
-        Objects.requireNonNull(getCommand("메뉴2")).setExecutor((sender, command, label, args) -> {
-            if (!(sender instanceof Player player)) {
-                sender.sendMessage("플레이어만 사용할 수 있습니다.");
-                return true;
-            }
-            if (!getServer().getPluginManager().isPluginEnabled("Kokonut-Core")
-                    || !org.crebs.coreui.menu.kokonut.UtilityMenu2.open(this, player)) {
-                sender.sendMessage("Kokonut-Core 편의기능 메뉴를 찾을 수 없습니다.");
-            }
-            return true;
         });
         Objects.requireNonNull(getCommand("메인메뉴")).setExecutor((sender, command, label, args) -> {
             if (!(sender instanceof Player player)) {

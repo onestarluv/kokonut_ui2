@@ -131,6 +131,13 @@ public final class ResourcePackGenerator {
                 if (!id.matches("[a-z0-9_/-]+")) throw new IOException("Glyph names must use lowercase letters, numbers, _, - or /: " + relative);
                 var image = ImageIO.read(file.toFile());
                 if (image == null) throw new IOException("Invalid PNG: " + relative);
+                if (image.getWidth() > 256 || image.getHeight() > 256) {
+                    // The client draws a missing-glyph box for larger bitmaps and Nexo replaces them with a placeholder.
+                    // Usually a leftover from an older bundled set (bundled files are never deleted): tile or remove it.
+                    java.util.logging.Logger.getLogger("CoreUi").warning("Skipped glyph " + relative + " ("
+                            + image.getWidth() + "x" + image.getHeight() + "): images must be at most 256x256");
+                    continue;
+                }
                 String key = "glyphs." + id;
                 int height = config.getInt(key + ".height", defaults.getInt(key + ".height", image.getHeight()));
                 int ascent = config.getInt(key + ".ascent", defaults.getInt(key + ".ascent", height));

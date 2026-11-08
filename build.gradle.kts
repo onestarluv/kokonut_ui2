@@ -13,7 +13,7 @@ repositories {
 dependencies {
     implementation("com.github.DRAGNIL68:Packer:d7bb7af0cf")
     compileOnly("io.papermc.paper:paper-api:26.3.build.243-stable")
-    // Optional Kokonut-Core utility menu (/메뉴2).
+    // Optional Kokonut-Core main menu and title services.
     compileOnly(files(providers.gradleProperty("kokonutCoreJar").orElse("../Kokonut_Core/build/libs/Kokonut-Core-cbt-1.0.jar")))
     // Optional Kokonut-Mail mailbox (main menu 우편함 button).
     compileOnly(files(providers.gradleProperty("kokonutMailJar").orElse("../Kokonut_Mail/build/libs/Kokonut-Mail-cbt-1.0.jar")))
@@ -27,6 +27,7 @@ val collectPluginArtifact = tasks.register<Copy>("collectPluginArtifact") {
     into(layout.projectDirectory.dir("../plugin"))
 }
 tasks.jar { finalizedBy(collectPluginArtifact) }
+base { archivesName.set("Kokonut_UI") }
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
@@ -53,6 +54,7 @@ tasks {
 
     processResources {
         val props = mapOf("version" to version)
+        inputs.properties(props)
         filesMatching("plugin.yml") {
             expand(props)
         }

@@ -46,3 +46,4 @@ menu/item/armor_stand minecraft:item/armor_stand.png 32
 menu/item/paper minecraft:item/paper.png 32
 menu/item/comparator minecraft:item/comparator.png 32
 menu/item/cocoa_beans minecraft:item/cocoa_beans.png 16
+menu/item/totem_of_undying minecraft:item/totem_of_undying.png 32

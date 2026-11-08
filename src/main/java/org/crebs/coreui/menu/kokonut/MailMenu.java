@@ -31,13 +31,13 @@ import java.util.function.Consumer;
  * top is on a 9 px line (row and grid y values are multiples of 9).
  */
 public final class MailMenu {
-    static final int WIDTH = 480, HEIGHT = 306, ROWS = 7, GRID = 32;
+    static final int WIDTH = 480, HEIGHT = 292, ROWS = 7, GRID = 32;
     private static final int LEFT = 15, RIGHT = 240, PAGE = 200, TOP = 31, BUTTON_Y = 258;
     private static final int[] ROW_Y = {45, 72, 99, 126, 153, 180, 207};
     private static final int[] GRID_Y = {99, 126, 153, 180};
     private static final TextColor INK = TextColor.color(0x3B2A1A), DIM = TextColor.color(0x7A6446),
             RED = TextColor.color(0xA83A2A), GREEN = TextColor.color(0x3E7A22), PAPER = TextColor.color(0xF6ECD0),
-            WHITE = TextColor.color(0xFFFFFF), FOOTER = TextColor.color(0xE8E8E8);
+            WHITE = TextColor.color(0xFFFFFF);
     private static final DateTimeFormatter SHORT = DateTimeFormatter.ofPattern("MM.dd HH:mm").withZone(ZoneId.of("Asia/Seoul"));
     private static final DateTimeFormatter LONG = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm").withZone(ZoneId.of("Asia/Seoul"));
     /** Players with a claim in flight; their clicks are ignored until it finishes. */
@@ -215,7 +215,6 @@ public final class MailMenu {
             if (e.locked()) c.button("off", 60, "처리 중", RIGHT + PAGE - 60, BUTTON_Y, DIM, null);
             else c.button("green", 60, "받기", RIGHT + PAGE - 60, BUTTON_Y, WHITE, p -> act.claim(p, e));
         }
-        c.centered("아이템에 마우스를 올리면 정보가 보여요  ·  ESC 닫기", 0, WIDTH, 296, FOOTER);
         return c.b.build();
     }
 

@@ -343,26 +343,30 @@ def icon_art():
 
 
 def menu_glyphs():
-    """Main menu (MainMenu.java): same leather-and-parchment kit as the dex. Sizes in GUI px."""
-    W, H = 320, 184
+    """Main menu (MainMenu.java): same leather-and-parchment kit as the dex. Sizes in GUI px.
+    New sizes get new file names: bundled glyphs are only copied to a server when missing, so reusing a name would
+    keep the old image there."""
+    W, H = 320, 116
     panel = bevel(W, H, hexc("#6B3A24"), OUTLINE, hexc("#9A5A36"), hexc("#3E1E10"))
     panel.rect(7, 7, W - 14, H - 14, hexc("#EADBB5"))
     panel.rect(7, H - 9, W - 14, 2, hexc("#CDB98A"))
     panel.rect(14, 40, W - 28, 1, hexc("#CDB98A"))  # divider under the profile row
     # The client cannot draw a bitmap glyph wider than 256 px (it shows a missing-glyph box), so wide art is tiled.
-    panel.crop(0, 0, 160, H).save("menu/ui/panel_0")
-    panel.crop(160, 0, 160, H).save("menu/ui/panel_1")
+    panel.crop(0, 0, 160, H).save(f"menu/ui/panel_{H}_0")
+    panel.crop(160, 0, 160, H).save(f"menu/ui/panel_{H}_1")
     c = hexc("#B03A2E")
     tab_img = bevel(88, 22, c, OUTLINE, lighten(c, 0.35), darken(c, 0.25), bottom=False)
     tab_img.rect(1, 20, 86, 2, c)
     tab_img.save("menu/ui/tab")
     Img(86, 2, c).save("menu/ui/tab_join")
-    bevel(54, 72, SLOT, INK, SLOT_LIGHT, SLOT_DARK).save("menu/ui/card")
+    bevel(40, 54, SLOT, INK, SLOT_LIGHT, SLOT_DARK).save("menu/ui/card_40")  # icon + name only
+    # 12x12 frame for the player's 8x8 skin face (client-drawn text object, cannot be scaled).
+    bevel(12, 12, SLOT, INK, SLOT_DARK, SLOT_LIGHT).save("menu/ui/head_frame")
     well = Img(36, 36, hexc("#C9B588"))
     well.rect(0, 0, 36, 1, hexc("#A8946A"))
     well.rect(0, 0, 1, 36, hexc("#A8946A"))
     well.save("menu/ui/well")
-    for w in (70, 146):
+    for w in (70,):
         chip = Img(w, 16, hexc("#E0CFA4"))
         chip.save(f"menu/ui/chip_{w}")
     unknown = Img(16, 16)  # fallback icon for items without a vanilla icon glyph
@@ -373,6 +377,22 @@ def menu_glyphs():
     unknown.save("menu/ui/unknown_item")
     for w in (12, 18):  # unread mail badge: 1-2 digits / "99+"
         bevel(w, 12, RED, OUTLINE, lighten(RED, 0.3), darken(RED, 0.3)).save(f"menu/ui/badge_{w}")
+    title_glyphs()
+
+
+def title_glyphs():
+    """Title screen (TitleMenu.java), same kit as the dex: the dark search field of the dex concept and the
+    vanilla-style name plates (black at 25 %) shown over the head in the detail frame."""
+    field = Img(176, 18, INK)
+    field.rect(0, 0, 176, 1, OUTLINE)
+    field.rect(0, 17, 176, 1, OUTLINE)
+    field.rect(0, 0, 1, 18, OUTLINE)
+    field.rect(175, 0, 1, 18, OUTLINE)
+    field.rect(1, 1, 174, 1, hexc("#2A1C10"))
+    field.rect(1, 1, 1, 16, hexc("#2A1C10"))
+    field.save("menu/ui/field_176")
+    for w in range(24, 201, 8):
+        Img(w, 11, (0, 0, 0, 64)).save(f"menu/ui/plate_{w}")
 
 
 def write_defaults():

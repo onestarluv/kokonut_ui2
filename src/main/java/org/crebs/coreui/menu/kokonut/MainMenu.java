@@ -2,6 +2,8 @@ package org.crebs.coreui.menu.kokonut;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.object.ObjectContents;
+import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 import org.bukkit.entity.Player;
 import org.crebs.coreui.CoreUi;
 import org.crebs.coreui.glyph.Glyph;
@@ -21,25 +23,28 @@ import java.util.function.Consumer;
  * Like the dex, every glyph hangs from the text line its top is on, so later (lower) elements paint on top.
  */
 public final class MainMenu {
-    static final int WIDTH = 320, HEIGHT = 224;
-    private static final int PANEL_Y = 20, CARD_Y = 66, CARD_W = 54, CARD_GAP = 6;
+    static final int WIDTH = 320, HEIGHT = 136;
+    private static final int PANEL_Y = 20, CARD_Y = 66, CARD_W = 40, CARD_H = 54, CARD_GAP = 4;
     private static final TextColor INK = TextColor.color(0x3B2A1A), DIM = TextColor.color(0x7A6446),
-            GOLD = TextColor.color(0xA8740A), GREEN = TextColor.color(0x3E7A22), RED = TextColor.color(0xA83A2A),
-            BROWN = TextColor.color(0x6B4A2A), PURPLE = TextColor.color(0x7A4FB0), WHITE = TextColor.color(0xFFFFFF), FOOTER = TextColor.color(0xE8E8E8);
+            GOLD = TextColor.color(0xA8740A), RED = TextColor.color(0xA83A2A), PURPLE = TextColor.color(0x7A4FB0),
+            WHITE = TextColor.color(0xFFFFFF);
 
-    /** What the profile row and status strip show; {@code null} balances mean "still loading / unavailable". */
-    /** {@code mail} is the unclaimed mail count from Kokonut-Mail, null when unknown. */
+    /**
+     * What the profile row shows; {@code null} balances mean "still loading / unavailable" and {@code mail} is the
+     * unclaimed mail count from Kokonut-Mail (null when unknown). The dex numbers are kept for callers and checks.
+     */
     record Info(String name, Component title, String place, Long gold, Long kokonut, Long mail,
-                int dexRegistered, int dexTotal, int rewards) {}
+                int dexRegistered, int dexTotal, int rewards, PlayerHeadObjectContents head) {}
 
-    record Button(String id, String label, String sub, String icon, Consumer<Player> action) {}
+    /** {@code icon} is a full glyph id: hand-drawn art ({@code menu/icon/<name>_32}) or a vanilla icon ({@code menu/item/<key>}). */
+    record Button(String id, String label, String icon, Consumer<Player> action) {}
 
     private MainMenu() {
     }
 
     /** Returns false while the menu glyphs are not loaded. */
     public static boolean open(CoreUi coreUi, Player player) {
-        if (!coreUi.getGlyphs().all().containsKey("menu/ui/panel_0")) return false;
+        if (!coreUi.getGlyphs().all().containsKey("menu/ui/panel_116_0")) return false;
         coreUi.open(player, build(coreUi, coreUi.getGlyphs().all(), info(coreUi, player)));
         return true;
     }
@@ -60,30 +65,39 @@ public final class MainMenu {
             var count = MailBridge.unclaimed(coreUi.getServer(), player.getUniqueId());
             if (count.isPresent()) mail = count.getAsLong();
         }
-        // The dex still runs on sample data; its numbers move here once real collection data exists.
         DexCatalog dex = DexCatalog.SAMPLE;
-        return new Info(player.getName(), title, player.getWorld().getName(), gold, kokonut, mail,
-                dex.registered(), dex.total(), claimable(dex));
+        return new Info(player.getName(), title, player.getWorld().getName(), gold, kokonut, mail, dex.registered(), dex.total(), 0, head(player));
     }
 
-    private static int claimable(DexCatalog dex) {
-        int count = 0;
-        for (var category : dex.categories())
-            for (var m : category.milestones()) if (m.state() == DexCatalog.MilestoneState.CLAIMABLE) count++;
-        for (var m : dex.globalMilestones()) if (m.state() == DexCatalog.MilestoneState.CLAIMABLE) count++;
-        return count;
+    /** The player's own skin face; the profile's signed textures are included so the client can draw it right away. */
+    static PlayerHeadObjectContents head(Player player) {
+        var head = ObjectContents.playerHead().id(player.getUniqueId()).hat(true);
+        if (PlayerHeadObjectContents.isValidName(player.getName())) head.name(player.getName());
+        for (var property : player.getPlayerProfile().getProperties()) {
+            if (!property.getName().equals("textures")) continue;
+            head.profileProperty(property.getSignature() == null
+                    ? PlayerHeadObjectContents.property(property.getName(), property.getValue())
+                    : PlayerHeadObjectContents.property(property.getName(), property.getValue(), property.getSignature()));
+        }
+        return head.build();
     }
 
-    /** Sub-labels must stay within the 54 px card (about 6 Hangul characters). */
+    /** Seven compact buttons: icon and name only (names up to about 4 Hangul characters fit the 40 px card). */
     static List<Button> buttons(CoreUi coreUi, Info info) {
         return List.of(
-                new Button("move", "이동", "워프·마을", "ender_pearl", p -> soon(p, "이동")),
-                new Button("dex", "도감", info.dexRegistered() + " / " + info.dexTotal(), "knowledge_book", p -> {
+                new Button("move", "이동", "menu/icon/warp_32", p -> soon(p, "이동")),
+                new Button("dex", "도감", "menu/icon/collect_32", p -> {
                     if (!ItemDexMenu.open(coreUi, p)) p.sendMessage(Component.text("[메뉴] 도감을 아직 불러오지 못했어요.", RED));
                 }),
-                new Button("style", "꾸미기", "칭호·장신구", "armor_stand", p -> soon(p, "꾸미기")),
-                new Button("mail", "우편함", info.mail() != null && info.mail() > 0 ? "새 우편 " + Math.min(info.mail(), 99) : "우편 확인", "menu/icon/post_32", p -> {
-                    // Kokonut-Mail's MailboxService opens its own mailbox GUI; close this dialog first.
+                new Button("style", "꾸미기", "menu/item/armor_stand", p -> {
+                    // 꾸미기 = titles for now (Kokonut-Core); later it can become a hub for titles and cosmetics.
+                    if (!coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Core")
+                            || !CoreViews.openTitles(coreUi, p)) soon(p, "꾸미기");
+                }),
+                new Button("accessory", "장신구", "menu/item/totem_of_undying", p -> run(coreUi, p, "장신구")),
+                new Button("quest", "퀘스트", "menu/icon/quest_32", p -> soon(p, "퀘스트")),
+                new Button("mail", "우편함", "menu/icon/post_32", p -> {
+                    // Kokonut-Mail's MailboxService opens its own mailbox screen; close this dialog first.
                     if (!coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Mail")) {
                         p.sendMessage(Component.text("[메뉴] 우편함 플러그인이 꺼져 있어요.", RED));
                         return;
@@ -91,7 +105,17 @@ public final class MainMenu {
                     coreUi.close(p);
                     if (!MailBridge.open(p)) p.sendMessage(Component.text("[메뉴] 우편함이 아직 준비되지 않았어요.", RED));
                 }),
-                new Button("settings", "설정", "알림·화면", "comparator", p -> soon(p, "설정")));
+                new Button("settings", "설정", "menu/item/comparator", p -> soon(p, "설정")));
+    }
+
+    /** Closes the menu and runs another plugin's command (e.g. /장신구 opens the accessory inventory). */
+    private static void run(CoreUi coreUi, Player player, String command) {
+        if (coreUi.getServer().getPluginCommand(command) == null) {
+            player.sendMessage(Component.text("[메뉴] " + command + " 플러그인이 꺼져 있어요.", RED));
+            return;
+        }
+        coreUi.close(player);
+        player.performCommand(command);
     }
 
     private static void soon(Player player, String name) {
@@ -103,54 +127,43 @@ public final class MainMenu {
         Canvas c = new Canvas(g);
         // Title tab and close button above the panel, then the panel (its top line is painted after the tab).
         c.image("menu/ui/tab", 12, 0);
-        c.image("menu/item/cocoa_beans", 16, 2);
+        c.image("menu/icon/ego", 16, 2);
         c.text("메인 메뉴", 34, 6, WHITE);
         c.image("dex/ui/close", 300, 0);
         c.click(300, 0, 20, 20, p -> coreUi.close(p));
-        c.image("menu/ui/panel_0", 0, PANEL_Y);
-        c.image("menu/ui/panel_1", 160, PANEL_Y);
+        c.image("menu/ui/panel_116_0", 0, PANEL_Y);
+        c.image("menu/ui/panel_116_1", 160, PANEL_Y);
         c.image("menu/ui/tab_join", 13, PANEL_Y);
 
-        // Profile row.
-        c.image("dex/ui/slot_normal", 14, 32);
-        c.image("menu/item/cocoa_beans", 16, 34);
-        c.text(info.name(), 40, 33, INK);
-        // Second line: the equipped Core title, or the current world when the player has none.
-        if (info.title() != null) c.label(info.title().colorIfAbsent(PURPLE), 40, 44);
-        else c.text("위치 · " + info.place(), 40, 44, DIM);
-        c.chip(164, 34, "dex/item/gold_nugget", info.gold(), "골드");
-        c.chip(238, 34, "menu/item/cocoa_beans", info.kokonut(), "코코넛");
+        // Profile row: the player's skin face (8x8 at y 36, a line boundary), name, title (or world), gold and kokonut.
+        c.image("menu/ui/head_frame", 14, 34);
+        if (info.head() != null) c.b.playerHead("head", info.head()).position(16, 36).add();
+        else c.image("menu/icon/kokonut", 16, 34);
+        c.text(info.name(), 32, 33, INK);
+        if (info.title() != null) c.label(info.title().colorIfAbsent(PURPLE), 32, 44);
+        else c.text("위치 · " + info.place(), 32, 44, DIM);
+        c.chip(164, 34, "menu/icon/gold", info.gold(), "골드");
+        c.chip(238, 34, "menu/icon/kokonut", info.kokonut(), "코코넛");
 
-        // Five buttons.
+        // One row of seven buttons: icon and name.
         List<Button> buttons = buttons(coreUi, info);
+        int left = (WIDTH - (buttons.size() * CARD_W + (buttons.size() - 1) * CARD_GAP)) / 2;
         for (int i = 0; i < buttons.size(); i++) {
             Button button = buttons.get(i);
-            int x = 13 + i * (CARD_W + CARD_GAP);
-            c.image("menu/ui/card", x, CARD_Y);
-            c.image("menu/ui/well", x + 9, CARD_Y + 6);
-            // Vanilla icons are "menu/item/<key>"; hand-drawn ones (art/icons) are given as full glyph ids.
-            c.image(button.icon().contains("/") ? button.icon() : "menu/item/" + button.icon(), x + 11, CARD_Y + 8);
-            c.centered(button.label(), x, CARD_W, CARD_Y + 47, INK);
-            c.centered(button.sub(), x, CARD_W, CARD_Y + 59, DIM);
+            int x = left + i * (CARD_W + CARD_GAP);
+            c.image("menu/ui/card_40", x, CARD_Y);
+            c.image("menu/ui/well", x + 2, CARD_Y + 3);
+            c.image(button.icon(), x + 4, CARD_Y + 5);
+            c.centered(button.label(), x, CARD_W, CARD_Y + 42, INK);
             if (button.id().equals("mail") && info.mail() != null && info.mail() > 0) {
                 String count = info.mail() > 99 ? "99+" : String.valueOf(info.mail());
                 int width = count.length() > 2 ? 18 : 12;
                 // y = CARD_Y + 15 is a text line after the icon well's, so the badge paints over the icon corner.
-                c.image("menu/ui/badge_" + width, x + CARD_W - width - 2, CARD_Y + 15);
-                c.centered(count, x + CARD_W - width - 2, width, CARD_Y + 17, WHITE);
+                c.image("menu/ui/badge_" + width, x + CARD_W - width - 1, CARD_Y + 15);
+                c.centered(count, x + CARD_W - width - 1, width, CARD_Y + 17, WHITE);
             }
-            c.click(x, CARD_Y, CARD_W, 72, button.action());
+            c.click(x, CARD_Y, CARD_W, CARD_H, button.action());
         }
-
-        // Status strip.
-        c.image("menu/ui/chip_146", 14, 146);
-        c.image("menu/ui/chip_146", 160, 146);
-        c.text("도감", 20, 150, DIM);
-        c.progress(44, 151, info.dexRegistered() / (double) Math.max(1, info.dexTotal()));
-        c.text(info.dexRegistered() + " / " + info.dexTotal(), 150, 150, INK);
-        c.right(info.rewards() > 0 ? "받을 도감 보상 " + info.rewards() + "개" : "받을 보상 없음", 300, 150, info.rewards() > 0 ? GREEN : DIM);
-        c.centered("버튼을 누르면 해당 메뉴가 열려요", 0, WIDTH, 176, BROWN);
-        c.centered("ESC 닫기", 0, WIDTH, 210, FOOTER);
         return c.b.build();
     }
 
