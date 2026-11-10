@@ -3,6 +3,8 @@ package org.crebs.coreui.menu.render;
 import com.google.gson.Gson;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.io.IOException;
@@ -12,13 +14,10 @@ import java.util.*;
 /**
  * Label fonts and text measurement.
  *
- * Labels use the fonts {@code coreui:text_0..8}, built like the server's minecraft:default font: Galmuri for most
- * characters, and the vanilla ascii font for the configured "vanilla chars" (the same set the server skips in
- * Galmuri). Each font is shifted down by its index so a label can start at any pixel inside its 9px text line;
- * capitals and images both end up one pixel above the requested y, matching CoreUi's image placement.
+ * Labels use Galmuri and vanilla ASCII for the configured characters. Each font is shifted down by its
+ * index to place labels at any pixel inside a 9px text line.
  *
- * Widths are exact: vanilla glyphs are whole pixels, Galmuri advances are multiples of 1/16 px (e.g. 'a' = 4.8125),
- * both taken from how the 26.3 client computes them, so the renderer can step back without drifting.
+ * Vanilla bitmap advances are whole pixels. Galmuri advances are multiples of 1/16 px.
  */
 public final class TextWidths {
     /** Smallest step of a Galmuri advance at size 8 / oversample 16. */
@@ -59,10 +58,22 @@ public final class TextWidths {
 
     /** Exact display width in GUI pixels, as the client sums it. */
     public static float exactWidth(Component component) {
-        Set<Integer> vanilla = vanillaChars;
+        return exactWidth(component, vanillaChars, false);
+    }
+
+    private static float exactWidth(Component component, Set<Integer> vanilla, boolean inheritedBold) {
+        boolean bold = switch (component.decoration(TextDecoration.BOLD)) {
+            case TRUE -> true;
+            case FALSE -> false;
+            case NOT_SET -> inheritedBold;
+        };
+        String value = component instanceof TextComponent text ? text.content() : plain(component.children(List.of()));
         float width = 0;
-        for (int cp : plain(component).codePoints().toArray())
-            width += vanilla.contains(cp) ? VANILLA.get(cp) : GALMURI.getOrDefault(cp, 8f);
+        for (int cp : value.codePoints().toArray()) {
+            width += vanilla.contains(cp) ? VANILLA.get(cp) : GALMURI.getOrDefault(cp, 6f);
+            if (bold) width += 1;
+        }
+        for (Component child : component.children()) width += exactWidth(child, vanilla, bold);
         return width;
     }
 
@@ -112,13 +123,13 @@ public final class TextWidths {
         return width;
     }
 
-    /** JSON of {@code coreui:text_<offset>}, mirroring the server's default font with a vertical offset. */
+    /** JSON of {@code coreui:text_<offset>}, with each provider shifted by the label offset. */
     public static String fontJson(int offset) {
         Set<Integer> vanilla = vanillaChars;
         StringBuilder skip = new StringBuilder();
         vanilla.stream().sorted().forEach(skip::appendCodePoint);
         List<Map<String, Object>> providers = new ArrayList<>();
-        // The server shifts Galmuri 0.5 px below vanilla text; keep that relation (vanilla top = offset - 1).
+        // Keep Galmuri aligned with the bitmap text.
         providers.add(Map.of("type", "ttf", "file", "coreui:galmuri11.ttf", "shift", List.of(0, offset - 0.5),
                 "size", 8, "oversample", 16, "skip", skip.toString()));
         if (vanilla.contains((int) ' ')) providers.add(Map.of("type", "space", "advances", Map.of(" ", 4)));

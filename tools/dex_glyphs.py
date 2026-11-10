@@ -77,7 +77,7 @@ class Img:
         if self.h < 8:
             self.px += [[CLEAR] * self.w for _ in range(8 - self.h)]
             self.h = 8
-        path = os.path.join(OUT, (rel if rel.startswith("menu/") else "dex/" + rel) + ".png")
+        path = os.path.join(OUT, (rel if rel.startswith(("menu/", "shop/", "quest/")) else "dex/" + rel) + ".png")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         raw = b"".join(b"\x00" + b"".join(bytes(p) for p in row) for row in self.px)
 
@@ -294,7 +294,7 @@ def main():
     for s in ("normal", "selected", "locked"):
         slot(s).save(f"ui/slot_{s}")
     close().save("ui/close")
-    for kind, widths in {"paper": (20, 24, 36, 52, 100), "dark": (36,), "green": (46, 60, 100), "off": (46, 60, 100)}.items():
+    for kind, widths in {"paper": (20, 24, 36, 52, 98, 100), "dark": (36,), "green": (46, 60, 98, 100), "off": (46, 60, 98, 100)}.items():
         for w in widths:
             button(kind, w).save(f"ui/btn_{kind}_{w}")
     for key, color in CATS:
@@ -316,6 +316,8 @@ def main():
     pip(False).save("ui/pip_off")
     # Item icons and portraits are vanilla textures (tools/dex_vanilla.txt + VanillaGlyphs.java), not PNGs here.
     menu_glyphs()
+    shop_glyphs()
+    quest_glyphs()
     icon_art()
     write_defaults()
     count = sum(len(f) for _, _, f in os.walk(OUT))
@@ -359,6 +361,22 @@ def menu_glyphs():
     tab_img.rect(1, 20, 86, 2, c)
     tab_img.save("menu/ui/tab")
     Img(86, 2, c).save("menu/ui/tab_join")
+    # Inactive title tab (main menu ↔ 마을): the dex's inactive-tab shading of the same red, 20 px with a bottom edge.
+    off = darken(c, 0.28)
+    bevel(88, 20, off, OUTLINE, lighten(off, 0.35), darken(off, 0.25)).save("menu/ui/tab_off")
+    # 마을 tab in green (the main menu is red): active tab + join strip, and the inactive tab for the main menu.
+    green = hexc("#4E8A2E")
+    gtab = bevel(88, 22, green, OUTLINE, lighten(green, 0.35), darken(green, 0.25), bottom=False)
+    gtab.rect(1, 20, 86, 2, green)
+    gtab.save("menu/ui/tab_green")
+    Img(86, 2, green).save("menu/ui/tab_green_join")
+    goff = darken(green, 0.28)
+    bevel(88, 20, goff, OUTLINE, lighten(goff, 0.35), darken(goff, 0.25)).save("menu/ui/tab_green_off")
+    # Selected state of the 36 px icon well (village icon picker): the well with the dex's red selection border.
+    sel = Img(36, 36, hexc("#C9B588"))
+    for (x, y, w, h) in ((0, 0, 36, 1), (0, 35, 36, 1), (0, 0, 1, 36), (35, 0, 1, 36)):
+        sel.rect(x, y, w, h, RED)
+    sel.save("menu/ui/well_selected")
     bevel(40, 54, SLOT, INK, SLOT_LIGHT, SLOT_DARK).save("menu/ui/card_40")  # icon + name only
     # 12x12 frame for the player's 8x8 skin face (client-drawn text object, cannot be scaled).
     bevel(12, 12, SLOT, INK, SLOT_DARK, SLOT_LIGHT).save("menu/ui/head_frame")
@@ -408,6 +426,27 @@ def title_glyphs():
     # and a 20x20 frame for the 16 px face. The client's own head object is fixed at 8x8.
     Img(2, 2, (255, 255, 255, 255)).save("menu/ui/px_2")
     bevel(20, 20, SLOT, INK, SLOT_DARK, SLOT_LIGHT).save("menu/ui/head_frame_20")
+
+
+# Shop (ShopMenu.java): laid out like the title screen, so it reuses the book, title tab, search field, slots and
+# buttons; only the wallet chips, quantity field and divider are new. Currency icons are the main menu's 16 px
+# menu/icon/<silver|gold|kokonut> (art/icons).
+def shop_glyphs():
+    Img(64, 16, hexc("#E0CFA4")).save("shop/ui/chip_64")  # wallet chip (chip_70 colour): 16 px currency icon + amount
+    bevel(36, 20, SLOT_LIGHT, INK, SLOT_DARK, SLOT_LIGHT).save("shop/ui/qty_36")  # inset quantity field
+    divider = Img(200, 1, hexc("#CDB98A"))
+    divider.save("shop/ui/divider_200")
+
+
+# Quest screens (QuestMenu, QuestOfferMenu): only the NPC speech bubble is new; slots, bars and buttons are the dex kit.
+def quest_glyphs():
+    W, H = 200, 46
+    bubble = Img(W, H, SLOT_LIGHT)
+    for (x, y, w, h) in ((1, 0, W - 2, 1), (1, H - 1, W - 2, 1), (0, 1, 1, H - 2), (W - 1, 1, 1, H - 2)):
+        bubble.rect(x, y, w, h, SLOT_DARK)  # 1 px border, corners left open for a rounded look
+    bubble.rect(1, H - 2, W - 2, 1, hexc("#E6D6AC"))  # soft lower shade
+    bubble.save("quest/ui/speech_200")
+
 
 
 def write_defaults():

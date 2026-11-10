@@ -24,11 +24,15 @@ glyphs:
     ascent: 8
   dex/ui/btn_green_60:
     ascent: 8
+  dex/ui/btn_green_98:
+    ascent: 8
   dex/ui/btn_off_100:
     ascent: 8
   dex/ui/btn_off_46:
     ascent: 8
   dex/ui/btn_off_60:
+    ascent: 8
+  dex/ui/btn_off_98:
     ascent: 8
   dex/ui/btn_paper_100:
     ascent: 8
@@ -39,6 +43,8 @@ glyphs:
   dex/ui/btn_paper_36:
     ascent: 8
   dex/ui/btn_paper_52:
+    ascent: 8
+  dex/ui/btn_paper_98:
     ascent: 8
   dex/ui/close:
     ascent: 8
@@ -195,6 +201,11 @@ glyphs:
   menu/icon/silver_32:
     height: 32
     ascent: 8
+  menu/icon/vil:
+    ascent: 8
+  menu/icon/vil_32:
+    height: 32
+    ascent: 8
   menu/icon/warp:
     ascent: 8
   menu/icon/warp_32:
@@ -315,7 +326,15 @@ glyphs:
     ascent: 8
   menu/ui/tab:
     ascent: 8
+  menu/ui/tab_green:
+    ascent: 8
+  menu/ui/tab_green_join:
+    ascent: 8
+  menu/ui/tab_green_off:
+    ascent: 8
   menu/ui/tab_join:
+    ascent: 8
+  menu/ui/tab_off:
     ascent: 8
   menu/ui/tag_104:
     ascent: 8
@@ -370,4 +389,14 @@ glyphs:
   menu/ui/unknown_item:
     ascent: 8
   menu/ui/well:
+    ascent: 8
+  menu/ui/well_selected:
+    ascent: 8
+  quest/ui/speech_200:
+    ascent: 8
+  shop/ui/chip_64:
+    ascent: 8
+  shop/ui/divider_200:
+    ascent: 8
+  shop/ui/qty_36:
     ascent: 8

@@ -90,7 +90,7 @@ public final class MainMenu {
     }
 
     /** The player's own skin face; the profile's signed textures are included so the client can draw it right away. */
-    static PlayerHeadObjectContents head(Player player) {
+    public static PlayerHeadObjectContents head(Player player) {
         var head = ObjectContents.playerHead().id(player.getUniqueId()).hat(true);
         if (PlayerHeadObjectContents.isValidName(player.getName())) head.name(player.getName());
         for (var property : player.getPlayerProfile().getProperties()) {
@@ -115,7 +115,10 @@ public final class MainMenu {
                             || !CoreViews.openTitles(coreUi, p)) soon(p, "꾸미기");
                 }),
                 new Button("accessory", "장신구", "menu/item/totem_of_undying", p -> run(coreUi, p, "장신구")),
-                new Button("quest", "퀘스트", "menu/icon/quest_32", p -> soon(p, "퀘스트")),
+                new Button("quest", "퀘스트", "menu/icon/quest_32", p -> {
+                    // Prototype with sample quests (QuestMenu); real quest data is not connected yet.
+                    if (!org.crebs.coreui.menu.quest.QuestMenu.open(coreUi, p)) soon(p, "퀘스트");
+                }),
                 new Button("mail", "우편함", "menu/icon/post_32", p -> {
                     // Kokonut-Mail's MailboxService opens its own mailbox screen; close this dialog first.
                     if (!coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Mail")) {
@@ -149,16 +152,25 @@ public final class MainMenu {
         c.image("menu/ui/tab", 12, 0);
         c.image("menu/icon/ego", 16, 2);
         c.text("메인 메뉴", 34, 6, WHITE);
+        // Category tab right of the red title tab: 마을 (village screen), green like the village screen's own tab.
+        if (g.containsKey("menu/ui/tab_green_off") && g.containsKey("menu/icon/vil")) {
+            c.image("menu/ui/tab_green_off", 104, 0);
+            c.image("menu/icon/vil", 108, 2);
+            c.text("마을", 126, 6, WHITE);
+            c.click(104, 0, 88, 20, p -> {
+                if (coreUi == null || !org.crebs.coreui.menu.village.VillageMenu.open(coreUi, p)) Messages.send(p, "마을 화면을 아직 불러오지 못했어요.");
+            });
+        }
         c.image("dex/ui/close", 300, 0);
         c.click(300, 0, 20, 20, p -> coreUi.close(p));
         c.image("menu/ui/panel_116_0", 0, PANEL_Y);
         c.image("menu/ui/panel_116_1", 160, PANEL_Y);
         c.image("menu/ui/tab_join", 13, PANEL_Y);
 
-        // Profile row: face, title (or world) on top, nickname below. A backing in the chip colour first (line 3),
-        // so the head frame, title and name paint over it; it ends 4 px after the longer of the two lines.
-        String place = "위치 · " + info.place();
-        int top = info.title() != null ? 34 + c.titleWidth(info.title(), 124) : 36 + TextWidths.width(Component.text(place));
+        // Profile row: face, the equipped title on top, nickname below (no location line: without a title the
+        // nickname alone sits in the middle). A backing in the chip colour first (line 3), so the head frame, title
+        // and name paint over it; it ends 4 px after the longer of the two lines.
+        int top = info.title() != null ? 34 + c.titleWidth(info.title(), 124) : 0;
         int right = Math.max(top, 36 + TextWidths.width(Component.text(info.name()))) + 4;
         c.fill("menu/ui/profile_bg_", 12, 32, Math.clamp(right - 12, 32, 160));
         // Face at 16 px (2x) from the skin; until the skin is loaded, the client's 8x8 head object (y on a 9 px line).
@@ -167,9 +179,10 @@ public final class MainMenu {
         else if (info.head() != null) c.b.playerHead("head", info.head()).position(19, 36).add();
         else c.image("menu/icon/kokonut", 15, 35);
         // Title backing at y 33..43 (inside the profile backing), nickname at y 45.
-        if (info.title() != null) c.title(info.title(), 34, 35, 124);
-        else c.text(place, 36, 35, DIM);
-        c.text(info.name(), 36, 45, INK);
+        if (info.title() != null) {
+            c.title(info.title(), 34, 35, 124);
+            c.text(info.name(), 36, 45, INK);
+        } else c.text(info.name(), 36, 40, INK);
 
         // Link buttons (wiki, minelist, discord): icon only, the name in the tooltip; right-aligned to the divider.
         for (int i = 0; i < info.links().size(); i++) {
@@ -234,12 +247,11 @@ public final class MainMenu {
 
         /**
          * The equipped title on the dark backing of the title screen ({@code menu/ui/tag_<w>}, drawn at y - 2): titles
-         * use chat colours meant for a dark background. Bold adds about a pixel per character to the measured width.
+         * use chat colours meant for a dark background.
          */
         /** Width of {@link #title}'s backing: the text plus 2 px each side, at most {@code max}. */
         int titleWidth(Component title, int max) {
-            String plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(title);
-            int text = Math.min(max - 4, TextWidths.width(title) + (bold(title) ? plain.codePointCount(0, plain.length()) : 0));
+            int text = Math.min(max - 4, TextWidths.width(title));
             return Math.max(8, text + 4);
         }
 
@@ -251,19 +263,13 @@ public final class MainMenu {
         }
 
         void title(Component title, int x, int y, int max) {
-            String plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(title);
-            int text = Math.min(max - 4, TextWidths.width(title) + (bold(title) ? plain.codePointCount(0, plain.length()) : 0));
+            int text = Math.min(max - 4, TextWidths.width(title));
             int width = Math.max(8, text + 4);
             // Exactly the text plus 2 px each side: the largest 8 px step plus an 8 px piece over its end.
             int base = width / 8 * 8;
             image("menu/ui/tag_" + base, x, y - 2);
             if (width > base) image("menu/ui/tag_8", x + width - 8, y - 2);
             b.label("txt" + ids++, title.colorIfAbsent(WHITE)).position(x + 2, y).size(Math.max(1, text), 9).add();
-        }
-
-        private static boolean bold(Component c) {
-            return c.decoration(net.kyori.adventure.text.format.TextDecoration.BOLD) == net.kyori.adventure.text.format.TextDecoration.State.TRUE
-                    || c.children().stream().anyMatch(Canvas::bold);
         }
 
         /** A face from {@link org.crebs.coreui.skin.SkinFaces}: one tinted {@code menu/ui/px_<scale>} dot per pixel. */

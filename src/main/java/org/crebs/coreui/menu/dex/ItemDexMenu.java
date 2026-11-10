@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 /**
  * Book-style item dex (categories: 광물·농작물·식물·물고기·유물·기타) drawn with the bundled {@code dex/...} glyphs.
- * Like {@code QuestPrototype}, every click rebuilds the menu from an immutable {@link State}.
+ * Every click rebuilds the menu from an immutable {@link State}.
  * All sizes are GUI pixels; the book is 456×272 with tabs above it and bookmarks on its right edge.
  */
 public final class ItemDexMenu {

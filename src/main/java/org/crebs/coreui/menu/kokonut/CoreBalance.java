@@ -35,6 +35,12 @@ public final class CoreBalance {
         return CurrencyUtil.snapshot(player).map(account -> new Balance(account.gold(), account.kokonut()));
     }
 
+    /** All three balances for the shop from the same non-blocking snapshot; empty while it is still loading. */
+    public static Optional<org.crebs.coreui.menu.shop.ShopCatalog.Wallet> wallet(UUID player) {
+        return CurrencyUtil.snapshot(player).map(account ->
+                new org.crebs.coreui.menu.shop.ShopCatalog.Wallet(account.silver(), account.gold(), account.kokonut()));
+    }
+
     /**
      * The equipped title from Core's {@link TitleLookup} service (memory only), or empty without one.
      * Titles that pick their own font fall back to plain text, because menu labels measure widths with the menu font.

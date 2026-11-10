@@ -19,7 +19,7 @@ commands:
     permission: coreui.dex
   coreui:
     description: Opens the CoreUi demo or rebuilds its resource pack
-    usage: /coreui demo [light|dark] | /coreui reload
+    usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui shop <id> [player] | /coreui reload
 permissions:
   coreui.demo:
     default: op
@@ -28,6 +28,15 @@ permissions:
     default: op
   # Prototype: 이동·꾸미기·설정 are not wired yet.
   coreui.mainmenu:
+    default: op
+  # Shops from shops.yml: /coreui shop <id> opens one for yourself.
+  coreui.shop:
+    default: op
+  # /coreui shop <id> <player>: open a shop for another player (console / NPC commands).
+  coreui.shop.others:
+    default: op
+  # /coreui quest npc <giver> <player>: open an NPC quest offer for another player (console / NPC commands).
+  coreui.quest.others:
     default: op
   coreui.reload:
     default: op

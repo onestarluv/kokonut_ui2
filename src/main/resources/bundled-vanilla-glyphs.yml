@@ -283,3 +283,195 @@ vanilla:
     height: 32
     ascent: 8
     advance: 31
+  village/icon/emerald:
+    texture: minecraft:item/emerald.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 27
+  village/icon/diamond:
+    texture: minecraft:item/diamond.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  village/icon/gold_ingot:
+    texture: minecraft:item/gold_ingot.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 33
+  village/icon/iron_ingot:
+    texture: minecraft:item/iron_ingot.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 33
+  village/icon/amethyst_shard:
+    texture: minecraft:item/amethyst_shard.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  village/icon/heart_of_the_sea:
+    texture: minecraft:item/heart_of_the_sea.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/nether_star:
+    texture: minecraft:item/nether_star.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/wheat:
+    texture: minecraft:item/wheat.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 33
+  village/icon/oak_sapling:
+    texture: minecraft:block/oak_sapling.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/cherry_sapling:
+    texture: minecraft:block/cherry_sapling.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/bamboo:
+    texture: minecraft:item/bamboo.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/sweet_berries:
+    texture: minecraft:item/sweet_berries.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/apple:
+    texture: minecraft:item/apple.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  village/icon/golden_apple:
+    texture: minecraft:item/golden_apple.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  village/icon/bread:
+    texture: minecraft:item/bread.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/cake:
+    texture: minecraft:item/cake.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 33
+  village/icon/honeycomb:
+    texture: minecraft:item/honeycomb.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  village/icon/cod:
+    texture: minecraft:item/cod.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/nautilus_shell:
+    texture: minecraft:item/nautilus_shell.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/fishing_rod:
+    texture: minecraft:item/fishing_rod.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/iron_pickaxe:
+    texture: minecraft:item/iron_pickaxe.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/iron_sword:
+    texture: minecraft:item/iron_sword.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 33
+  village/icon/bow:
+    texture: minecraft:item/bow.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 33
+  village/icon/trident:
+    texture: minecraft:item/trident.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/blaze_rod:
+    texture: minecraft:item/blaze_rod.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/compass:
+    texture: minecraft:item/compass_16.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/filled_map:
+    texture: minecraft:item/filled_map.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 33
+  village/icon/lantern:
+    texture: minecraft:item/lantern.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 23
+  village/icon/writable_book:
+    texture: minecraft:item/writable_book.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 33
+  village/icon/feather:
+    texture: minecraft:item/feather.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/ender_pearl:
+    texture: minecraft:item/ender_pearl.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  village/icon/slime_ball:
+    texture: minecraft:item/slime_ball.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29

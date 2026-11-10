@@ -508,8 +508,7 @@ public final class MenuRenderer {
     private void place(int x, int y, Component content, int fontAdvance, Key click) {
         y += contentTop();
         int left = (canvasWidth(session.getMenu()) - session.getMenu().getWidth()) / 2 + x;
-        // Server-style font (Galmuri + vanilla ascii) shifted to this pixel of the line. Galmuri advances are
-        // fractional: pad with invisible Galmuri glyphs up to a whole pixel, then step back by whole pixels.
+        // Shift the label to this pixel of the line. Pad fractional fallback glyphs before stepping back.
         Key font = TextWidths.font(Math.floorMod(y, 9));
         int subpixels = Math.round(TextWidths.exactWidth(content) * TextWidths.SUBPIXELS);
         String pad = TextWidths.wholePixelPad(subpixels);

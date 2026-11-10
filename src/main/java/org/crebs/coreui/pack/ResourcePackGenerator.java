@@ -184,7 +184,7 @@ public final class ResourcePackGenerator {
                 writeFont(pack, gson, id, texture, height, ascent, mask);
             }
         }
-        // Label fonts follow the configured vanilla/Galmuri split (see TextWidths), so they are generated here.
+        // Generate a version of the label font for each vertical offset.
         for (int offset = 0; offset < 9; offset++) {
             byte[] json = org.crebs.coreui.menu.render.TextWidths.fontJson(offset).getBytes(StandardCharsets.UTF_8);
             try (InputStream stream = new ByteArrayInputStream(json)) {

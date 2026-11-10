@@ -20,7 +20,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Kokonut-Mail mailbox as a CoreUi dialog (book layout of the dex). Data and claiming stay in Kokonut-Mail's
@@ -39,7 +42,6 @@ public final class MailMenu {
     private static final TextColor INK = TextColor.color(0x3B2A1A), DIM = TextColor.color(0x7A6446),
             RED = TextColor.color(0xA83A2A), GREEN = TextColor.color(0x3E7A22), PAPER = TextColor.color(0xF6ECD0),
             WHITE = TextColor.color(0xFFFFFF);
-    private static final DateTimeFormatter SHORT = DateTimeFormatter.ofPattern("MM.dd HH:mm").withZone(ZoneId.of("Asia/Seoul"));
     private static final DateTimeFormatter LONG = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm").withZone(ZoneId.of("Asia/Seoul"));
     /** Players with a claim in flight; their clicks are ignored until it finishes. */
     private static boolean current(Player player,Object ticket) { return player.isOnline() && MailRequests.current(player,ticket); }
@@ -85,11 +87,9 @@ public final class MailMenu {
     /** Fetches the page (and the selected mail's attachments), then draws. Futures complete on the server thread. */
     private static void load(CoreUi coreUi, MailboxService mail, Player player, int page, UUID selected, int attachPage) {
         Object ticket=MailRequests.begin(player);
-        mail.page(player.getUniqueId(), page, ROWS).whenComplete((loaded, error) -> {
-            if(!current(player,ticket)) return;
-            if (error != null || loaded == null) { failed(player); return; }
-            detail(coreUi,mail,player,loaded,selected,attachPage,ticket);
-        });
+        request(coreUi, player, ticket, "page=" + page,
+                () -> mail.page(player.getUniqueId(), page, ROWS),
+                loaded -> detail(coreUi,mail,player,loaded,selected,attachPage,ticket));
     }
     private static void detail(CoreUi coreUi,MailboxService mail,Player player,MailPage loaded,UUID selected,int attachPage,Object ticket) {
         MailEntry pick=loaded.entries().stream().filter(e->e.id().equals(selected)).findFirst()
@@ -97,11 +97,9 @@ public final class MailMenu {
         if(pick==null) { show(coreUi,mail,player,View.of(loaded,null,0,List.of())); return; }
         int pages=Math.max(1,(pick.attachments()+GRID-1)/GRID);
         int ap=Math.clamp(pick.id().equals(selected)?attachPage:0,0,pages-1);
-        mail.attachments(player.getUniqueId(),pick.id(),ap*GRID,GRID).whenComplete((items,error)-> {
-            if(!current(player,ticket)) return;
-            if(error!=null || items==null) { failed(player); return; }
-            show(coreUi,mail,player,View.of(loaded,pick,ap,items));
-        });
+        request(coreUi, player, ticket, "attachments mail=" + pick.id() + " page=" + ap,
+                () -> mail.attachments(player.getUniqueId(),pick.id(),ap*GRID,GRID),
+                items -> show(coreUi,mail,player,View.of(loaded,pick,ap,items)));
     }
     private static void select(CoreUi coreUi,MailboxService mail,Player player,MailPage page,UUID selected,int attachPage) {
         Object ticket=MailRequests.begin(player);
@@ -110,6 +108,35 @@ public final class MailMenu {
 
     private static void failed(Player player) {
         if (player.isOnline()) Messages.send(player, "우편을 불러오지 못했어요. 잠시 후 다시 열어 주세요.");
+    }
+
+    /** Observe both service failures and exceptions thrown while building/showing the dialog.
+     * Exceptions thrown in an unobserved whenComplete callback otherwise disappear into its returned future.
+     */
+    private static <T> void request(CoreUi coreUi, Player player, Object ticket, String stage,
+                                    Supplier<CompletableFuture<T>> fetch, Consumer<T> display) {
+        try {
+            fetch.get().whenComplete((value, error) -> {
+                if (!current(player, ticket)) return;
+                if (error != null) { failed(coreUi, player, stage, error); return; }
+                try {
+                    display.accept(Objects.requireNonNull(value, "mail response"));
+                } catch (RuntimeException | LinkageError failure) {
+                    failed(coreUi, player, stage + " display", failure);
+                }
+            });
+        } catch (RuntimeException | LinkageError failure) {
+            failed(coreUi, player, stage + " request", failure);
+        }
+    }
+
+    private static void failed(CoreUi coreUi, Player player, String stage, Throwable failure) {
+        Throwable cause = failure;
+        while (cause instanceof CompletionException && cause.getCause() != null) cause = cause.getCause();
+        // Keep SQL credentials and item payloads out of logs; retain type and frames for diagnosis.
+        coreUi.getLogger().warning("Mailbox failed player=" + player.getUniqueId() + " stage=" + stage
+                + " type=" + cause.getClass().getName() + " frames=" + Arrays.toString(cause.getStackTrace()));
+        failed(player);
     }
 
     private static void show(CoreUi coreUi, MailboxService mail, Player player, View view) {
@@ -154,6 +181,7 @@ public final class MailMenu {
     static CoreMenu build(Map<String, Glyph> g, View view, Actions act) {
         Canvas c = new Canvas(g);
         MailPage page = view.page();
+        long now = System.currentTimeMillis();
         // Chrome: book, title tab (joined to the book), close.
         for (int col = 0; col < 2; col++) {
             c.image("dex/ui/page_0_" + col, col * 228, 20);
@@ -181,7 +209,7 @@ public final class MailMenu {
             if (e.kind() == MailKind.SINGLE && preview != null && preview.amount() > 1) c.count(preview.amount(), LEFT, y);
             boolean bundle = e.kind() == MailKind.BUNDLE;
             c.fitted(bundle && e.name() != null ? e.name() : "보낸이 " + e.sender(), LEFT + 25, y + 1, PAGE - 25, selected ? GREEN : INK);
-            String sub = (bundle ? e.sender() + " · 첨부 " + e.attachments() + "개 · " : "") + SHORT.format(Instant.ofEpochMilli(e.created()));
+            String sub = MailTime.remaining(e.expiresAt(), now) + (bundle ? " · " + e.sender() + " · 첨부 " + e.attachments() + "개" : "");
             c.fitted(e.locked() ? sub + " · 처리 중" : sub, LEFT + 25, y + 11, PAGE - 25, e.locked() ? RED : DIM);
             net.kyori.adventure.text.event.HoverEventSource<?> hover = !bundle && preview != null ? preview.hover()
                     : HoverEvent.showText(Component.text((e.name() == null ? "묶음 우편" : e.name()) + "\n첨부 " + e.attachments() + "개 · 보낸이 " + e.sender()));
@@ -218,6 +246,10 @@ public final class MailMenu {
                 }
                 Slot item = view.attachments().get(i);
                 c.image("dex/ui/slot_normal", x, y);
+                if (item == null) {
+                    c.item(null, x + 2, y + 2);
+                    continue;
+                }
                 c.item(item.key(), x + 2, y + 2);
                 if (item.amount() > 1) c.count(item.amount(), x, y);
                 c.click(x, y, 20, 20, p -> { }, item.hover());
@@ -227,6 +259,7 @@ public final class MailMenu {
                 c.button("paper", 20, ">", RIGHT + 24, BUTTON_Y, INK, view.attachPage() + 1 < attachPages ? p -> act.attachPage(p, view.attachPage() + 1) : null);
             }
             if (e.locked()) c.button("off", 60, "처리 중", RIGHT + PAGE - 60, BUTTON_Y, DIM, null);
+            else if (e.expiresAt() <= now) c.button("off", 60, "만료됨", RIGHT + PAGE - 60, BUTTON_Y, DIM, null);
             else c.button("green", 60, "받기", RIGHT + PAGE - 60, BUTTON_Y, WHITE, p -> act.claim(p, e));
         }
         return c.b.build();

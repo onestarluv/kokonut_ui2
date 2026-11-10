@@ -53,6 +53,7 @@ public final class CoreUi extends JavaPlugin {
             if (error == null) getLogger().info("Resource pack generated: " + path);
             else getLogger().log(java.util.logging.Level.SEVERE, "Resource pack generation failed", error);
         });
+        org.crebs.coreui.menu.shop.ShopRegistry.load(this);
         getServer().getPluginManager().registerEvents(new MenuListener(this), this);
         skins = new org.crebs.coreui.skin.SkinFaces(this);
         getServer().getPluginManager().registerEvents(skins, this);
@@ -82,6 +83,7 @@ public final class CoreUi extends JavaPlugin {
                 }
                 Messages.send(sender, "Rebuilding CoreUi resource pack...");
                 applyTextConfig();
+                org.crebs.coreui.menu.shop.ShopRegistry.load(this);
                 reloadPack().whenComplete((path, error) -> {
                     if (!isEnabled()) return;
                     getServer().getScheduler().runTask(this, () -> {
@@ -94,17 +96,79 @@ public final class CoreUi extends JavaPlugin {
                 });
                 return true;
             }
-            if (args.length == 1 && args[0].equalsIgnoreCase("quest")) {
-                if (!sender.hasPermission("coreui.demo")) {
-                    Messages.send(sender, "You do not have permission to open the CoreUi demo");
+            if (args.length >= 1 && args[0].equalsIgnoreCase("quest")) {
+                // /coreui quest                     : quest journal (prototype, coreui.demo)
+                // /coreui quest npc <giver> [player]: NPC quest offer screen, e.g. from a Citizens console command
+                boolean npc = args.length >= 3 && args.length <= 4 && args[1].equalsIgnoreCase("npc");
+                if (args.length != 1 && !npc) {
+                    Messages.send(sender, "Usage: /coreui quest | /coreui quest npc <" + String.join("|", org.crebs.coreui.menu.quest.QuestOfferMenu.givers()) + "> [player]");
                     return true;
                 }
-                if (!(sender instanceof Player player)) {
-                    Messages.send(sender, "Open the prototype in-game: /coreui quest");
+                Player target;
+                if (npc && args.length == 4) {
+                    if (!sender.hasPermission("coreui.quest.others")) {
+                        Messages.send(sender, "You do not have permission to open quest screens for other players");
+                        return true;
+                    }
+                    target = getServer().getPlayerExact(args[3]);
+                    if (target == null) {
+                        Messages.send(sender, "플레이어 '" + args[3] + "'이(가) 접속해 있지 않아요.");
+                        return true;
+                    }
+                } else if (sender instanceof Player self) {
+                    if (!sender.hasPermission("coreui.demo")) {
+                        Messages.send(sender, "You do not have permission to open the quest prototype");
+                        return true;
+                    }
+                    target = self;
+                } else {
+                    Messages.send(sender, "Usage from the console: /coreui quest npc <giver> <player>");
                     return true;
                 }
-                if (!org.crebs.coreui.menu.demo.QuestPrototype.open(this, player)) {
-                    Messages.send(sender, "프로토타입 이미지가 없어요. Glyphs/proto 폴더와 glyphs.yml을 넣고 /coreui reload 하세요.");
+                if (npc && !org.crebs.coreui.menu.quest.QuestOfferMenu.givers().contains(args[2])) {
+                    Messages.send(sender, "NPC '" + args[2] + "'이(가) 없어요: " + String.join(", ", org.crebs.coreui.menu.quest.QuestOfferMenu.givers()));
+                    return true;
+                }
+                boolean opened = npc ? org.crebs.coreui.menu.quest.QuestOfferMenu.open(this, target, args[2])
+                        : org.crebs.coreui.menu.quest.QuestMenu.open(this, target);
+                if (!opened) Messages.send(sender, "퀘스트 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
+                return true;
+            }
+            if (args.length >= 1 && args.length <= 3 && args[0].equalsIgnoreCase("shop")) {
+                // /coreui shop <id>            : open a shop for yourself (coreui.shop)
+                // /coreui shop <id> <player>   : open it for someone else, e.g. a Citizens NPC console command (coreui.shop.others)
+                if (args.length == 1) {
+                    Messages.send(sender, "Usage: /coreui shop <id> [player] · shops: " + String.join(", ", org.crebs.coreui.menu.shop.ShopRegistry.ids()));
+                    return true;
+                }
+                var shop = org.crebs.coreui.menu.shop.ShopRegistry.get(args[1]).orElse(null);
+                if (shop == null) {
+                    Messages.send(sender, "상점 '" + args[1] + "'이(가) shops.yml에 없어요.");
+                    return true;
+                }
+                Player target;
+                if (args.length == 3) {
+                    if (!sender.hasPermission("coreui.shop.others")) {
+                        Messages.send(sender, "You do not have permission to open shops for other players");
+                        return true;
+                    }
+                    target = getServer().getPlayerExact(args[2]);
+                    if (target == null) {
+                        Messages.send(sender, "플레이어 '" + args[2] + "'이(가) 접속해 있지 않아요.");
+                        return true;
+                    }
+                } else if (sender instanceof Player self) {
+                    if (!sender.hasPermission("coreui.shop")) {
+                        Messages.send(sender, "You do not have permission to open shops");
+                        return true;
+                    }
+                    target = self;
+                } else {
+                    Messages.send(sender, "Usage from the console: /coreui shop <id> <player>");
+                    return true;
+                }
+                if (!org.crebs.coreui.menu.shop.ShopMenu.open(this, target, shop)) {
+                    Messages.send(sender, "상점 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
                 }
                 return true;
             }
@@ -133,15 +197,27 @@ public final class CoreUi extends JavaPlugin {
                 Messages.send(sender, "CoreUi demo opened. Apply plugins/CoreUi/Pack/CoreUi.zip to your client resource packs");
                 return true;
             }
-            Messages.send(sender, "Usage: /coreui demo [light|dark] | /coreui reload");
+            Messages.send(sender, "Usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui shop <id> [player] | /coreui reload");
             return true;
         });
         Objects.requireNonNull(getCommand("coreui")).setTabCompleter((sender, command, label, args) -> {
             if (args.length == 1) {
                 List<String> suggestions = new ArrayList<>();
                 if (sender.hasPermission("coreui.demo")) { suggestions.add("demo"); suggestions.add("quest"); }
+                if (sender.hasPermission("coreui.shop") || sender.hasPermission("coreui.shop.others")) suggestions.add("shop");
                 if (sender.hasPermission("coreui.reload")) suggestions.add("reload");
                 return suggestions.stream().filter(value -> value.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
+            }
+            if (args.length == 2 && args[0].equalsIgnoreCase("quest")) {
+                return List.of("npc").stream().filter(value -> value.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
+            }
+            if (args.length == 3 && args[0].equalsIgnoreCase("quest") && args[1].equalsIgnoreCase("npc")) {
+                return org.crebs.coreui.menu.quest.QuestOfferMenu.givers().stream()
+                        .filter(value -> value.startsWith(args[2].toLowerCase(Locale.ROOT))).toList();
+            }
+            if (args.length == 2 && args[0].equalsIgnoreCase("shop") && sender.hasPermission("coreui.shop")) {
+                return org.crebs.coreui.menu.shop.ShopRegistry.ids().stream()
+                        .filter(value -> value.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
             }
             if (args.length == 2 && args[0].equalsIgnoreCase("demo") && sender.hasPermission("coreui.demo")) {
                 return List.of("light", "dark").stream()
@@ -185,7 +261,7 @@ public final class CoreUi extends JavaPlugin {
         }, 200L, 200L);
     }
 
-    /** Reads text.vanilla-chars (must match the server default font's Galmuri "skip"); falls back to the default. */
+    /** Reads which ASCII characters use the vanilla label font. */
     private void applyTextConfig() {
         reloadConfig();
         String chars = getConfig().getString("text.vanilla-chars", org.crebs.coreui.menu.render.TextWidths.DEFAULT_VANILLA_CHARS);

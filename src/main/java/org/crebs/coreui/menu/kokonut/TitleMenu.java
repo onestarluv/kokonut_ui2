@@ -13,7 +13,6 @@ import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEventSource;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
@@ -301,11 +300,6 @@ public final class TitleMenu {
         return out.children(out.children().stream().map(TitleMenu::clean).toList());
     }
 
-    private static boolean bold(Component component) {
-        return component.decoration(TextDecoration.BOLD) == TextDecoration.State.TRUE
-                || component.children().stream().anyMatch(TitleMenu::bold);
-    }
-
     private static TextColor firstColor(Component component) {
         if (component.color() != null) return component.color();
         for (Component child : component.children()) {
@@ -359,10 +353,10 @@ public final class TitleMenu {
 
         /**
          * Styled text (title colours and gradients) when it fits, else its plain text cut with "…" in its first colour.
-         * Bold adds about a pixel per character, which the width table does not count. Returns the drawn width.
+         * Returns the drawn width.
          */
         int rich(Component value, String plain, int x, int y, int max, TextColor fallback) {
-            int width = TextWidths.width(value) + (bold(value) ? plain.codePointCount(0, plain.length()) : 0);
+            int width = TextWidths.width(value);
             if (width <= max) {
                 label(value.colorIfAbsent(fallback), x, y, width);
                 return width;
@@ -383,7 +377,7 @@ public final class TitleMenu {
          * The backing's top is never on a later text line than the text, so the text paints over it. Returns its width.
          */
         int tagged(Component value, String plain, int x, int y, int max) {
-            int text = Math.min(max - 4, TextWidths.width(value) + (bold(value) ? plain.codePointCount(0, plain.length()) : 0));
+            int text = Math.min(max - 4, TextWidths.width(value));
             int width = Math.min(200, Math.max(8, text + 4));
             tag(x, y - 2, width);
             rich(value, plain, x + 2, y, width - 4, WHITE);
@@ -399,7 +393,7 @@ public final class TitleMenu {
 
         void plated(Component value, String plain, int cx, int y, TextColor color) {
             int max = 192;
-            int width = Math.min(max, TextWidths.width(value) + (bold(value) ? plain.codePointCount(0, plain.length()) : 0));
+            int width = Math.min(max, TextWidths.width(value));
             int plate = Math.min(200, Math.max(24, (width + 6 + 7) / 8 * 8));
             image("menu/ui/plate_" + plate, cx - plate / 2, y);
             rich(value, plain, cx - width / 2, y + 2, max, color);
