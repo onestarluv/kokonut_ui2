@@ -18,6 +18,10 @@ dependencies {
     // Optional Kokonut-Mail mailbox (main menu 우편함 button).
     compileOnly(files(providers.gradleProperty("kokonutMailJar").orElse("../Kokonut_Mail/build/libs/Kokonut-Mail-cbt-1.0.jar")))
     // Optional BetterHud (Kokonut_HUD) shader integration; resolved from the server at runtime.
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testImplementation("io.papermc.paper:paper-api:26.3.build.243-stable")
+    testImplementation(files(providers.gradleProperty("kokonutCoreJar").orElse("../Kokonut_Core/build/libs/Kokonut-Core-cbt-1.0.jar")))
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     compileOnly(files(providers.gradleProperty("betterHudApiJar").orElse("../Kokonut_HUD/api/build/libs/betterhud-api-cbt-1.0.jar")))
 }
 
@@ -47,6 +51,9 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks {
+    test {
+        useJUnitPlatform()
+    }
     runServer {
         minecraftVersion("26.3")
         jvmArgs("-Xms2G", "-Xmx2G")

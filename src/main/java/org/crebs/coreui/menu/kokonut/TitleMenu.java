@@ -37,6 +37,7 @@ import java.util.function.Consumer;
  * Left page: search field and the owned titles; right page: chat preview, description and equip buttons.
  * Search opens a small native dialog with a text field (dialog bodies cannot hold inputs that our canvas clicks
  * would send), then reopens this screen filtered by {@link TitleSearch}.
+ * With Core's nickname colors available a green 색 닉네임 tab sits right of the title tab ({@link ColorNickMenu}).
  * Text never straddles y = 153, where the lower book tiles start (they are painted later and would cover it).
  */
 public final class TitleMenu {
@@ -65,7 +66,7 @@ public final class TitleMenu {
 
     /** What one frame shows. {@code shown} is {@code owned} after the search; {@code equipped} may be null. */
     record View(String player, net.kyori.adventure.text.object.PlayerHeadObjectContents head, int[] face, boolean ready, boolean busy,
-                List<Title> owned, List<Title> shown, Long equipped, Title selected, int page, String query) {
+                List<Title> owned, List<Title> shown, Long equipped, Title selected, int page, String query, boolean colorTab) {
         int pages() {
             return Math.max(1, (shown.size() + ROWS - 1) / ROWS);
         }
@@ -85,22 +86,26 @@ public final class TitleMenu {
         void clearSearch(Player p);
         void equip(Player p, Title title);
         void unequip(Player p);
+        void colorNick(Player p);
         void close(Player p);
     }
 
     private TitleMenu() {
     }
 
-    /** {@code /칭호} and the main menu: false (Core's chest GUI) while the glyphs are not loaded. */
-    public static boolean open(CoreUi coreUi, TitleCatalog catalog, Player player) {
+    /**
+     * {@code /칭호} and the main menu: false (Core's chest GUI) while the glyphs are not loaded.
+     * {@code colorTab} opens the nickname color screen; null (no tab) when Core has no color service.
+     */
+    public static boolean open(CoreUi coreUi, TitleCatalog catalog, Player player, Consumer<Player> colorTab) {
         var g = coreUi.getGlyphs().all();
         if (!g.containsKey("menu/ui/field_176") || !g.containsKey("menu/ui/plate_200") || !g.containsKey("menu/ui/tag_8") || !g.containsKey("menu/ui/px_2") || !g.containsKey("dex/ui/page_0_0")) return false;
         player.playSound(player, Sound.ITEM_BOOK_PAGE_TURN, SoundCategory.MASTER, 0.6f, 1f);
-        show(coreUi, catalog, player, new State("", 0, null));
+        show(coreUi, catalog, colorTab, player, new State("", 0, null));
         return true;
     }
 
-    private static void show(CoreUi coreUi, TitleCatalog catalog, Player player, State state) {
+    private static void show(CoreUi coreUi, TitleCatalog catalog, Consumer<Player> colorTab, Player player, State state) {
         if (!player.isOnline()) return;
         List<Title> owned = catalog.ready(player)
                 ? catalog.owned(player).stream().map(e -> Title.of(e.id(), e.title(), e.description())).toList() : List.of();
@@ -109,15 +114,17 @@ public final class TitleMenu {
         int pages = Math.max(1, (shown.size() + ROWS - 1) / ROWS);
         int page = Math.clamp(state.page(), 0, pages - 1);
         Title selected = pick(shown, page, state.selected(), equipped);
-        View view = new View(displayName(player), MainMenu.head(player), coreUi.getSkinFaces().face(player), catalog.ready(player), catalog.busy(player), owned, shown, equipped, selected, page, state.query());
+        View view = new View(displayName(player), MainMenu.head(player), coreUi.getSkinFaces().face(player), catalog.ready(player), catalog.busy(player), owned, shown, equipped, selected, page, state.query(),
+                colorTab != null && coreUi.getGlyphs().all().containsKey("menu/ui/tab_green_off"));
         State now = new State(state.query(), page, selected == null ? null : selected.id());
         coreUi.open(player, build(coreUi.getGlyphs().all(), view, new Actions() {
-            public void select(Player p, Title title) { show(coreUi, catalog, p, new State(now.query(), now.page(), title.id())); }
-            public void page(Player p, int to) { show(coreUi, catalog, p, new State(now.query(), to, null)); }
-            public void search(Player p) { askQuery(coreUi, catalog, p, now); }
-            public void clearSearch(Player p) { show(coreUi, catalog, p, new State("", 0, now.selected())); }
-            public void equip(Player p, Title title) { change(coreUi, catalog, p, now, title.id()); }
-            public void unequip(Player p) { change(coreUi, catalog, p, now, null); }
+            public void select(Player p, Title title) { show(coreUi, catalog, colorTab, p, new State(now.query(), now.page(), title.id())); }
+            public void page(Player p, int to) { show(coreUi, catalog, colorTab, p, new State(now.query(), to, null)); }
+            public void search(Player p) { askQuery(coreUi, catalog, colorTab, p, now); }
+            public void clearSearch(Player p) { show(coreUi, catalog, colorTab, p, new State("", 0, now.selected())); }
+            public void equip(Player p, Title title) { change(coreUi, catalog, colorTab, p, now, title.id()); }
+            public void unequip(Player p) { change(coreUi, catalog, colorTab, p, now, null); }
+            public void colorNick(Player p) { if (colorTab != null) colorTab.accept(p); }
             public void close(Player p) { coreUi.close(p); }
         }));
     }
@@ -131,16 +138,16 @@ public final class TitleMenu {
     }
 
     /** Saves through Core (which sends the chat message), shows "처리 중" meanwhile and redraws when it finishes. */
-    private static void change(CoreUi coreUi, TitleCatalog catalog, Player player, State state, Long id) {
+    private static void change(CoreUi coreUi, TitleCatalog catalog, Consumer<Player> colorTab, Player player, State state, Long id) {
         if (catalog.busy(player)) return;
         catalog.equip(player, id, () -> {
             boolean done = id == null ? catalog.equipped(player).isEmpty()
                     : catalog.equipped(player).isPresent() && catalog.equipped(player).getAsLong() == id;
             if (done) player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 0.5f, 1.2f);
             else player.playSound(player, Sound.ENTITY_VILLAGER_NO, SoundCategory.NEUTRAL, 0.8f, 1f);
-            if (stillOpen(coreUi, player)) show(coreUi, catalog, player, state);
+            if (stillOpen(coreUi, player)) show(coreUi, catalog, colorTab, player, state);
         });
-        if (stillOpen(coreUi, player)) show(coreUi, catalog, player, state);
+        if (stillOpen(coreUi, player)) show(coreUi, catalog, colorTab, player, state);
     }
 
     /** The server nickname when set, else the Minecraft name (see {@link CoreBalance#displayName}). */
@@ -149,21 +156,25 @@ public final class TitleMenu {
     }
 
     private static boolean stillOpen(CoreUi coreUi, Player player) {
-        return player.isOnline() && coreUi.getSession(player).map(s -> s.getMenu().getId().equals(ID)).orElse(false);
+        return stillOpen(coreUi, player, ID);
+    }
+
+    static boolean stillOpen(CoreUi coreUi, Player player, String id) {
+        return player.isOnline() && coreUi.getSession(player).map(s -> s.getMenu().getId().equals(id)).orElse(false);
     }
 
     /** Native dialog with a text field; "검색" reopens the list filtered, "취소" reopens it unchanged. */
-    private static void askQuery(CoreUi coreUi, TitleCatalog catalog, Player player, State state) {
+    private static void askQuery(CoreUi coreUi, TitleCatalog catalog, Consumer<Player> colorTab, Player player, State state) {
         coreUi.removeSession(player);
         var once = ClickCallback.Options.builder().uses(1).lifetime(Duration.ofMinutes(10)).build();
         ActionButton search = ActionButton.builder(Component.text("검색")).width(100)
                 .action(DialogAction.customClick((response, audience) -> onMain(coreUi, () -> {
                     String query = Objects.requireNonNullElse(response.getText("query"), "").strip();
-                    show(coreUi, catalog, player, new State(query, 0, null));
+                    show(coreUi, catalog, colorTab, player, new State(query, 0, null));
                 }), once)).build();
         ActionButton cancel = ActionButton.builder(Component.text("취소")).width(100)
                 .action(DialogAction.customClick((response, audience) -> onMain(coreUi,
-                        () -> show(coreUi, catalog, player, state)), once)).build();
+                        () -> show(coreUi, catalog, colorTab, player, state)), once)).build();
         player.showDialog(Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(Component.text("칭호 검색"))
                         .canCloseWithEscape(true).pause(false)
@@ -183,8 +194,8 @@ public final class TitleMenu {
 
     /** One frame; pure apart from the callbacks, so offline checks can build it with sample data. */
     static CoreMenu build(Map<String, Glyph> g, View v, Actions act) {
-        Canvas c = new Canvas(g);
-        // Chrome: book, title tab (joined to the book), close.
+        Canvas c = new Canvas(g, ID, "칭호");
+        // Chrome: book, title tab (joined to the book), the 색 닉네임 tab beside it, close.
         for (int col = 0; col < 2; col++) {
             c.image("dex/ui/page_0_" + col, col * 228, 20);
             c.image("dex/ui/page_1_" + col, col * 228, 153);
@@ -193,6 +204,12 @@ public final class TitleMenu {
         c.item("name_tag", 20, 2);
         c.text("칭호", 38, 6, WHITE);
         c.image("menu/ui/tab_join", 17, 20);
+        if (v.colorTab()) {
+            c.image("menu/ui/tab_green_off", 108, 0);
+            c.item(ColorNickMenu.TAB_ICON, 112, 2);
+            c.text("색 닉네임", 130, 6, WHITE);
+            c.click(108, 0, 88, 20, act::colorNick, null);
+        }
         c.image("dex/ui/close", 432, 0);
         c.click(432, 0, 20, 20, act::close, null);
 
@@ -309,14 +326,15 @@ public final class TitleMenu {
         return null;
     }
 
-    private static final class Canvas {
+    /** The frame under construction; shared with {@link ColorNickMenu}. */
+    static final class Canvas {
         final Map<String, Glyph> g;
-        final CoreMenuBuilder b = CoreMenu.builder(ID).title(Component.text("칭호"))
-                .theme(ThemeColour.DARK).noBackground().size(WIDTH, HEIGHT);
+        final CoreMenuBuilder b;
         int ids;
 
-        Canvas(Map<String, Glyph> g) {
+        Canvas(Map<String, Glyph> g, String id, String title) {
             this.g = g;
+            this.b = CoreMenu.builder(id).title(Component.text(title)).theme(ThemeColour.DARK).noBackground().size(WIDTH, HEIGHT);
         }
 
         void image(String id, int x, int y) {
@@ -328,6 +346,13 @@ public final class TitleMenu {
             Glyph icon = g.get("item/" + key);
             if (icon != null && !icon.supportsOffset(Math.floorMod(y, 9))) icon = null;
             image(icon == null ? "menu/ui/unknown_item" : icon.id(), x, y);
+        }
+
+        /** A vanilla item icon multiplied by {@code tint} (offset-2 positions only), or the "?" icon. */
+        void tinted(String key, int x, int y, TextColor tint) {
+            Glyph icon = g.get("item/" + key);
+            if (icon == null || !icon.supportsOffset(Math.floorMod(y, 9))) { image("menu/ui/unknown_item", x, y); return; }
+            b.glyph("img" + ids++, icon).position(x, y).tint(tint).add();
         }
 
         void click(int x, int y, int w, int h, Consumer<Player> onClick, HoverEventSource<?> hover) {

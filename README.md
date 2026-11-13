@@ -185,6 +185,26 @@ is a prototype). `/메뉴` stays Kokonut-Core's utility menu.
   items) as `menu/icon/<name>` (16 px) and `menu/icon/<name>_32`; vanilla `menu/item/<key>` (32 px) for the rest.
 - Images: `bundled-glyphs/menu/ui/*` (panel_116, tab, card_40, well, chip, badge).
 
+## Titles and Nickname Colors (`/칭호`, `/별명색`)
+
+With Kokonut-Core installed, CoreUi registers a `TitleView` and a `ColorNickView`, so `/칭호` opens `TitleMenu` and
+`/별명색` opens `ColorNickMenu` (same book) instead of Core's chest GUIs. Core keeps ownership, saving and the
+chat messages (`TitleCatalog`, `ColorNickCatalog`); Core's chest GUI is the fallback while the glyphs are not loaded.
+
+- Tab row, as on the village screen: 칭호 (red) and 색 닉네임 (green). The active tab is joined to the book
+  (`menu/ui/tab` + `tab_join`, `tab_green` + `tab_green_join`); the other one is dimmed (`tab_off`,
+  `tab_green_off`) and switches screens. With a Core that has no nickname colors the title screen has no second tab.
+- 색 닉네임: the owned colors (Core's `NickColor`: vanilla's 16, 16 hex colors and 11 gradients; permission
+  `kokonut.colornick.<id>`) eight per page, each with the player's name in that color on a dark backing, its name
+  and a dye icon (vanilla dyes; a white dye tinted to the color for hex colors and gradients); the right page shows the name plate
+  preview and 장착 / 해제, exactly like titles ("처리 중" while Core saves, then the screen redraws).
+- Tests: `gradlew test` builds both screens offline (`ColorNickMenuTest`: tabs, paging, equip/unequip buttons,
+  loading and empty states). Preview images: `tools/MenuPreview.java` writes `docs/colornick-preview-*.png`.
+
+| 칭호 탭 | 색 닉네임 탭 |
+| :---: | :---: |
+| ![](docs/colornick-preview-titles.png) | ![](docs/colornick-preview-list.png) |
+
 ## Mailbox (`/우편함`)
 
 With Kokonut-Mail installed, CoreUi registers a `MailboxView` on startup, so `/우편함`, the main menu and Core's
