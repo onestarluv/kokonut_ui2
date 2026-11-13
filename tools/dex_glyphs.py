@@ -77,7 +77,7 @@ class Img:
         if self.h < 8:
             self.px += [[CLEAR] * self.w for _ in range(8 - self.h)]
             self.h = 8
-        path = os.path.join(OUT, (rel if rel.startswith(("menu/", "shop/", "quest/", "skill/")) else "dex/" + rel) + ".png")
+        path = os.path.join(OUT, (rel if rel.startswith(("menu/", "shop/", "quest/", "skill/", "gem/")) else "dex/" + rel) + ".png")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         raw = b"".join(b"\x00" + b"".join(bytes(p) for p in row) for row in self.px)
 
@@ -319,6 +319,7 @@ def main():
     shop_glyphs()
     quest_glyphs()
     skill_glyphs()
+    gem_glyphs()
     icon_art()
     write_defaults()
     count = sum(len(f) for _, _, f in os.walk(OUT))
@@ -549,6 +550,27 @@ def skill_glyphs():
         Img(86, 2, c).save(f"skill/ui/tab_{name}_join")
         off = darken(c, 0.28)
         bevel(88, 20, off, OUTLINE, lighten(off, 0.35), darken(off, 0.25)).save(f"skill/ui/tab_{name}_off")
+
+
+
+# Gem cutting (GemMenu.java, prototype): 16 px facets (8x8 pixel art doubled, 14 px visible, 1 px clear margin).
+# good (견고함·아름다움 landed, blue), bad (결함 landed, red) and miss (any line, black) are the user's art in
+# art/gem/, copied as-is; empty is drawn here in the same blocky diamond so the row lines up.
+GEM_ROWS = ((3, 3), (2, 4), (1, 5), (0, 6), (1, 5), (2, 4), (3, 3))  # diamond: first/last 2 px block per row
+
+
+def gem_glyphs():
+    art = os.path.join(ROOT, "art", "gem")
+    target = os.path.join(OUT, "gem", "ui")
+    os.makedirs(target, exist_ok=True)
+    for name in ("good", "bad", "miss"):
+        shutil.copyfile(os.path.join(art, f"facet_{name}.png"), os.path.join(target, f"facet_{name}.png"))
+    empty = Img(16, 16)
+    for row, (a, b) in enumerate(GEM_ROWS):
+        for k in range(a, b + 1):
+            edge = k in (a, b) or row in (0, len(GEM_ROWS) - 1)
+            empty.rect(1 + k * 2, 1 + row * 2, 2, 2, hexc("#8C7A5A") if edge else hexc("#D9C9A3"))
+    empty.save("gem/ui/facet_empty")
 
 
 def write_defaults():

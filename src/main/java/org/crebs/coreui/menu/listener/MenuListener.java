@@ -32,5 +32,6 @@ public final class MenuListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         plugin.removeSession(event.getPlayer());
+        org.crebs.coreui.menu.gem.GemMenu.forget(event.getPlayer().getUniqueId());
     }
 }

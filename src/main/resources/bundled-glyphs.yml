@@ -146,6 +146,14 @@ glyphs:
     ascent: 8
   dex/ui/tab_relic_on:
     ascent: 8
+  gem/ui/facet_bad:
+    ascent: 8
+  gem/ui/facet_empty:
+    ascent: 8
+  gem/ui/facet_good:
+    ascent: 8
+  gem/ui/facet_miss:
+    ascent: 8
   menu/icon/collect:
     ascent: 8
   menu/icon/collect_32:

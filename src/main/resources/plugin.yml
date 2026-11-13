@@ -19,7 +19,7 @@ commands:
     permission: coreui.dex
   coreui:
     description: Opens the CoreUi demo or rebuilds its resource pack
-    usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui skill | /coreui shop <id> [player] | /coreui reload
+    usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui skill | /coreui gem | /coreui shop <id> [player] | /coreui reload
 permissions:
   coreui.demo:
     default: op
