@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Label fonts and text measurement.
  *
- * Labels use Galmuri and vanilla ASCII for the configured characters. Each font is shifted down by its
+ * Labels use Galmuri by default. Each font is shifted down by its
  * index to place labels at any pixel inside a 9px text line.
  *
  * Vanilla bitmap advances are whole pixels. Galmuri advances are multiples of 1/16 px.
@@ -22,8 +22,7 @@ import java.util.*;
 public final class TextWidths {
     /** Smallest step of a Galmuri advance at size 8 / oversample 16. */
     static final int SUBPIXELS = 16;
-    public static final String DEFAULT_VANILLA_CHARS =
-            "1234567890!?;:@#$%^&*()-=_+`~qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>/{},.[]'\"|\\ ";
+    public static final String DEFAULT_VANILLA_CHARS = "";
     private static final Map<Integer, Float> GALMURI = load("/coreui-widths.properties");
     private static final Map<Integer, Float> VANILLA = load("/vanilla-ascii-widths.properties");
     private static volatile Set<Integer> vanillaChars = parse(DEFAULT_VANILLA_CHARS);
@@ -126,12 +125,17 @@ public final class TextWidths {
     /** JSON of {@code coreui:text_<offset>}, with each provider shifted by the label offset. */
     public static String fontJson(int offset) {
         Set<Integer> vanilla = vanillaChars;
+        Map<String, Object> ttf = new HashMap<>(Map.of(
+                "type", "ttf", "file", "coreui:galmuri11.ttf", "shift", List.of(0, offset - 0.5),
+                "size", 8, "oversample", 16));
+        Gson gson = new Gson();
+        if (vanilla.isEmpty()) return gson.toJson(Map.of("providers", List.of(ttf)));
+
         StringBuilder skip = new StringBuilder();
         vanilla.stream().sorted().forEach(skip::appendCodePoint);
+        ttf.put("skip", skip.toString());
         List<Map<String, Object>> providers = new ArrayList<>();
-        // Keep Galmuri aligned with the bitmap text.
-        providers.add(Map.of("type", "ttf", "file", "coreui:galmuri11.ttf", "shift", List.of(0, offset - 0.5),
-                "size", 8, "oversample", 16, "skip", skip.toString()));
+        providers.add(ttf);
         if (vanilla.contains((int) ' ')) providers.add(Map.of("type", "space", "advances", Map.of(" ", 4)));
         List<String> rows = new ArrayList<>();
         for (int row = 0; row < 16; row++) {
@@ -143,7 +147,7 @@ public final class TextWidths {
             rows.add(line.toString());
         }
         providers.add(Map.of("type", "bitmap", "file", "minecraft:font/ascii.png", "ascent", 8 - offset, "chars", rows));
-        return new Gson().toJson(Map.of("providers", providers));
+        return gson.toJson(Map.of("providers", providers));
     }
 
     private static String plain(Component component) {
