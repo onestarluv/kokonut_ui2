@@ -475,3 +475,141 @@ vanilla:
     height: 32
     ascent: 8
     advance: 29
+  skill/icon/diamond_pickaxe:
+    texture: minecraft:item/diamond_pickaxe.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/spyglass:
+    texture: minecraft:item/spyglass.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/compass:
+    texture: minecraft:item/compass_16.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/brush:
+    texture: minecraft:item/brush.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/amethyst_shard:
+    texture: minecraft:item/amethyst_shard.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  skill/icon/rabbit_foot:
+    texture: minecraft:item/rabbit_foot.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  skill/icon/filled_map:
+    texture: minecraft:item/filled_map.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 33
+  skill/icon/echo_shard:
+    texture: minecraft:item/echo_shard.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/emerald:
+    texture: minecraft:item/emerald.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 27
+  skill/icon/nether_star:
+    texture: minecraft:item/nether_star.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/flint:
+    texture: minecraft:item/flint.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/lantern:
+    texture: minecraft:item/lantern.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 23
+  skill/icon/golden_pickaxe:
+    texture: minecraft:item/golden_pickaxe.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/blaze_powder:
+    texture: minecraft:item/blaze_powder.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/golden_apple:
+    texture: minecraft:item/golden_apple.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  skill/icon/gunpowder:
+    texture: minecraft:item/gunpowder.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  skill/icon/sugar:
+    texture: minecraft:item/sugar.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  skill/icon/redstone:
+    texture: minecraft:item/redstone.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  skill/icon/experience_bottle:
+    texture: minecraft:item/experience_bottle.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  skill/icon/bundle:
+    texture: minecraft:item/bundle.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  skill/icon/netherite_pickaxe:
+    texture: minecraft:item/netherite_pickaxe.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31
+  skill/icon/diamond:
+    texture: minecraft:item/diamond.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
+  skill/icon/totem_of_undying:
+    texture: minecraft:item/totem_of_undying.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 31

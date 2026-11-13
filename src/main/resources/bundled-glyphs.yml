@@ -400,3 +400,91 @@ glyphs:
     ascent: 8
   shop/ui/qty_36:
     ascent: 8
+  skill/ui/check:
+    ascent: 8
+  skill/ui/cross:
+    ascent: 8
+  skill/ui/edge_off_h14:
+    ascent: 8
+  skill/ui/edge_off_h8:
+    ascent: 8
+  skill/ui/edge_off_l14:
+    ascent: 8
+  skill/ui/edge_off_l14_9:
+    ascent: 8
+  skill/ui/edge_off_l28:
+    ascent: 8
+  skill/ui/edge_off_r14:
+    ascent: 8
+  skill/ui/edge_off_r14_9:
+    ascent: 8
+  skill/ui/edge_off_r28:
+    ascent: 8
+  skill/ui/edge_off_v7:
+    ascent: 8
+  skill/ui/edge_off_v9:
+    ascent: 8
+  skill/ui/edge_on_h14:
+    ascent: 8
+  skill/ui/edge_on_h8:
+    ascent: 8
+  skill/ui/edge_on_l14:
+    ascent: 8
+  skill/ui/edge_on_l14_9:
+    ascent: 8
+  skill/ui/edge_on_l28:
+    ascent: 8
+  skill/ui/edge_on_r14:
+    ascent: 8
+  skill/ui/edge_on_r14_9:
+    ascent: 8
+  skill/ui/edge_on_r28:
+    ascent: 8
+  skill/ui/edge_on_v7:
+    ascent: 8
+  skill/ui/edge_on_v9:
+    ascent: 8
+  skill/ui/hub:
+    ascent: 8
+  skill/ui/key_locked:
+    ascent: 8
+  skill/ui/key_on:
+    ascent: 8
+  skill/ui/key_open:
+    ascent: 8
+  skill/ui/node_locked:
+    ascent: 8
+  skill/ui/node_on:
+    ascent: 8
+  skill/ui/node_open:
+    ascent: 8
+  skill/ui/ring:
+    ascent: 8
+  skill/ui/tab_blue:
+    ascent: 8
+  skill/ui/tab_blue_join:
+    ascent: 8
+  skill/ui/tab_blue_off:
+    ascent: 8
+  skill/ui/tab_gold:
+    ascent: 8
+  skill/ui/tab_gold_join:
+    ascent: 8
+  skill/ui/tab_gold_off:
+    ascent: 8
+  skill/ui/xp_1:
+    ascent: 8
+  skill/ui/xp_128:
+    ascent: 8
+  skill/ui/xp_16:
+    ascent: 8
+  skill/ui/xp_2:
+    ascent: 8
+  skill/ui/xp_32:
+    ascent: 8
+  skill/ui/xp_4:
+    ascent: 8
+  skill/ui/xp_64:
+    ascent: 8
+  skill/ui/xp_8:
+    ascent: 8

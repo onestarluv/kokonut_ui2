@@ -134,6 +134,21 @@ public final class CoreUi extends JavaPlugin {
                 if (!opened) Messages.send(sender, "퀘스트 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
                 return true;
             }
+            if (args.length == 1 && args[0].equalsIgnoreCase("skill")) {
+                // /coreui skill : skill tree (prototype, coreui.demo)
+                if (!sender.hasPermission("coreui.demo")) {
+                    Messages.send(sender, "You do not have permission to open the skill prototype");
+                    return true;
+                }
+                if (!(sender instanceof Player self)) {
+                    Messages.send(sender, "Open the skill prototype in-game: /coreui skill");
+                    return true;
+                }
+                if (!org.crebs.coreui.menu.skill.SkillMenu.open(this, self)) {
+                    Messages.send(sender, "숙련도 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
+                }
+                return true;
+            }
             if (args.length >= 1 && args.length <= 3 && args[0].equalsIgnoreCase("shop")) {
                 // /coreui shop <id>            : open a shop for yourself (coreui.shop)
                 // /coreui shop <id> <player>   : open it for someone else, e.g. a Citizens NPC console command (coreui.shop.others)
@@ -197,13 +212,13 @@ public final class CoreUi extends JavaPlugin {
                 Messages.send(sender, "CoreUi demo opened. Apply plugins/CoreUi/Pack/CoreUi.zip to your client resource packs");
                 return true;
             }
-            Messages.send(sender, "Usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui shop <id> [player] | /coreui reload");
+            Messages.send(sender, "Usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui skill | /coreui shop <id> [player] | /coreui reload");
             return true;
         });
         Objects.requireNonNull(getCommand("coreui")).setTabCompleter((sender, command, label, args) -> {
             if (args.length == 1) {
                 List<String> suggestions = new ArrayList<>();
-                if (sender.hasPermission("coreui.demo")) { suggestions.add("demo"); suggestions.add("quest"); }
+                if (sender.hasPermission("coreui.demo")) { suggestions.add("demo"); suggestions.add("quest"); suggestions.add("skill"); }
                 if (sender.hasPermission("coreui.shop") || sender.hasPermission("coreui.shop.others")) suggestions.add("shop");
                 if (sender.hasPermission("coreui.reload")) suggestions.add("reload");
                 return suggestions.stream().filter(value -> value.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();

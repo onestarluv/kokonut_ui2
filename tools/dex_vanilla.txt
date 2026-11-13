@@ -80,3 +80,27 @@ village/icon/writable_book minecraft:item/writable_book.png 32
 village/icon/feather minecraft:item/feather.png 32
 village/icon/ender_pearl minecraft:item/ender_pearl.png 32
 village/icon/slime_ball minecraft:item/slime_ball.png 32
+# Skill tree prototype (SkillMenu): 32 px node icons for the detail page and the hub.
+skill/icon/diamond_pickaxe minecraft:item/diamond_pickaxe.png 32
+skill/icon/spyglass minecraft:item/spyglass.png 32
+skill/icon/compass minecraft:item/compass_16.png 32
+skill/icon/brush minecraft:item/brush.png 32
+skill/icon/amethyst_shard minecraft:item/amethyst_shard.png 32
+skill/icon/rabbit_foot minecraft:item/rabbit_foot.png 32
+skill/icon/filled_map minecraft:item/filled_map.png 32
+skill/icon/echo_shard minecraft:item/echo_shard.png 32
+skill/icon/emerald minecraft:item/emerald.png 32
+skill/icon/nether_star minecraft:item/nether_star.png 32
+skill/icon/flint minecraft:item/flint.png 32
+skill/icon/lantern minecraft:item/lantern.png 32
+skill/icon/golden_pickaxe minecraft:item/golden_pickaxe.png 32
+skill/icon/blaze_powder minecraft:item/blaze_powder.png 32
+skill/icon/golden_apple minecraft:item/golden_apple.png 32
+skill/icon/gunpowder minecraft:item/gunpowder.png 32
+skill/icon/sugar minecraft:item/sugar.png 32
+skill/icon/redstone minecraft:item/redstone.png 32
+skill/icon/experience_bottle minecraft:item/experience_bottle.png 32
+skill/icon/bundle minecraft:item/bundle.png 32
+skill/icon/netherite_pickaxe minecraft:item/netherite_pickaxe.png 32
+skill/icon/diamond minecraft:item/diamond.png 32
+skill/icon/totem_of_undying minecraft:item/totem_of_undying.png 32

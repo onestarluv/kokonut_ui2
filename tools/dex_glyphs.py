@@ -77,7 +77,7 @@ class Img:
         if self.h < 8:
             self.px += [[CLEAR] * self.w for _ in range(8 - self.h)]
             self.h = 8
-        path = os.path.join(OUT, (rel if rel.startswith(("menu/", "shop/", "quest/")) else "dex/" + rel) + ".png")
+        path = os.path.join(OUT, (rel if rel.startswith(("menu/", "shop/", "quest/", "skill/")) else "dex/" + rel) + ".png")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         raw = b"".join(b"\x00" + b"".join(bytes(p) for p in row) for row in self.px)
 
@@ -318,6 +318,7 @@ def main():
     menu_glyphs()
     shop_glyphs()
     quest_glyphs()
+    skill_glyphs()
     icon_art()
     write_defaults()
     count = sum(len(f) for _, _, f in os.walk(OUT))
@@ -447,6 +448,107 @@ def quest_glyphs():
     bubble.rect(1, H - 2, W - 2, 1, hexc("#E6D6AC"))  # soft lower shade
     bubble.save("quest/ui/speech_200")
 
+
+# Skill tree (SkillMenu.java, prototype): node frames per state, the selection ring, connectors drawn in the gaps
+# between node rows, the hub medallion, a gold XP fill, check/cross marks and the gold/blue tabs (보상, 정보).
+SKILL_NODES = {  # state: (outline, inner border, fill)
+    "on": ("#7A5210", "#F2C640", "#F8E9B4"),
+    "open": ("#2E5A1A", "#7CB856", "#F6EBCF"),
+    "locked": ("#8C7A5A", "#B8A67C", "#C9B88E"),
+}
+SKILL_EDGES = {"on": "#C0841A", "off": "#C2AE82"}
+CHECK = ["........", ".......#", "......##", "#....##.", "##..##..", ".####...", "..##....", "........"]
+CROSS = ["........", ".##..##.", ".######.", "..####..", "..####..", ".######.", ".##..##.", "........"]
+
+
+def skill_node(state):
+    edge, inner, fill = (hexc(c) for c in SKILL_NODES[state])
+    img = Img(20, 20, fill)
+    for i, c in enumerate((edge, inner)):
+        for (x, y, w, h) in ((i, i, 20 - 2 * i, 1), (i, 19 - i, 20 - 2 * i, 1), (i, i, 1, 20 - 2 * i), (19 - i, i, 1, 20 - 2 * i)):
+            img.rect(x, y, w, h, c)
+    for (x, y) in ((0, 0), (19, 0), (0, 19), (19, 19)):  # open corners: rounder than the square item slots
+        img.set(x, y, CLEAR)
+    return img
+
+
+def skill_elbow(dx, h, color):
+    """2 px connector from the top-left corner down to the bottom-right one ((dx + 2) x h), bent in the middle."""
+    img = Img(dx + 2, h)
+    mid = h // 2 - 1
+    img.rect(0, 0, 2, mid + 2, color)
+    img.rect(0, mid, dx + 2, 2, color)
+    img.rect(dx, mid, 2, h - mid, color)
+    return img
+
+
+def mirrored(img):
+    out = Img(img.w, img.h)
+    for y in range(img.h):
+        out.px[y] = img.px[y][::-1]
+    return out
+
+
+def skill_glyphs():
+    for state in SKILL_NODES:
+        skill_node(state).save(f"skill/ui/node_{state}")
+        key = Img(8, 8, hexc(SKILL_NODES[state][2]))  # legend swatch
+        for (x, y, w, h) in ((0, 0, 8, 1), (0, 7, 8, 1), (0, 0, 1, 8), (7, 0, 1, 8)):
+            key.rect(x, y, w, h, hexc(SKILL_NODES[state][0]))
+        for (x, y, w, h) in ((1, 1, 6, 1), (1, 6, 6, 1), (1, 1, 1, 6), (6, 1, 1, 6)):
+            key.rect(x, y, w, h, hexc(SKILL_NODES[state][1]))
+        key.save(f"skill/ui/key_{state}")
+    # Selection ring around a node (drawn at x-2, y-2); hollow, so the node's own frame keeps showing its state.
+    ring = Img(24, 24)
+    for (x, y, w, h) in ((1, 0, 22, 2), (1, 22, 22, 2), (0, 1, 2, 22), (22, 1, 2, 22)):
+        ring.rect(x, y, w, h, RED)
+    ring.save("skill/ui/ring")
+    # Hub medallion (36 px, the 32 px skill icon goes inside): dark leather with a gold rim.
+    hub = Img(36, 36, hexc("#4A2414"))
+    for i, c in enumerate((OUTLINE, hexc("#E8C050"), hexc("#A8802A"))):
+        for (x, y, w, h) in ((i, i, 36 - 2 * i, 1), (i, 35 - i, 36 - 2 * i, 1), (i, i, 1, 36 - 2 * i), (35 - i, i, 1, 36 - 2 * i)):
+            hub.rect(x, y, w, h, c)
+    for (x, y) in ((0, 0), (35, 0), (0, 35), (35, 35)):
+        hub.set(x, y, CLEAR)
+    hub.save("skill/ui/hub")
+    # Connectors. v<h>: straight down; r<dx>/l<dx>: elbow to the lower right/left in a 7 px gap (_9: the 9 px gap
+    # under the hub); h<w>: between neighbours of one row.
+    for state, color in SKILL_EDGES.items():
+        c = hexc(color)
+        for h in (7, 9):
+            Img(2, h, c).save(f"skill/ui/edge_{state}_v{h}")
+        for dx in (14, 28):
+            elbow = skill_elbow(dx, 7, c)
+            elbow.save(f"skill/ui/edge_{state}_r{dx}")
+            mirrored(elbow).save(f"skill/ui/edge_{state}_l{dx}")
+        elbow = skill_elbow(14, 9, c)
+        elbow.save(f"skill/ui/edge_{state}_r14_9")
+        mirrored(elbow).save(f"skill/ui/edge_{state}_l14_9")
+        for w in (8, 14):
+            Img(w, 2, c).save(f"skill/ui/edge_{state}_h{w}")
+    # XP bar fill (gold; the dex's green fill means "collected").
+    n = 1
+    while n <= 128:
+        piece = Img(n, 3, hexc("#E2AC2C"))
+        piece.rect(0, 0, n, 1, hexc("#F8DC6E"))
+        piece.save(f"skill/ui/xp_{n}")
+        n *= 2
+    for name, rows, color in (("check", CHECK, "#3E7A22"), ("cross", CROSS, "#A83A2A")):
+        mark_img = Img(8, 8)
+        for y, row in enumerate(rows):
+            for x, ch in enumerate(row):
+                if ch == "#":
+                    mark_img.set(x, y, hexc(color))
+        mark_img.save(f"skill/ui/{name}")
+    # 보상 (gold) and 정보 (blue) tabs beside the red 테크트리 tab: the dex bookmark colours on the 88 px title tab.
+    for name, color in (("gold", "#B8892A"), ("blue", "#3F6FA8")):
+        c = hexc(color)
+        on = bevel(88, 22, c, OUTLINE, lighten(c, 0.35), darken(c, 0.25), bottom=False)
+        on.rect(1, 20, 86, 2, c)
+        on.save(f"skill/ui/tab_{name}")
+        Img(86, 2, c).save(f"skill/ui/tab_{name}_join")
+        off = darken(c, 0.28)
+        bevel(88, 20, off, OUTLINE, lighten(off, 0.35), darken(off, 0.25)).save(f"skill/ui/tab_{name}_off")
 
 
 def write_defaults():
