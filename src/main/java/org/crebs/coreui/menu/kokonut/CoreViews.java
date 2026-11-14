@@ -30,6 +30,11 @@ public final class CoreViews {
         } catch (LinkageError olderCore) {
             // Core without nickname colors: the title screen simply has no 색 닉네임 tab.
         }
+        try {
+            Villages.register(coreUi);
+        } catch (LinkageError olderCore) {
+            // Core without villages: the 마을 tab says the screen is not available.
+        }
     }
 
     /** The title screen; false when Core's title service is missing or the glyphs are not loaded. */
@@ -62,6 +67,14 @@ public final class CoreViews {
         return p -> {
             if (!openColorNicks(coreUi, p)) Messages.send(p, "색 닉네임 화면을 아직 불러오지 못했어요.");
         };
+    }
+
+    /** {@code /마을} without arguments opens the village screen. */
+    private static final class Villages {
+        static void register(CoreUi coreUi) {
+            coreUi.getServer().getServicesManager().register(kr.gomsv.kokonutCore.api.village.VillageView.class,
+                    player -> org.crebs.coreui.menu.village.VillageMenu.open(coreUi, player), coreUi, ServicePriority.Normal);
+        }
     }
 
     /** Everything that names Core's nickname color API, so an older Core only fails inside this class. */

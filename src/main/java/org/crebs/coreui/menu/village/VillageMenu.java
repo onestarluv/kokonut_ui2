@@ -21,38 +21,46 @@ import org.crebs.coreui.Messages;
 import org.crebs.coreui.glyph.Glyph;
 import org.crebs.coreui.menu.CoreMenu;
 import org.crebs.coreui.menu.book.BookCanvas;
+import org.crebs.coreui.menu.village.VillageStore.Invite;
 import org.crebs.coreui.menu.village.VillageStore.Member;
+import org.crebs.coreui.menu.village.VillageStore.Overview;
 import org.crebs.coreui.menu.village.VillageStore.Role;
 import org.crebs.coreui.menu.village.VillageStore.Village;
 
+import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 import static org.crebs.coreui.menu.book.BookCanvas.*;
 
 /**
- * Village screens (prototype), opened from the main menu's green 마을 tab. They follow Kokonut-Core's village model
- * ({@code kr.gomsv.kokonutCore.village}: name, grade 0..6, OWNER/OFFICER/MEMBER, chunks, home, founding date); Core
- * has no public village API yet, so the data is {@link VillageStore}'s sample village. Three views share the book
- * and the tab row (메인 메뉴 red/inactive, 마을 green/active):
+ * Village screens, opened from the main menu's green 마을 tab or {@code /마을}. Data and every change go through
+ * Kokonut-Core's village service ({@link VillageBridge}); Core checks permissions again, so the buttons shown here
+ * are only a convenience. Views share the book and the tab row (메인 메뉴 red/inactive, 마을 green/active):
  * <ul>
+ *   <li>{@link View#NONE}: no village yet: founding (cost, 마을 창설 → name dialog) and received invitations
+ *       (수락 / 거절).</li>
  *   <li>{@link View#MAIN}: village card (the icon well opens the icon picker for the 마을장), home, 마을로 이동 /
- *       주민 목록; right page = the 마을장's notice (written in a multi-line dialog), 마을 테크 (later) / 공지 수정.</li>
- *   <li>{@link View#MEMBERS}: 8 px skin heads with nicknames and roles (마을장, 부마을장, then by join date); the
- *       selected member's details and own introduction (소개 수정 on your own row) and, for the 마을장,
- *       부마을장 지정·해제 and 추방 (asks once more).</li>
+ *       주민 목록; right page = the notice (마을장·부마을장 edit it in a multi-line dialog), 마을 테크 (later).</li>
+ *   <li>{@link View#MEMBERS}: 8 px skin heads with nicknames and roles (마을장, 부마을장, then by join date), 초대 for
+ *       마을장·부마을장; the selected member's details and own introduction (소개 수정 / 탈퇴 on your own row),
+ *       부마을장 지정·해제 (마을장) and 추방 (마을장: anyone, 부마을장: 주민; asks once more).</li>
  *   <li>{@link View#ICON}: a grid of icons, a preview, 취소 / 적용.</li>
  * </ul>
- * PROTOTYPE: everyone is treated as the 마을장, changes live in server memory, 이동 and 마을 테크 only explain
- * themselves.
+ * Navigation between views reuses the loaded snapshot; after a change the snapshot is loaded again.
  */
 public final class VillageMenu {
     static final String ID = "kokonut-village";
     static final int MAX_GRADE = 6;
     /** Member rows, 18 px apart on 9 px lines (the client's head object lands exactly there). */
     private static final int[] MEMBER_Y = {45, 63, 81, 99, 117, 135, 153, 171, 189, 207, 225};
+    /** Invitation rows on the right page of {@link View#NONE} (above the book seam). */
+    private static final int[] INVITE_Y = {49, 63, 77, 91, 105, 119};
     /** Notice lines; none starts at y 145..152, where the lower book tiles would cover it. */
     private static final int[] NOTICE_Y = {49, 60, 71, 82, 93, 104, 115, 126, 137, 159, 170, 181, 192, 203, 214, 225};
     /** Icon picker: 36 px wells with 32 px icons, 5 per row; no well crosses the book seam at y 153. */
@@ -73,21 +81,53 @@ public final class VillageMenu {
             new String[]{"writable_book", "책과 깃펜"}, new String[]{"feather", "깃털"}, new String[]{"ender_pearl", "엔더 진주"},
             new String[]{"slime_ball", "슬라임 볼"});
 
-    enum View { MAIN, MEMBERS, ICON }
+    enum View { NONE, MAIN, MEMBERS, ICON }
 
-    /** {@code member}: selected on MEMBERS; {@code confirmKick}: 추방 asked once; {@code icon}: picked on ICON. */
-    record State(View view, String member, boolean confirmKick, String icon, int page) {
+    /**
+     * {@code member}: selected member (MEMBERS) or invitation's village id (NONE); {@code confirm}: 추방/탈퇴 asked once;
+     * {@code icon}: picked on ICON.
+     */
+    record State(View view, String member, boolean confirm, String icon, int page) {
         static final State MAIN = new State(View.MAIN, null, false, null, 0);
+        static final State NONE = new State(View.NONE, null, false, null, 0);
 
         static State members(String member) { return new State(View.MEMBERS, member, false, null, 0); }
         static State icon(String picked) { return new State(View.ICON, null, false, picked, 0); }
+        static State invite(long village) { return new State(View.NONE, Long.toString(village), false, null, 0); }
         State page(int p) { return new State(view, null, false, icon, p); }
-        State confirm() { return new State(view, member, true, icon, page); }
+        State asking() { return new State(view, member, true, icon, page); }
     }
 
+    /** A change's outcome from Core; {@code message} is shown to the player either way. */
+    record Reply(boolean ok, String message) { }
+
+    /** Where the data comes from and where changes go (Kokonut-Core through {@link VillageBridge}). */
+    interface Backend {
+        /** {@code done} gets null when loading failed. */
+        void load(Player p, Consumer<Overview> done);
+        void create(Player p, String name, Consumer<Reply> done);
+        void invite(Player p, String target, Consumer<Reply> done);
+        void accept(Player p, long village, Consumer<Reply> done);
+        void decline(Player p, long village, Consumer<Reply> done);
+        void leave(Player p, Consumer<Reply> done);
+        void kick(Player p, UUID target, Consumer<Reply> done);
+        void setRole(Player p, UUID target, Role role, Consumer<Reply> done);
+        void setIcon(Player p, String icon, Consumer<Reply> done);
+        void setNotice(Player p, String text, Consumer<Reply> done);
+        void setIntro(Player p, String text, Consumer<Reply> done);
+        void home(Player p, Consumer<Reply> done);
+    }
+
+    /** What the buttons do; {@link #build} only draws. */
     interface Actions {
         void go(Player p, State next);
         void mainMenu(Player p);
+        void create(Player p);
+        void accept(Player p, Invite i);
+        void decline(Player p, Invite i);
+        void invite(Player p);
+        void leave(Player p);
+        void home(Player p);
         void editNotice(Player p, Village v);
         void editIntro(Player p, Member m);
         void toggleOfficer(Player p, Member m);
@@ -100,100 +140,146 @@ public final class VillageMenu {
     private VillageMenu() {
     }
 
-    /** False while the glyphs are not loaded (pack still generating or an older pack on the server). */
+    /**
+     * Starts loading and opens the screen when the data arrives. False while the glyphs are not loaded (pack still
+     * generating or an older pack on the server) or Kokonut-Core has no village service.
+     */
     public static boolean open(CoreUi coreUi, Player player) {
         var g = coreUi.getGlyphs().all();
         if (!g.containsKey("dex/ui/page_0_0") || !g.containsKey("menu/ui/tab_green") || !g.containsKey("menu/icon/vil_32") || !g.containsKey("menu/ui/well_selected")
-                || !g.containsKey("dex/ui/btn_paper_98")) return false;
+                || !g.containsKey("dex/ui/btn_paper_98") || !g.containsKey("dex/ui/btn_paper_52")) return false;
+        Backend backend = backend(coreUi);
+        if (backend == null) return false;
         player.playSound(player, Sound.BLOCK_BEACON_AMBIENT, SoundCategory.BLOCKS, 0.6f, 1.2f);
-        show(coreUi, player, State.MAIN);
+        reload(coreUi, backend, player, null);
         return true;
     }
 
-    private static void show(CoreUi coreUi, Player player, State state) {
+    private static Backend backend(CoreUi coreUi) {
+        if (!coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Core")) return null;
+        try {
+            return VillageBridge.find(coreUi.getServer());
+        } catch (LinkageError olderCore) {
+            return null;
+        }
+    }
+
+    /** Loads the snapshot again, then shows {@code next} (null: the village's main page, or NONE without a village). */
+    private static void reload(CoreUi coreUi, Backend backend, Player player, State next) {
+        backend.load(player, overview -> {
+            if (!player.isOnline()) return;
+            if (overview == null) { Messages.send(player, "마을 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요."); return; }
+            State state = next;
+            if (overview.village() == null) state = state != null && state.view() == View.NONE ? state : State.NONE;
+            else if (state == null || state.view() == View.NONE) state = State.MAIN;
+            show(coreUi, backend, player, overview, state);
+        });
+    }
+
+    private static void show(CoreUi coreUi, Backend backend, Player player, Overview overview, State state) {
         if (!player.isOnline()) return;
-        coreUi.open(player, build(coreUi.getGlyphs().all(), VillageStore.snapshot(), state, true, new Actions() {
-            public void go(Player p, State next) { show(coreUi, p, next); }
+        UUID viewer = player.getUniqueId();
+        // A change's result: message, then fresh data on {@code next}.
+        java.util.function.BiFunction<Player, State, Consumer<Reply>> after = (p, next) -> reply -> {
+            feedback(p, reply.message(), reply.ok());
+            reload(coreUi, backend, p, next);
+        };
+        coreUi.open(player, build(coreUi.getGlyphs().all(), overview, viewer, state, new Actions() {
+            public void go(Player p, State next) { show(coreUi, backend, p, overview, next); }
             public void mainMenu(Player p) {
                 if (!org.crebs.coreui.menu.kokonut.MainMenu.open(coreUi, p)) Messages.send(p, "메인 메뉴를 아직 불러오지 못했어요.");
             }
-            public void editNotice(Player p, Village v) { askNotice(coreUi, p, v); }
-            public void editIntro(Player p, Member m) { askIntro(coreUi, p, m); }
+            public void create(Player p) { askName(coreUi, backend, p, overview); }
+            public void accept(Player p, Invite i) { backend.accept(p, i.villageId(), after.apply(p, State.MAIN)); }
+            public void decline(Player p, Invite i) { backend.decline(p, i.villageId(), after.apply(p, State.NONE)); }
+            public void invite(Player p) { askInvite(coreUi, backend, p, overview); }
+            public void leave(Player p) { backend.leave(p, after.apply(p, State.NONE)); }
+            public void home(Player p) {
+                coreUi.close(p);
+                backend.home(p, reply -> feedback(p, reply.message(), reply.ok()));
+            }
+            public void editNotice(Player p, Village v) { askNotice(coreUi, backend, p, overview, v); }
+            public void editIntro(Player p, Member m) { askIntro(coreUi, backend, p, overview, m); }
             public void toggleOfficer(Player p, Member m) {
-                VillageStore.toggleOfficer(m.name());
-                boolean now = m.role() != Role.OFFICER;
-                feedback(p, m.name() + "님을 " + (now ? "부마을장으로 지정했어요." : "부마을장에서 해제했어요."), true);
-                show(coreUi, p, State.members(m.name()));
+                backend.setRole(p, m.id(), m.role() == Role.OFFICER ? Role.MEMBER : Role.OFFICER, after.apply(p, State.members(m.id().toString())));
             }
-            public void kick(Player p, Member m) {
-                VillageStore.kick(m.name());
-                feedback(p, m.name() + "님을 마을에서 추방했어요.", false);
-                show(coreUi, p, State.members(null));
-            }
-            public void setIcon(Player p, String key) {
-                VillageStore.setIcon(key);
-                feedback(p, "마을 아이콘을 바꿨어요.", true);
-                show(coreUi, p, State.MAIN);
-            }
+            public void kick(Player p, Member m) { backend.kick(p, m.id(), after.apply(p, State.members(null))); }
+            public void setIcon(Player p, String key) { backend.setIcon(p, key, after.apply(p, State.MAIN)); }
             public void tell(Player p, String message) { feedback(p, message, false); }
             public void close(Player p) { coreUi.close(p); }
         }));
     }
 
     private static void feedback(Player p, String message, boolean good) {
-        Messages.send(p, "[프로토타입] " + message);
+        if (!p.isOnline()) return;
+        Messages.send(p, message);
         if (good) p.playSound(p, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 0.5f, 1.2f);
         else p.playSound(p, Sound.ITEM_BOOK_PAGE_TURN, SoundCategory.MASTER, 0.6f, 0.8f);
     }
 
-    /** Multi-line notice editor (Paper dialog); 저장 stores it and reopens the village screen. */
-    private static void askNotice(CoreUi coreUi, Player player, Village v) {
+    // ---- input dialogs ----
+
+    /** One text dialog: 저장/취소; {@code save} gets the stripped text, {@code cancel} reopens the screen. */
+    private static void ask(CoreUi coreUi, Player player, String title, String body, String key, String label, String initial,
+                            int maxLength, int[] lines, String saveLabel, Consumer<String> save, Runnable cancel) {
         coreUi.removeSession(player);
         var once = ClickCallback.Options.builder().uses(1).lifetime(Duration.ofMinutes(10)).build();
-        ActionButton save = ActionButton.builder(Component.text("저장")).width(100)
-                .action(DialogAction.customClick((response, audience) -> onMain(coreUi, () -> {
-                    String text = Objects.requireNonNullElse(response.getText("notice"), "").strip();
-                    VillageStore.setNotice(text, org.crebs.coreui.menu.kokonut.CoreBalance.displayName(player));
-                    feedback(player, text.isEmpty() ? "공지를 지웠어요." : "공지를 저장했어요.", true);
-                    show(coreUi, player, State.MAIN);
-                }), once)).build();
-        ActionButton cancel = ActionButton.builder(Component.text("취소")).width(100)
-                .action(DialogAction.customClick((response, audience) -> onMain(coreUi, () -> show(coreUi, player, State.MAIN)), once)).build();
+        ActionButton ok = ActionButton.builder(Component.text(saveLabel)).width(100)
+                .action(DialogAction.customClick((response, audience) -> onMain(coreUi,
+                        () -> save.accept(Objects.requireNonNullElse(response.getText(key), "").strip())), once)).build();
+        ActionButton no = ActionButton.builder(Component.text("취소")).width(100)
+                .action(DialogAction.customClick((response, audience) -> onMain(coreUi, cancel), once)).build();
+        var input = DialogInput.text(key, Component.text(label)).initial(initial).maxLength(maxLength).width(300);
+        if (lines != null) input.multiline(TextDialogInput.MultilineOptions.create(lines[0], lines[1]));
         player.showDialog(Dialog.create(builder -> builder.empty()
-                .base(DialogBase.builder(Component.text("마을 공지 수정"))
+                .base(DialogBase.builder(Component.text(title))
                         .canCloseWithEscape(true).pause(false)
                         .afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
-                        .body(List.of(DialogBody.plainMessage(Component.text("주민 모두가 마을 화면에서 보는 공지예요. 비우고 저장하면 지워져요."), 260)))
-                        .inputs(List.of(DialogInput.text("notice", Component.text("공지"))
-                                .initial(v.notice()).maxLength(400).width(300)
-                                .multiline(TextDialogInput.MultilineOptions.create(12, 140)).build()))
+                        .body(List.of(DialogBody.plainMessage(Component.text(body), 260)))
+                        .inputs(List.of(input.build()))
                         .build())
-                .type(DialogType.confirmation(save, cancel))));
+                .type(DialogType.confirmation(ok, no))));
+    }
+
+    private static void askName(CoreUi coreUi, Backend backend, Player player, Overview o) {
+        ask(coreUi, player, "마을 창설", "은화 " + money(o.createCost()) + "이 들어요. 지금 서 있는 곳이 마을 홈이 돼요.\n이름은 한글·영문·숫자 2~12자예요.",
+                "name", "마을 이름", "", 12, null, "창설", name -> {
+                    if (name.isEmpty()) { show(coreUi, backend, player, o, State.NONE); return; }
+                    backend.create(player, name, reply -> {
+                        feedback(player, reply.message(), reply.ok());
+                        reload(coreUi, backend, player, reply.ok() ? State.MAIN : State.NONE);
+                    });
+                }, () -> show(coreUi, backend, player, o, State.NONE));
+    }
+
+    private static void askInvite(CoreUi coreUi, Backend backend, Player player, Overview o) {
+        ask(coreUi, player, "주민 초대", "초대할 플레이어의 닉네임을 적어 주세요. 초대는 3일 동안 유효해요.",
+                "target", "닉네임", "", 32, null, "초대", target -> {
+                    if (target.isEmpty()) { show(coreUi, backend, player, o, State.members(null)); return; }
+                    backend.invite(player, target, reply -> {
+                        feedback(player, reply.message(), reply.ok());
+                        reload(coreUi, backend, player, State.members(null));
+                    });
+                }, () -> show(coreUi, backend, player, o, State.members(null)));
+    }
+
+    /** Multi-line notice editor (Paper dialog); 저장 stores it and reopens the village screen. */
+    private static void askNotice(CoreUi coreUi, Backend backend, Player player, Overview o, Village v) {
+        ask(coreUi, player, "마을 공지 수정", "주민 모두가 마을 화면에서 보는 공지예요. 비우고 저장하면 지워져요.",
+                "notice", "공지", v.notice(), 400, new int[]{12, 140}, "저장", text -> backend.setNotice(player, text, reply -> {
+                    feedback(player, reply.message(), reply.ok());
+                    reload(coreUi, backend, player, State.MAIN);
+                }), () -> show(coreUi, backend, player, o, State.MAIN));
     }
 
     /** Multi-line introduction editor for the viewer's own member row. */
-    private static void askIntro(CoreUi coreUi, Player player, Member m) {
-        coreUi.removeSession(player);
-        var once = ClickCallback.Options.builder().uses(1).lifetime(Duration.ofMinutes(10)).build();
-        ActionButton save = ActionButton.builder(Component.text("저장")).width(100)
-                .action(DialogAction.customClick((response, audience) -> onMain(coreUi, () -> {
-                    String text = Objects.requireNonNullElse(response.getText("intro"), "").strip();
-                    VillageStore.setIntro(m.name(), text);
-                    feedback(player, text.isEmpty() ? "소개글을 지웠어요." : "소개글을 저장했어요.", true);
-                    show(coreUi, player, State.members(m.name()));
-                }), once)).build();
-        ActionButton cancel = ActionButton.builder(Component.text("취소")).width(100)
-                .action(DialogAction.customClick((response, audience) -> onMain(coreUi, () -> show(coreUi, player, State.members(m.name()))), once)).build();
-        player.showDialog(Dialog.create(builder -> builder.empty()
-                .base(DialogBase.builder(Component.text("내 소개 수정"))
-                        .canCloseWithEscape(true).pause(false)
-                        .afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
-                        .body(List.of(DialogBody.plainMessage(Component.text("주민 목록에서 다른 주민들이 보는 소개글이에요."), 260)))
-                        .inputs(List.of(DialogInput.text("intro", Component.text("소개"))
-                                .initial(m.intro()).maxLength(200).width(300)
-                                .multiline(TextDialogInput.MultilineOptions.create(6, 90)).build()))
-                        .build())
-                .type(DialogType.confirmation(save, cancel))));
+    private static void askIntro(CoreUi coreUi, Backend backend, Player player, Overview o, Member m) {
+        State back = State.members(m.id().toString());
+        ask(coreUi, player, "내 소개 수정", "주민 목록에서 다른 주민들이 보는 소개글이에요.",
+                "intro", "소개", m.intro(), 200, new int[]{6, 90}, "저장", text -> backend.setIntro(player, text, reply -> {
+                    feedback(player, reply.message(), reply.ok());
+                    reload(coreUi, backend, player, back);
+                }), () -> show(coreUi, backend, player, o, back));
     }
 
     private static void onMain(CoreUi coreUi, Runnable task) {
@@ -201,11 +287,14 @@ public final class VillageMenu {
         else Bukkit.getScheduler().runTask(coreUi, task);
     }
 
-    /**
-     * One frame; pure apart from the callbacks, so offline checks and the preview tool can build it.
-     * {@code owner}: the viewer is the 마을장 (management buttons shown).
-     */
-    static CoreMenu build(Map<String, Glyph> g, Village v, State state, boolean owner, Actions act) {
+    private static String money(long amount) {
+        return NumberFormat.getIntegerInstance(Locale.KOREA).format(amount);
+    }
+
+    // ---- drawing ----
+
+    /** One frame; pure apart from the callbacks, so offline checks and the preview tool can build it. */
+    static CoreMenu build(Map<String, Glyph> g, Overview o, UUID viewer, State state, Actions act) {
         BookCanvas c = new BookCanvas(g, ID, "마을");
         c.pages();
         // Tab row: 메인 메뉴 (red, inactive, goes back) and 마을 (green, active, joined to the book).
@@ -218,9 +307,16 @@ public final class VillageMenu {
         c.text("마을", 130, 6, WHITE);
         c.image("menu/ui/tab_green_join", 109, 20);
         c.close(act::close);
+        Village v = o.village();
+        if (v == null) {
+            none(c, o, state, act);
+            return c.build();
+        }
+        Member me = v.member(viewer);
+        Role role = me == null ? Role.MEMBER : me.role();
         switch (state.view()) {
-            case MAIN -> main(c, v, owner, act);
-            case MEMBERS -> members(c, v, state, owner, act);
+            case NONE, MAIN -> main(c, v, role, act);
+            case MEMBERS -> members(c, v, viewer, role, state, act);
             case ICON -> icons(c, v, state, act);
         }
         return c.build();
@@ -238,8 +334,58 @@ public final class VillageMenu {
         return ICONS.stream().filter(i -> i[0].equals(key)).map(i -> i[1]).findFirst().orElse(key);
     }
 
-    private static void main(BookCanvas c, Village v, boolean owner, Actions act) {
+    /** No village: founding on the left, received invitations on the right. */
+    private static void none(BookCanvas c, Overview o, State state, Actions act) {
+        c.text("마을", LEFT, TOP, INK);
+        c.image("menu/ui/well", LEFT, 43);
+        icon(c, "vil", LEFT, 43);
+        c.fitted("아직 마을이 없어요", LEFT + 44, 49, PAGE - 44, INK);
+        c.fitted("마을을 세우거나 초대를 받아요", LEFT + 44, 61, PAGE - 44, DIM);
+        c.image("shop/ui/divider_200", LEFT, 85);
+        String[][] rows = {{"창설 비용", "은화 " + money(o.createCost())}, {"처음 인원", "최대 " + o.startMembers() + "명"},
+                {"마을 등급", "0 ~ " + MAX_GRADE + "등급"}, {"초대 유효", "3일"}};
+        for (int i = 0; i < rows.length; i++) {
+            c.text(rows[i][0], LEFT, 91 + i * 12, DIM);
+            c.right(rows[i][1], LEFT + PAGE, 91 + i * 12, INK);
+        }
+        c.fitted("창설하면 지금 서 있는 곳이 마을 홈이 돼요.", LEFT, 159, PAGE, BODY);
+        c.fitted("마을 주민과 마을 채팅·공지를 함께 써요.", LEFT, 171, PAGE, BODY);
+        c.button("green", 98, "마을 창설", LEFT, BUTTON_Y, WHITE, act::create);
+
+        // Right page: invitations.
+        List<Invite> invites = o.invites();
+        c.text("받은 초대", RIGHT, TOP, INK);
+        c.right(invites.size() + "개", RIGHT + PAGE, TOP, DIM);
+        c.image("shop/ui/divider_200", RIGHT, 43);
+        if (invites.isEmpty()) {
+            c.centered("받은 초대가 없어요", RIGHT, PAGE, 120, DIM);
+            c.centered("마을 주민에게 초대를 부탁해 보세요", RIGHT, PAGE, 132, DIM);
+            return;
+        }
+        Invite picked = invites.stream().filter(i -> Long.toString(i.villageId()).equals(state.member())).findFirst().orElse(invites.getFirst());
+        for (int i = 0; i < invites.size() && i < INVITE_Y.length; i++) {
+            Invite inv = invites.get(i);
+            int y = INVITE_Y[i];
+            boolean selected = inv == picked;
+            c.fitted(inv.name(), RIGHT, y, PAGE - 50, selected ? GREEN : INK);
+            c.right(inv.grade() + "등급", RIGHT + PAGE, y, DIM);
+            c.click(RIGHT, y - 3, PAGE, 14, p -> act.go(p, State.invite(inv.villageId())), null);
+        }
+        c.image("menu/ui/well", RIGHT, 159);
+        icon(c, picked.icon(), RIGHT, 159);
+        c.fitted(picked.name(), RIGHT + 44, 162, PAGE - 44, INK);
+        c.fitted("주민 " + picked.members() + "/" + picked.maxMembers() + "명", RIGHT + 44, 174, PAGE - 44, DIM);
+        c.fitted(picked.inviter() + "님의 초대 · " + picked.at(), RIGHT, 203, PAGE, BODY);
+        boolean full = picked.members() >= picked.maxMembers();
+        if (full) c.fitted("인원이 가득 차서 지금은 들어갈 수 없어요", RIGHT, 215, PAGE, RED);
+        c.button("paper", 98, "거절", RIGHT, BUTTON_Y, INK, p -> act.decline(p, picked));
+        if (full) c.button("off", 98, "수락", RIGHT + PAGE - 98, BUTTON_Y, DIM, null);
+        else c.button("green", 98, "수락", RIGHT + PAGE - 98, BUTTON_Y, WHITE, p -> act.accept(p, picked));
+    }
+
+    private static void main(BookCanvas c, Village v, Role role, Actions act) {
         Member leader = v.owner();
+        boolean owner = role == Role.OWNER;
         c.fitted(v.name(), LEFT, TOP, PAGE - 50, INK);
         c.right(v.grade() + "등급", LEFT + PAGE, TOP, GREEN);
         c.image("menu/ui/well", LEFT, 43);
@@ -247,26 +393,29 @@ public final class VillageMenu {
         if (owner) c.click(LEFT, 43, 36, 36, p -> act.go(p, State.icon(v.icon())),
                 HoverEvent.showText(Component.text("마을 아이콘 바꾸기 (마을장)")));
         c.fitted("마을장 " + (leader == null ? "-" : leader.name()), LEFT + 44, 46, PAGE - 44, INK);
-        c.fitted("주민 " + v.members().size() + "명 · 영토 " + v.chunks() + "청크", LEFT + 44, 58, PAGE - 44, DIM);
+        c.fitted("주민 " + v.members().size() + "/" + v.maxMembers() + "명 · 영토 " + v.chunks() + "청크", LEFT + 44, 58, PAGE - 44, DIM);
         for (int i = 0; i < MAX_GRADE; i++) c.image(i < v.grade() ? "dex/ui/pip_on" : "dex/ui/pip_off", LEFT + 44 + i * 8, 72);
         c.text("등급 " + v.grade() + " / " + MAX_GRADE, LEFT + 44 + MAX_GRADE * 8 + 4, 71, DIM);
 
         c.image("shop/ui/divider_200", LEFT, 85);
-        String[][] rows = {{"마을 위치", v.home()}, {"창설일", v.founded()}};
-        for (int i = 0; i < rows.length; i++) {
-            c.text(rows[i][0], LEFT, 91 + i * 12, DIM);
-            c.right(rows[i][1], LEFT + PAGE, 91 + i * 12, INK);
-        }
-        c.button("paper", 98, "마을로 이동", LEFT, BUTTON_Y, INK, p -> act.tell(p, "마을 홈(" + v.home() + ")으로 이동은 아직 연결되지 않았어요."));
+        c.text("마을 홈", LEFT, 91, DIM);
+        c.fitted(v.home(), LEFT, 103, PAGE, INK);
+        c.text("창설일", LEFT, 117, DIM);
+        c.right(v.founded(), LEFT + PAGE, 117, INK);
+        c.text("내 역할", LEFT, 129, DIM);
+        c.right(role.label, LEFT + PAGE, 129, role == Role.MEMBER ? INK : GREEN);
+        if (owner) c.fitted("마을 홈 바꾸기: /마을 홈설정", LEFT, 159, PAGE, DIM);
+        if ("-".equals(v.home())) c.button("off", 98, "마을로 이동", LEFT, BUTTON_Y, DIM, null);
+        else c.button("paper", 98, "마을로 이동", LEFT, BUTTON_Y, INK, act::home);
         c.button("paper", 98, "주민 목록", LEFT + 102, BUTTON_Y, INK, p -> act.go(p, State.members(null)));
 
-        // Right page: the 마을장's notice.
+        // Right page: the notice.
         c.text("마을 공지", RIGHT, TOP, INK);
         if (!v.notice().isEmpty()) c.right(v.noticeBy() + " · " + v.noticeAt(), RIGHT + PAGE, TOP, DIM);
         c.image("shop/ui/divider_200", RIGHT, 43);
         if (v.notice().isEmpty()) {
             c.centered("아직 공지가 없어요", RIGHT, PAGE, 120, DIM);
-            if (owner) c.centered("공지 수정을 눌러 주민들에게 알려 보세요", RIGHT, PAGE, 132, DIM);
+            if (role.manages()) c.centered("공지 수정을 눌러 주민들에게 알려 보세요", RIGHT, PAGE, 132, DIM);
         } else {
             List<String> lines = c.wrap(v.notice(), PAGE);
             for (int i = 0; i < lines.size() && i < NOTICE_Y.length; i++) {
@@ -275,30 +424,34 @@ public final class VillageMenu {
             }
         }
         c.button("paper", 98, "마을 테크", RIGHT, BUTTON_Y, INK, p -> act.tell(p, "마을 테크(기술 트리) 화면은 추후 구현 예정이에요."));
-        if (owner) c.button("paper", 98, "공지 수정", RIGHT + PAGE - 98, BUTTON_Y, INK, p -> act.editNotice(p, v));
+        if (role.manages()) c.button("paper", 98, "공지 수정", RIGHT + PAGE - 98, BUTTON_Y, INK, p -> act.editNotice(p, v));
     }
 
-    private static void members(BookCanvas c, Village v, State state, boolean owner, Actions act) {
+    private static void members(BookCanvas c, Village v, UUID viewer, Role role, State state, Actions act) {
         List<Member> members = v.members();
         int pages = Math.max(1, (members.size() + MEMBER_Y.length - 1) / MEMBER_Y.length);
         int page = Math.clamp(state.page(), 0, pages - 1);
         List<Member> rows = members.subList(Math.min(members.size(), page * MEMBER_Y.length),
                 Math.min(members.size(), (page + 1) * MEMBER_Y.length));
-        Member selected = members.stream().filter(m -> m.name().equals(state.member())).findFirst()
+        Member selected = members.stream().filter(m -> m.id().toString().equals(state.member())).findFirst()
                 .orElse(rows.isEmpty() ? null : rows.getFirst());
 
         c.text("주민 목록", LEFT, TOP, INK);
-        c.right(members.size() + "명", LEFT + PAGE, TOP, DIM);
+        c.right(members.size() + "/" + v.maxMembers() + "명", LEFT + PAGE, TOP, DIM);
         for (int i = 0; i < rows.size(); i++) {
             Member m = rows.get(i);
             int y = MEMBER_Y[i];
-            boolean picked = selected != null && selected.name().equals(m.name());
+            boolean picked = selected != null && selected.id().equals(m.id());
             c.head(head(m), LEFT, y);
             c.fitted(m.name(), LEFT + 11, y, PAGE - 70, picked ? GREEN : INK);
             c.right(m.role().label, LEFT + PAGE, y, m.role() == Role.MEMBER ? DIM : GREEN);
-            c.click(LEFT, y - 4, PAGE, 17, p -> act.go(p, State.members(m.name())), null);
+            c.click(LEFT, y - 4, PAGE, 17, p -> act.go(p, State.members(m.id().toString())), null);
         }
-        c.button("paper", 98, "돌아가기", LEFT, BUTTON_Y, INK, p -> act.go(p, State.MAIN));
+        c.button("paper", 52, "돌아가기", LEFT, BUTTON_Y, INK, p -> act.go(p, State.MAIN));
+        if (role.manages()) {
+            if (members.size() < v.maxMembers()) c.button("paper", 52, "초대", LEFT + 56, BUTTON_Y, INK, act::invite);
+            else c.button("paper", 52, "가득 참", LEFT + 56, BUTTON_Y, DIM, null);
+        }
         if (pages > 1) {
             c.button("paper", 20, "<", LEFT + 132, BUTTON_Y, INK, page > 0 ? p -> act.go(p, state.page(page - 1)) : null);
             c.centered((page + 1) + "/" + pages, LEFT + 152, 28, BUTTON_Y + 6, INK);
@@ -319,7 +472,7 @@ public final class VillageMenu {
         }
         // The member's own introduction (wrapped; no line starts on the book seam at y 145..152).
         c.image("shop/ui/divider_200", RIGHT, 96);
-        boolean self = m.role() == Role.OWNER; // PROTOTYPE: the viewer is the 마을장
+        boolean self = m.id().equals(viewer);
         c.text("소개", RIGHT, 102, DIM);
         if (m.intro().isEmpty()) c.text(self ? "소개 수정을 눌러 나를 소개해 보세요" : "아직 소개글이 없어요", RIGHT, 115, DIM);
         else {
@@ -328,18 +481,28 @@ public final class VillageMenu {
             for (int i = 0; i < lines.size() && i < ys.length; i++)
                 c.text(i == ys.length - 1 && lines.size() > ys.length ? lines.get(i) + " …" : lines.get(i), RIGHT, ys[i], BODY);
         }
-        if (state.confirmKick()) c.centered("한 번 더 누르면 " + m.name() + "님을 추방해요", RIGHT, PAGE, 238, RED);
 
-        // Buttons: your own row edits your introduction; the 마을장 manages everyone else.
+        // Buttons: your own row edits your introduction (and leaves); 마을장/부마을장 manage the others.
         int bx = RIGHT + PAGE - 98;
+        boolean canKick = !self && (role == Role.OWNER ? m.role() != Role.OWNER : role == Role.OFFICER && m.role() == Role.MEMBER);
         if (self) {
             c.button("paper", 98, "소개 수정", RIGHT, BUTTON_Y, INK, p -> act.editIntro(p, m));
-            c.button("off", 98, "추방 불가", bx, BUTTON_Y, DIM, null);
-        } else if (owner && m.role() != Role.OWNER) {
+            if (role == Role.OWNER) c.button("off", 98, "탈퇴 불가", bx, BUTTON_Y, DIM, null);
+            else if (state.confirm()) c.button("paper", 98, "정말 탈퇴", bx, BUTTON_Y, RED, act::leave);
+            else c.button("paper", 98, "마을 탈퇴", bx, BUTTON_Y, RED, p -> act.go(p, State.members(m.id().toString()).asking()));
+            if (state.confirm() && role != Role.OWNER) c.centered("한 번 더 누르면 마을에서 탈퇴해요", RIGHT, PAGE, 238, RED);
+            if (role == Role.OWNER) c.centered("마을장은 /마을 위임 · /마을 해산을 써요", RIGHT, PAGE, 238, DIM);
+            return;
+        }
+        if (role == Role.OWNER) {
             if (m.role() == Role.MEMBER) c.button("green", 98, "부마을장 지정", RIGHT, BUTTON_Y, WHITE, p -> act.toggleOfficer(p, m));
             else c.button("paper", 98, "부마을장 해제", RIGHT, BUTTON_Y, INK, p -> act.toggleOfficer(p, m));
-            if (state.confirmKick()) c.button("paper", 98, "정말 추방", bx, BUTTON_Y, RED, p -> act.kick(p, m));
-            else c.button("paper", 98, "추방", bx, BUTTON_Y, RED, p -> act.go(p, State.members(m.name()).confirm()));
+        }
+        if (canKick) {
+            if (state.confirm()) {
+                c.centered("한 번 더 누르면 " + m.name() + "님을 추방해요", RIGHT, PAGE, 238, RED);
+                c.button("paper", 98, "정말 추방", bx, BUTTON_Y, RED, p -> act.kick(p, m));
+            } else c.button("paper", 98, "추방", bx, BUTTON_Y, RED, p -> act.go(p, State.members(m.id().toString()).asking()));
         }
     }
 
@@ -372,7 +535,7 @@ public final class VillageMenu {
         c.image("shop/ui/divider_200", RIGHT, 85);
         c.text("현재 아이콘", RIGHT, 91, DIM);
         c.right(iconName(v.icon()), RIGHT + PAGE, 91, INK);
-        c.fitted("마을 화면과 마을 목록에 보여요.", RIGHT, 106, PAGE, BODY);
+        c.fitted("마을 화면과 받은 초대에 보여요.", RIGHT, 106, PAGE, BODY);
         c.fitted("마을장만 바꿀 수 있어요.", RIGHT, 118, PAGE, BODY);
         c.button("paper", 98, "취소", RIGHT, BUTTON_Y, INK, p -> act.go(p, State.MAIN));
         if (picked.equals(v.icon())) c.button("off", 98, "적용", RIGHT + PAGE - 98, BUTTON_Y, DIM, null);

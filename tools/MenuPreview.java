@@ -222,25 +222,28 @@ public class MenuPreview {
     static void village(Map<String, Glyph> glyphs, String out, boolean hotspots) throws Exception {
         Class<?> vMenu = Class.forName("org.crebs.coreui.menu.village.VillageMenu");
         Class<?> vStore = Class.forName("org.crebs.coreui.menu.village.VillageStore");
-        Class<?> vVillage = Class.forName("org.crebs.coreui.menu.village.VillageStore$Village");
+        Class<?> vOverview = Class.forName("org.crebs.coreui.menu.village.VillageStore$Overview");
         Class<?> vState = Class.forName("org.crebs.coreui.menu.village.VillageMenu$State");
         Class<?> vView = Class.forName("org.crebs.coreui.menu.village.VillageMenu$View");
         Class<?> vActions = Class.forName("org.crebs.coreui.menu.village.VillageMenu$Actions");
-        Method snapshot = vStore.getDeclaredMethod("snapshot");
-        snapshot.setAccessible(true);
-        Object village = snapshot.invoke(null);
+        Method sample = vStore.getDeclaredMethod("sample", boolean.class);
+        sample.setAccessible(true);
+        java.lang.reflect.Field ownerField = vStore.getDeclaredField("SAMPLE_OWNER");
+        ownerField.setAccessible(true);
+        java.util.UUID owner = (java.util.UUID) ownerField.get(null);
         Constructor<?> newState = vState.getDeclaredConstructor(vView, String.class, boolean.class, String.class, int.class);
         newState.setAccessible(true);
-        Method build = vMenu.getDeclaredMethod("build", Map.class, vVillage, vState, boolean.class, vActions);
+        Method build = vMenu.getDeclaredMethod("build", Map.class, vOverview, java.util.UUID.class, vState, vActions);
         build.setAccessible(true);
         Object noop = Proxy.newProxyInstance(vMenu.getClassLoader(), new Class<?>[]{vActions}, (p, m, a) -> null);
         Object[][] frames = {
-                {"village", newState.newInstance(Enum.valueOf((Class) vView, "MAIN"), null, false, null, 0)},
-                {"village-members", newState.newInstance(Enum.valueOf((Class) vView, "MEMBERS"), "모래", true, null, 0)},
-                {"village-icon", newState.newInstance(Enum.valueOf((Class) vView, "ICON"), null, false, "cherry_sapling", 0)},
+                {"village", true, newState.newInstance(Enum.valueOf((Class) vView, "MAIN"), null, false, null, 0)},
+                {"village-members", true, newState.newInstance(Enum.valueOf((Class) vView, "MEMBERS"), new java.util.UUID(0, 3).toString(), true, null, 0)},
+                {"village-icon", true, newState.newInstance(Enum.valueOf((Class) vView, "ICON"), null, false, "cherry_sapling", 0)},
+                {"village-none", false, newState.newInstance(Enum.valueOf((Class) vView, "NONE"), null, false, null, 0)},
         };
         for (Object[] f : frames) {
-            CoreMenu vm = (CoreMenu) build.invoke(null, glyphs, village, f[1], true, noop);
+            CoreMenu vm = (CoreMenu) build.invoke(null, glyphs, sample.invoke(null, f[1]), owner, f[2], noop);
             render(vm, hotspots, new File(out + "-" + f[0] + ".png"));
             System.out.println("wrote " + out + "-" + f[0] + ".png (" + vm.getElements().size() + " elements)");
         }
