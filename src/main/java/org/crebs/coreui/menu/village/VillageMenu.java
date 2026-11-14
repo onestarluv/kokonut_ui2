@@ -116,6 +116,8 @@ public final class VillageMenu {
         void setNotice(Player p, String text, Consumer<Reply> done);
         void setIntro(Player p, String text, Consumer<Reply> done);
         void home(Player p, Consumer<Reply> done);
+        /** Buys the chunk the player stands in (마을장·부마을장). */
+        void claimChunk(Player p, Consumer<Reply> done);
     }
 
     /** What the buttons do; {@link #build} only draws. */
@@ -128,6 +130,7 @@ public final class VillageMenu {
         void invite(Player p);
         void leave(Player p);
         void home(Player p);
+        void claimChunk(Player p);
         void editNotice(Player p, Village v);
         void editIntro(Player p, Member m);
         void toggleOfficer(Player p, Member m);
@@ -194,6 +197,7 @@ public final class VillageMenu {
             public void decline(Player p, Invite i) { backend.decline(p, i.villageId(), after.apply(p, State.NONE)); }
             public void invite(Player p) { askInvite(coreUi, backend, p, overview); }
             public void leave(Player p) { backend.leave(p, after.apply(p, State.NONE)); }
+            public void claimChunk(Player p) { backend.claimChunk(p, after.apply(p, State.MAIN)); }
             public void home(Player p) {
                 coreUi.close(p);
                 backend.home(p, reply -> feedback(p, reply.message(), reply.ok()));
@@ -315,7 +319,7 @@ public final class VillageMenu {
         Member me = v.member(viewer);
         Role role = me == null ? Role.MEMBER : me.role();
         switch (state.view()) {
-            case NONE, MAIN -> main(c, v, role, act);
+            case NONE, MAIN -> main(c, v, role, state, act);
             case MEMBERS -> members(c, v, viewer, role, state, act);
             case ICON -> icons(c, v, state, act);
         }
@@ -383,7 +387,7 @@ public final class VillageMenu {
         else c.button("green", 98, "수락", RIGHT + PAGE - 98, BUTTON_Y, WHITE, p -> act.accept(p, picked));
     }
 
-    private static void main(BookCanvas c, Village v, Role role, Actions act) {
+    private static void main(BookCanvas c, Village v, Role role, State state, Actions act) {
         Member leader = v.owner();
         boolean owner = role == Role.OWNER;
         c.fitted(v.name(), LEFT, TOP, PAGE - 50, INK);
@@ -404,7 +408,21 @@ public final class VillageMenu {
         c.right(v.founded(), LEFT + PAGE, 117, INK);
         c.text("내 역할", LEFT, 129, DIM);
         c.right(role.label, LEFT + PAGE, 129, role == Role.MEMBER ? INK : GREEN);
-        if (owner) c.fitted("마을 홈 바꾸기: /마을 홈설정", LEFT, 159, PAGE, DIM);
+        // Territory (below the book seam): size, next price and, for the 마을장, buying the chunk they stand in.
+        c.text("영토", LEFT, 159, DIM);
+        c.right(v.chunks() + " / " + v.maxChunks() + "청크", LEFT + PAGE, 159, INK);
+        c.text("다음 청크", LEFT, 171, DIM);
+        String next = v.nextChunkCost() < 0 ? "더 넓힐 수 없음" : v.nextChunkCost() == 0 ? "무료" : "은화 " + money(v.nextChunkCost());
+        c.right(next, LEFT + PAGE, 171, v.nextChunkCost() == 0 ? GREEN : INK);
+        if (role.manages()) {
+            c.fitted("서 있는 청크를 사요 · 기존 영토와 맞닿아야 해요", LEFT, 185, PAGE, DIM);
+            c.fitted((owner ? "홈 설정 /마을 홈설정 · " : "") + "영토 줄이기 /마을 영토 해제", LEFT, 197, PAGE, DIM);
+            if (v.nextChunkCost() < 0) c.button("off", 98, "이 청크 구매", LEFT, 232, DIM, null);
+            else if (state.confirm()) {
+                c.button("green", 98, "정말 구매", LEFT, 232, WHITE, act::claimChunk);
+                c.fitted(v.nextChunkCost() == 0 ? "한 번 더 누르면 무료로 사요" : "한 번 더 누르면 " + next + "로 사요", LEFT + 102, 238, PAGE - 102, RED);
+            } else c.button("paper", 98, "이 청크 구매", LEFT, 232, INK, p -> act.go(p, State.MAIN.asking()));
+        }
         if ("-".equals(v.home())) c.button("off", 98, "마을로 이동", LEFT, BUTTON_Y, DIM, null);
         else c.button("paper", 98, "마을로 이동", LEFT, BUTTON_Y, INK, act::home);
         c.button("paper", 98, "주민 목록", LEFT + 102, BUTTON_Y, INK, p -> act.go(p, State.members(null)));

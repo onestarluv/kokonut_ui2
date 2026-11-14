@@ -54,7 +54,8 @@ final class VillageBridge implements Backend {
         var members = v.members().stream().map(m -> new Member(m.id(), m.nickname(), m.name(), role(m.role()),
                 day(m.joinedAt()), lastSeen(m.id(), m.lastSeen()), m.intro())).toList();
         String home = v.home() == null ? "-" : v.home().describe();
-        return new Village(v.id(), v.name(), v.grade(), members, v.maxMembers(), v.chunks(), home, day(v.createdAt()), v.icon(),
+        return new Village(v.id(), v.name(), v.grade(), members, v.maxMembers(), v.chunks(), kr.gomsv.kokonutCore.api.village.VillageRules.MAX_CHUNKS,
+                service.chunkCost((int) v.chunks() + 1), home, day(v.createdAt()), v.icon(),
                 v.notice(), v.noticeBy() == null ? "" : v.noticeBy(), day(v.noticeAt()));
     }
 
@@ -100,4 +101,5 @@ final class VillageBridge implements Backend {
     @Override public void setNotice(Player p, String text, Consumer<Reply> done) { service.setNotice(p, text, reply(done)); }
     @Override public void setIntro(Player p, String text, Consumer<Reply> done) { service.setIntro(p, text, reply(done)); }
     @Override public void home(Player p, Consumer<Reply> done) { service.teleportHome(p, reply(done)); }
+    @Override public void claimChunk(Player p, Consumer<Reply> done) { service.claimChunk(p, reply(done)); }
 }

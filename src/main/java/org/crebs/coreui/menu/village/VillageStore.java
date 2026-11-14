@@ -24,8 +24,9 @@ final class VillageStore {
     record Member(UUID id, String name, String account, Role role, String joined, String lastSeen, String intro) { }
 
     /** Immutable snapshot the screens draw. {@code icon} is a vanilla item key, or {@code "vil"} (the hand-drawn village icon). */
-    record Village(long id, String name, int grade, List<Member> members, int maxMembers, long chunks, String home, String founded,
-                   String icon, String notice, String noticeBy, String noticeAt) {
+    /** {@code nextChunkCost}: silver for the next chunk (0 free, -1 when the territory is full of {@code maxChunks}). */
+    record Village(long id, String name, int grade, List<Member> members, int maxMembers, long chunks, int maxChunks, long nextChunkCost,
+                   String home, String founded, String icon, String notice, String noticeBy, String noticeAt) {
         Member owner() {
             return members.stream().filter(m -> m.role() == Role.OWNER).findFirst().orElse(null);
         }
@@ -51,7 +52,7 @@ final class VillageStore {
         if (!member) {
             return new Overview(null, List.of(
                     new Invite(7, "벚꽃 마을", "cherry_sapling", 2, 11, 13, "달빛", "2026.11.13"),
-                    new Invite(9, "바다 마을", "nautilus_shell", 0, 3, 8, "모래", "2026.11.12")), 10_000, 8);
+                    new Invite(9, "바다 마을", "nautilus_shell", 0, 3, 8, "모래", "2026.11.12")), 100_000, 8);
         }
         List<Member> members = List.of(
                 new Member(SAMPLE_OWNER, "핑퐁", "MHF_Steve", Role.OWNER, "2026.11.08", "접속 중", "코코넛 마을을 만든 핑퐁이에요.\n광장 공사 중이니 원목 기부 환영해요!"),
@@ -63,9 +64,9 @@ final class VillageStore {
                 new Member(new UUID(0, 7), "바람", "MHF_Sheep", Role.MEMBER, "2026.11.09", "2시간 전", ""),
                 new Member(new UUID(0, 5), "하늘", "MHF_Chicken", Role.MEMBER, "2026.11.10", "3일 전", ""),
                 new Member(new UUID(0, 8), "초코", "MHF_Creeper", Role.MEMBER, "2026.11.10", "접속 중", "광산 탐험가입니다."));
-        Village village = new Village(1, "코코넛 마을", 3, members, 16, 34, "home1 · world · 120, 64, -340", "2026.11.08", "vil",
+        Village village = new Village(1, "코코넛 마을", 3, members, 16, 34, 400, 30_000, "home1 · home1 · 120, 64, -340", "2026.11.08", "vil",
                 "이번 주말에 마을 광장 공사를 해요.\n참나무 원목을 창고 상자에 넣어 주세요!\n\n공사 중에는 광장 대신 북쪽 다리로 다녀 주세요.",
                 "핑퐁", "2026.11.09");
-        return new Overview(village, List.of(), 10_000, 8);
+        return new Overview(village, List.of(), 100_000, 8);
     }
 }
