@@ -184,4 +184,11 @@ public final class BookCanvas {
         centered(label, x, width, y + 6, color);
         if (onClick != null) click(x, y, width, 20, onClick, null);
     }
+
+    /** A button whose explanation shows on mouse-over; a disabled button ({@code onClick} null) still shows it. */
+    public void button(String kind, int width, String label, int x, int y, TextColor color, Consumer<Player> onClick, String hover) {
+        image("dex/ui/btn_" + kind + "_" + width, x, y);
+        centered(label, x, width, y + 6, color);
+        click(x, y, width, 20, onClick != null ? onClick : p -> { }, hover == null ? null : HoverEvent.showText(Component.text(hover)));
+    }
 }

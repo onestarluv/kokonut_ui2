@@ -11,7 +11,7 @@ import java.util.UUID;
 final class VillageStore {
     /** Kokonut-Core roles ({@code OWNER, OFFICER, MEMBER}) with the names players see. */
     enum Role {
-        OWNER("마을장"), OFFICER("부마을장"), MEMBER("주민");
+        OWNER("마을장"), OFFICER("관리자"), MEMBER("주민");
         final String label;
         Role(String label) { this.label = label; }
         boolean manages() { return this != MEMBER; }

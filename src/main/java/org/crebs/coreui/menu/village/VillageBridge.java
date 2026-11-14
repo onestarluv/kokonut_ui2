@@ -102,4 +102,9 @@ final class VillageBridge implements Backend {
     @Override public void setIntro(Player p, String text, Consumer<Reply> done) { service.setIntro(p, text, reply(done)); }
     @Override public void home(Player p, Consumer<Reply> done) { service.teleportHome(p, reply(done)); }
     @Override public void claimChunk(Player p, Consumer<Reply> done) { service.claimChunk(p, reply(done)); }
+    @Override public void unclaimChunk(Player p, Consumer<Reply> done) { service.unclaimChunk(p, reply(done)); }
+    @Override public void setHome(Player p, Consumer<Reply> done) { service.setHome(p, reply(done)); }
+    @Override public void transfer(Player p, UUID target, Consumer<Reply> done) { service.transfer(p, target, reply(done)); }
+    @Override public void disband(Player p, Consumer<Reply> done) { service.disband(p, reply(done)); }
+    @Override public boolean toggleTerritoryView(Player p) { return service.toggleTerritoryView(p); }
 }

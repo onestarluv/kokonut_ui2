@@ -231,16 +231,17 @@ public class MenuPreview {
         java.lang.reflect.Field ownerField = vStore.getDeclaredField("SAMPLE_OWNER");
         ownerField.setAccessible(true);
         java.util.UUID owner = (java.util.UUID) ownerField.get(null);
-        Constructor<?> newState = vState.getDeclaredConstructor(vView, String.class, boolean.class, String.class, int.class);
+        Constructor<?> newState = vState.getDeclaredConstructor(vView, String.class, String.class, String.class, int.class);
         newState.setAccessible(true);
         Method build = vMenu.getDeclaredMethod("build", Map.class, vOverview, java.util.UUID.class, vState, vActions);
         build.setAccessible(true);
         Object noop = Proxy.newProxyInstance(vMenu.getClassLoader(), new Class<?>[]{vActions}, (p, m, a) -> null);
         Object[][] frames = {
-                {"village", true, newState.newInstance(Enum.valueOf((Class) vView, "MAIN"), null, false, null, 0)},
-                {"village-members", true, newState.newInstance(Enum.valueOf((Class) vView, "MEMBERS"), new java.util.UUID(0, 3).toString(), true, null, 0)},
-                {"village-icon", true, newState.newInstance(Enum.valueOf((Class) vView, "ICON"), null, false, "cherry_sapling", 0)},
-                {"village-none", false, newState.newInstance(Enum.valueOf((Class) vView, "NONE"), null, false, null, 0)},
+                {"village", true, newState.newInstance(Enum.valueOf((Class) vView, "MAIN"), null, null, null, 0)},
+                {"village-members", true, newState.newInstance(Enum.valueOf((Class) vView, "MEMBERS"), new java.util.UUID(0, 3).toString(), "kick", null, 0)},
+                {"village-icon", true, newState.newInstance(Enum.valueOf((Class) vView, "ICON"), null, null, "cherry_sapling", 0)},
+                {"village-none", false, newState.newInstance(Enum.valueOf((Class) vView, "NONE"), null, null, null, 0)},
+                {"village-settings", true, newState.newInstance(Enum.valueOf((Class) vView, "SETTINGS"), null, null, null, 0)},
         };
         for (Object[] f : frames) {
             CoreMenu vm = (CoreMenu) build.invoke(null, glyphs, sample.invoke(null, f[1]), owner, f[2], noop);

@@ -46,10 +46,10 @@ import static org.crebs.coreui.menu.book.BookCanvas.*;
  *   <li>{@link View#NONE}: no village yet: founding (cost, 마을 창설 → name dialog) and received invitations
  *       (수락 / 거절).</li>
  *   <li>{@link View#MAIN}: village card (the icon well opens the icon picker for the 마을장), home, 마을로 이동 /
- *       주민 목록; right page = the notice (마을장·부마을장 edit it in a multi-line dialog), 마을 테크 (later).</li>
- *   <li>{@link View#MEMBERS}: 8 px skin heads with nicknames and roles (마을장, 부마을장, then by join date), 초대 for
- *       마을장·부마을장; the selected member's details and own introduction (소개 수정 / 탈퇴 on your own row),
- *       부마을장 지정·해제 (마을장) and 추방 (마을장: anyone, 부마을장: 주민; asks once more).</li>
+ *       주민 목록; right page = the notice (마을장·관리자 edit it in a multi-line dialog), 마을 테크 (later).</li>
+ *   <li>{@link View#MEMBERS}: 8 px skin heads with nicknames and roles (마을장, 관리자, then by join date), 초대 for
+ *       마을장·관리자; the selected member's details and own introduction (소개 수정 / 탈퇴 on your own row),
+ *       관리자 지정·해제 (마을장) and 추방 (마을장: anyone, 관리자: 주민; asks once more).</li>
  *   <li>{@link View#ICON}: a grid of icons, a preview, 취소 / 적용.</li>
  * </ul>
  * Navigation between views reuses the loaded snapshot; after a change the snapshot is loaded again.
@@ -81,21 +81,26 @@ public final class VillageMenu {
             new String[]{"writable_book", "책과 깃펜"}, new String[]{"feather", "깃털"}, new String[]{"ender_pearl", "엔더 진주"},
             new String[]{"slime_ball", "슬라임 볼"});
 
-    enum View { NONE, MAIN, MEMBERS, ICON }
+    enum View { NONE, MAIN, MEMBERS, ICON, SETTINGS }
+
+    /** Actions that need a second click: the first one only turns the button into "정말 …". */
+    static final String CLAIM = "claim", UNCLAIM = "unclaim", KICK = "kick", LEAVE = "leave", TRANSFER = "transfer", DISBAND = "disband";
 
     /**
-     * {@code member}: selected member (MEMBERS) or invitation's village id (NONE); {@code confirm}: 추방/탈퇴 asked once;
-     * {@code icon}: picked on ICON.
+     * {@code member}: selected member (MEMBERS) or invitation's village id (NONE); {@code ask}: which action waits for its
+     * second click ({@link #CLAIM} …), null when none; {@code icon}: picked on ICON.
      */
-    record State(View view, String member, boolean confirm, String icon, int page) {
-        static final State MAIN = new State(View.MAIN, null, false, null, 0);
-        static final State NONE = new State(View.NONE, null, false, null, 0);
+    record State(View view, String member, String ask, String icon, int page) {
+        static final State MAIN = new State(View.MAIN, null, null, null, 0);
+        static final State NONE = new State(View.NONE, null, null, null, 0);
+        static final State SETTINGS = new State(View.SETTINGS, null, null, null, 0);
 
-        static State members(String member) { return new State(View.MEMBERS, member, false, null, 0); }
-        static State icon(String picked) { return new State(View.ICON, null, false, picked, 0); }
-        static State invite(long village) { return new State(View.NONE, Long.toString(village), false, null, 0); }
-        State page(int p) { return new State(view, null, false, icon, p); }
-        State asking() { return new State(view, member, true, icon, page); }
+        static State members(String member) { return new State(View.MEMBERS, member, null, null, 0); }
+        static State icon(String picked) { return new State(View.ICON, null, null, picked, 0); }
+        static State invite(long village) { return new State(View.NONE, Long.toString(village), null, null, 0); }
+        State page(int p) { return new State(view, null, null, icon, p); }
+        State asking(String what) { return new State(view, member, what, icon, page); }
+        boolean asks(String what) { return what.equals(ask); }
     }
 
     /** A change's outcome from Core; {@code message} is shown to the player either way. */
@@ -116,8 +121,14 @@ public final class VillageMenu {
         void setNotice(Player p, String text, Consumer<Reply> done);
         void setIntro(Player p, String text, Consumer<Reply> done);
         void home(Player p, Consumer<Reply> done);
-        /** Buys the chunk the player stands in (마을장·부마을장). */
+        /** Buys the chunk the player stands in (마을장·관리자). */
         void claimChunk(Player p, Consumer<Reply> done);
+        void unclaimChunk(Player p, Consumer<Reply> done);
+        void setHome(Player p, Consumer<Reply> done);
+        void transfer(Player p, UUID target, Consumer<Reply> done);
+        void disband(Player p, Consumer<Reply> done);
+        /** Territory border particles on/off; true when now on. */
+        boolean toggleTerritoryView(Player p);
     }
 
     /** What the buttons do; {@link #build} only draws. */
@@ -131,6 +142,11 @@ public final class VillageMenu {
         void leave(Player p);
         void home(Player p);
         void claimChunk(Player p);
+        void unclaimChunk(Player p);
+        void setHome(Player p);
+        void territoryView(Player p);
+        void transfer(Player p, Member m);
+        void disband(Player p);
         void editNotice(Player p, Village v);
         void editIntro(Player p, Member m);
         void toggleOfficer(Player p, Member m);
@@ -198,6 +214,14 @@ public final class VillageMenu {
             public void invite(Player p) { askInvite(coreUi, backend, p, overview); }
             public void leave(Player p) { backend.leave(p, after.apply(p, State.NONE)); }
             public void claimChunk(Player p) { backend.claimChunk(p, after.apply(p, State.MAIN)); }
+            public void unclaimChunk(Player p) { backend.unclaimChunk(p, after.apply(p, State.SETTINGS)); }
+            public void setHome(Player p) { backend.setHome(p, after.apply(p, State.SETTINGS)); }
+            public void territoryView(Player p) {
+                coreUi.close(p);
+                feedback(p, backend.toggleTerritoryView(p) ? "영토 보기를 켰어요. 다시 누르거나 /마을 영토 보기 로 꺼요." : "영토 보기를 껐어요.", true);
+            }
+            public void transfer(Player p, Member m) { backend.transfer(p, m.id(), after.apply(p, State.members(m.id().toString()))); }
+            public void disband(Player p) { backend.disband(p, after.apply(p, State.NONE)); }
             public void home(Player p) {
                 coreUi.close(p);
                 backend.home(p, reply -> feedback(p, reply.message(), reply.ok()));
@@ -246,7 +270,7 @@ public final class VillageMenu {
     }
 
     private static void askName(CoreUi coreUi, Backend backend, Player player, Overview o) {
-        ask(coreUi, player, "마을 창설", "은화 " + money(o.createCost()) + "이 들어요. 지금 서 있는 곳이 마을 홈이 돼요.\n이름은 한글·영문·숫자 2~12자예요.",
+        ask(coreUi, player, "마을 창설", money(o.createCost()) + " 실버 · 한글·영문·숫자 2~12자",
                 "name", "마을 이름", "", 12, null, "창설", name -> {
                     if (name.isEmpty()) { show(coreUi, backend, player, o, State.NONE); return; }
                     backend.create(player, name, reply -> {
@@ -257,7 +281,7 @@ public final class VillageMenu {
     }
 
     private static void askInvite(CoreUi coreUi, Backend backend, Player player, Overview o) {
-        ask(coreUi, player, "주민 초대", "초대할 플레이어의 닉네임을 적어 주세요. 초대는 3일 동안 유효해요.",
+        ask(coreUi, player, "주민 초대", "초대는 3일 동안 유효해요.",
                 "target", "닉네임", "", 32, null, "초대", target -> {
                     if (target.isEmpty()) { show(coreUi, backend, player, o, State.members(null)); return; }
                     backend.invite(player, target, reply -> {
@@ -269,7 +293,7 @@ public final class VillageMenu {
 
     /** Multi-line notice editor (Paper dialog); 저장 stores it and reopens the village screen. */
     private static void askNotice(CoreUi coreUi, Backend backend, Player player, Overview o, Village v) {
-        ask(coreUi, player, "마을 공지 수정", "주민 모두가 마을 화면에서 보는 공지예요. 비우고 저장하면 지워져요.",
+        ask(coreUi, player, "마을 공지 수정", "비우고 저장하면 지워져요.",
                 "notice", "공지", v.notice(), 400, new int[]{12, 140}, "저장", text -> backend.setNotice(player, text, reply -> {
                     feedback(player, reply.message(), reply.ok());
                     reload(coreUi, backend, player, State.MAIN);
@@ -279,7 +303,7 @@ public final class VillageMenu {
     /** Multi-line introduction editor for the viewer's own member row. */
     private static void askIntro(CoreUi coreUi, Backend backend, Player player, Overview o, Member m) {
         State back = State.members(m.id().toString());
-        ask(coreUi, player, "내 소개 수정", "주민 목록에서 다른 주민들이 보는 소개글이에요.",
+        ask(coreUi, player, "내 소개 수정", "비우고 저장하면 지워져요.",
                 "intro", "소개", m.intro(), 200, new int[]{6, 90}, "저장", text -> backend.setIntro(player, text, reply -> {
                     feedback(player, reply.message(), reply.ok());
                     reload(coreUi, backend, player, back);
@@ -322,6 +346,10 @@ public final class VillageMenu {
             case NONE, MAIN -> main(c, v, role, state, act);
             case MEMBERS -> members(c, v, viewer, role, state, act);
             case ICON -> icons(c, v, state, act);
+            case SETTINGS -> {
+                if (role.manages()) settings(c, v, role, state, act);
+                else main(c, v, role, State.MAIN, act);
+            }
         }
         return c.build();
     }
@@ -344,17 +372,14 @@ public final class VillageMenu {
         c.image("menu/ui/well", LEFT, 43);
         icon(c, "vil", LEFT, 43);
         c.fitted("아직 마을이 없어요", LEFT + 44, 49, PAGE - 44, INK);
-        c.fitted("마을을 세우거나 초대를 받아요", LEFT + 44, 61, PAGE - 44, DIM);
         c.image("shop/ui/divider_200", LEFT, 85);
-        String[][] rows = {{"창설 비용", "은화 " + money(o.createCost())}, {"처음 인원", "최대 " + o.startMembers() + "명"},
+        String[][] rows = {{"창설 비용", money(o.createCost()) + " 실버"}, {"처음 인원", "최대 " + o.startMembers() + "명"},
                 {"마을 등급", "0 ~ " + MAX_GRADE + "등급"}, {"초대 유효", "3일"}};
         for (int i = 0; i < rows.length; i++) {
             c.text(rows[i][0], LEFT, 91 + i * 12, DIM);
             c.right(rows[i][1], LEFT + PAGE, 91 + i * 12, INK);
         }
-        c.fitted("창설하면 지금 서 있는 곳이 마을 홈이 돼요.", LEFT, 159, PAGE, BODY);
-        c.fitted("마을 주민과 마을 채팅·공지를 함께 써요.", LEFT, 171, PAGE, BODY);
-        c.button("green", 98, "마을 창설", LEFT, BUTTON_Y, WHITE, act::create);
+        c.button("green", 98, "마을 창설", LEFT, BUTTON_Y, WHITE, act::create, "지금 서 있는 곳이 마을 홈과 첫 영토가 돼요");
 
         // Right page: invitations.
         List<Invite> invites = o.invites();
@@ -363,7 +388,6 @@ public final class VillageMenu {
         c.image("shop/ui/divider_200", RIGHT, 43);
         if (invites.isEmpty()) {
             c.centered("받은 초대가 없어요", RIGHT, PAGE, 120, DIM);
-            c.centered("마을 주민에게 초대를 부탁해 보세요", RIGHT, PAGE, 132, DIM);
             return;
         }
         Invite picked = invites.stream().filter(i -> Long.toString(i.villageId()).equals(state.member())).findFirst().orElse(invites.getFirst());
@@ -381,9 +405,8 @@ public final class VillageMenu {
         c.fitted("주민 " + picked.members() + "/" + picked.maxMembers() + "명", RIGHT + 44, 174, PAGE - 44, DIM);
         c.fitted(picked.inviter() + "님의 초대 · " + picked.at(), RIGHT, 203, PAGE, BODY);
         boolean full = picked.members() >= picked.maxMembers();
-        if (full) c.fitted("인원이 가득 차서 지금은 들어갈 수 없어요", RIGHT, 215, PAGE, RED);
         c.button("paper", 98, "거절", RIGHT, BUTTON_Y, INK, p -> act.decline(p, picked));
-        if (full) c.button("off", 98, "수락", RIGHT + PAGE - 98, BUTTON_Y, DIM, null);
+        if (full) c.button("off", 98, "수락", RIGHT + PAGE - 98, BUTTON_Y, DIM, null, "인원이 가득 차서 들어갈 수 없어요");
         else c.button("green", 98, "수락", RIGHT + PAGE - 98, BUTTON_Y, WHITE, p -> act.accept(p, picked));
     }
 
@@ -394,8 +417,7 @@ public final class VillageMenu {
         c.right(v.grade() + "등급", LEFT + PAGE, TOP, GREEN);
         c.image("menu/ui/well", LEFT, 43);
         icon(c, v.icon(), LEFT, 43);
-        if (owner) c.click(LEFT, 43, 36, 36, p -> act.go(p, State.icon(v.icon())),
-                HoverEvent.showText(Component.text("마을 아이콘 바꾸기 (마을장)")));
+        if (owner) c.click(LEFT, 43, 36, 36, p -> act.go(p, State.icon(v.icon())), HoverEvent.showText(Component.text("마을 아이콘 바꾸기")));
         c.fitted("마을장 " + (leader == null ? "-" : leader.name()), LEFT + 44, 46, PAGE - 44, INK);
         c.fitted("주민 " + v.members().size() + "/" + v.maxMembers() + "명 · 영토 " + v.chunks() + "청크", LEFT + 44, 58, PAGE - 44, DIM);
         for (int i = 0; i < MAX_GRADE; i++) c.image(i < v.grade() ? "dex/ui/pip_on" : "dex/ui/pip_off", LEFT + 44 + i * 8, 72);
@@ -412,18 +434,19 @@ public final class VillageMenu {
         c.text("영토", LEFT, 159, DIM);
         c.right(v.chunks() + " / " + v.maxChunks() + "청크", LEFT + PAGE, 159, INK);
         c.text("다음 청크", LEFT, 171, DIM);
-        String next = v.nextChunkCost() < 0 ? "더 넓힐 수 없음" : v.nextChunkCost() == 0 ? "무료" : "은화 " + money(v.nextChunkCost());
+        String next = v.nextChunkCost() < 0 ? "더 넓힐 수 없음" : v.nextChunkCost() == 0 ? "무료" : money(v.nextChunkCost()) + " 실버";
         c.right(next, LEFT + PAGE, 171, v.nextChunkCost() == 0 ? GREEN : INK);
+        // Row above the bottom buttons: 관리자+ buy the chunk they stand in and open the settings; others see borders.
         if (role.manages()) {
-            c.fitted("서 있는 청크를 사요 · 기존 영토와 맞닿아야 해요", LEFT, 185, PAGE, DIM);
-            c.fitted((owner ? "홈 설정 /마을 홈설정 · " : "") + "영토 줄이기 /마을 영토 해제", LEFT, 197, PAGE, DIM);
-            if (v.nextChunkCost() < 0) c.button("off", 98, "이 청크 구매", LEFT, 232, DIM, null);
-            else if (state.confirm()) {
-                c.button("green", 98, "정말 구매", LEFT, 232, WHITE, act::claimChunk);
-                c.fitted(v.nextChunkCost() == 0 ? "한 번 더 누르면 무료로 사요" : "한 번 더 누르면 " + next + "로 사요", LEFT + 102, 238, PAGE - 102, RED);
-            } else c.button("paper", 98, "이 청크 구매", LEFT, 232, INK, p -> act.go(p, State.MAIN.asking()));
+            if (v.nextChunkCost() < 0) c.button("off", 98, "이 청크 구매", LEFT, 232, DIM, null, "영토가 최대예요");
+            else if (state.asks(CLAIM)) c.button("green", 98, "정말 구매", LEFT, 232, WHITE, act::claimChunk, "지금 서 있는 청크를 " + next + "로 사요");
+            else c.button("paper", 98, "이 청크 구매", LEFT, 232, INK, p -> act.go(p, State.MAIN.asking(CLAIM)),
+                    "지금 서 있는 청크를 사요 · 기존 영토와 맞닿아야 해요");
+            c.button("paper", 98, "마을 설정", LEFT + 102, 232, INK, p -> act.go(p, State.SETTINGS), "영토·홈·아이콘·공지·초대");
+        } else {
+            c.button("paper", 98, "영토 보기", LEFT, 232, INK, act::territoryView, "주변 영토 경계를 파티클로 보여 줘요");
         }
-        if ("-".equals(v.home())) c.button("off", 98, "마을로 이동", LEFT, BUTTON_Y, DIM, null);
+        if ("-".equals(v.home())) c.button("off", 98, "마을로 이동", LEFT, BUTTON_Y, DIM, null, "마을 홈이 아직 없어요");
         else c.button("paper", 98, "마을로 이동", LEFT, BUTTON_Y, INK, act::home);
         c.button("paper", 98, "주민 목록", LEFT + 102, BUTTON_Y, INK, p -> act.go(p, State.members(null)));
 
@@ -433,7 +456,6 @@ public final class VillageMenu {
         c.image("shop/ui/divider_200", RIGHT, 43);
         if (v.notice().isEmpty()) {
             c.centered("아직 공지가 없어요", RIGHT, PAGE, 120, DIM);
-            if (role.manages()) c.centered("공지 수정을 눌러 주민들에게 알려 보세요", RIGHT, PAGE, 132, DIM);
         } else {
             List<String> lines = c.wrap(v.notice(), PAGE);
             for (int i = 0; i < lines.size() && i < NOTICE_Y.length; i++) {
@@ -441,7 +463,7 @@ public final class VillageMenu {
                 c.text(last ? lines.get(i) + " …" : lines.get(i), RIGHT, NOTICE_Y[i], BODY);
             }
         }
-        c.button("paper", 98, "마을 테크", RIGHT, BUTTON_Y, INK, p -> act.tell(p, "마을 테크(기술 트리) 화면은 추후 구현 예정이에요."));
+        c.button("off", 98, "마을 테크", RIGHT, BUTTON_Y, DIM, null, "준비 중이에요");
         if (role.manages()) c.button("paper", 98, "공지 수정", RIGHT + PAGE - 98, BUTTON_Y, INK, p -> act.editNotice(p, v));
     }
 
@@ -468,7 +490,7 @@ public final class VillageMenu {
         c.button("paper", 52, "돌아가기", LEFT, BUTTON_Y, INK, p -> act.go(p, State.MAIN));
         if (role.manages()) {
             if (members.size() < v.maxMembers()) c.button("paper", 52, "초대", LEFT + 56, BUTTON_Y, INK, act::invite);
-            else c.button("paper", 52, "가득 참", LEFT + 56, BUTTON_Y, DIM, null);
+            else c.button("paper", 52, "가득 참", LEFT + 56, BUTTON_Y, DIM, null, "마을 인원이 가득 찼어요");
         }
         if (pages > 1) {
             c.button("paper", 20, "<", LEFT + 132, BUTTON_Y, INK, page > 0 ? p -> act.go(p, state.page(page - 1)) : null);
@@ -492,7 +514,7 @@ public final class VillageMenu {
         c.image("shop/ui/divider_200", RIGHT, 96);
         boolean self = m.id().equals(viewer);
         c.text("소개", RIGHT, 102, DIM);
-        if (m.intro().isEmpty()) c.text(self ? "소개 수정을 눌러 나를 소개해 보세요" : "아직 소개글이 없어요", RIGHT, 115, DIM);
+        if (m.intro().isEmpty()) c.text("아직 소개글이 없어요", RIGHT, 115, DIM);
         else {
             List<String> lines = c.wrap(m.intro(), PAGE);
             int[] ys = {115, 126, 137, 159, 170, 181, 192, 203, 214};
@@ -500,28 +522,62 @@ public final class VillageMenu {
                 c.text(i == ys.length - 1 && lines.size() > ys.length ? lines.get(i) + " …" : lines.get(i), RIGHT, ys[i], BODY);
         }
 
-        // Buttons: your own row edits your introduction (and leaves); 마을장/부마을장 manage the others.
+        // Buttons: your own row edits your introduction (and leaves); 마을장/관리자 manage the others.
         int bx = RIGHT + PAGE - 98;
         boolean canKick = !self && (role == Role.OWNER ? m.role() != Role.OWNER : role == Role.OFFICER && m.role() == Role.MEMBER);
         if (self) {
             c.button("paper", 98, "소개 수정", RIGHT, BUTTON_Y, INK, p -> act.editIntro(p, m));
-            if (role == Role.OWNER) c.button("off", 98, "탈퇴 불가", bx, BUTTON_Y, DIM, null);
-            else if (state.confirm()) c.button("paper", 98, "정말 탈퇴", bx, BUTTON_Y, RED, act::leave);
-            else c.button("paper", 98, "마을 탈퇴", bx, BUTTON_Y, RED, p -> act.go(p, State.members(m.id().toString()).asking()));
-            if (state.confirm() && role != Role.OWNER) c.centered("한 번 더 누르면 마을에서 탈퇴해요", RIGHT, PAGE, 238, RED);
-            if (role == Role.OWNER) c.centered("마을장은 /마을 위임 · /마을 해산을 써요", RIGHT, PAGE, 238, DIM);
+            if (role == Role.OWNER) c.button("off", 98, "탈퇴 불가", bx, BUTTON_Y, DIM, null, "마을장은 위임하거나 해산해야 해요");
+            else if (state.asks(LEAVE)) c.button("paper", 98, "정말 탈퇴", bx, BUTTON_Y, RED, act::leave, "한 번 더 누르면 마을에서 나가요");
+            else c.button("paper", 98, "마을 탈퇴", bx, BUTTON_Y, RED, p -> act.go(p, State.members(m.id().toString()).asking(LEAVE)));
             return;
         }
         if (role == Role.OWNER) {
-            if (m.role() == Role.MEMBER) c.button("green", 98, "부마을장 지정", RIGHT, BUTTON_Y, WHITE, p -> act.toggleOfficer(p, m));
-            else c.button("paper", 98, "부마을장 해제", RIGHT, BUTTON_Y, INK, p -> act.toggleOfficer(p, m));
+            if (m.role() == Role.MEMBER) c.button("green", 98, "관리자 지정", RIGHT, BUTTON_Y, WHITE, p -> act.toggleOfficer(p, m),
+                    "초대·주민 추방·공지·영토를 맡겨요");
+            else c.button("paper", 98, "관리자 해제", RIGHT, BUTTON_Y, INK, p -> act.toggleOfficer(p, m));
+            if (state.asks(TRANSFER)) c.button("green", 98, "정말 위임", RIGHT, 232, WHITE, p -> act.transfer(p, m),
+                    m.name() + "님이 마을장이 되고, 나는 관리자가 돼요");
+            else c.button("paper", 98, "마을장 위임", RIGHT, 232, INK, p -> act.go(p, State.members(m.id().toString()).asking(TRANSFER)));
         }
         if (canKick) {
-            if (state.confirm()) {
-                c.centered("한 번 더 누르면 " + m.name() + "님을 추방해요", RIGHT, PAGE, 238, RED);
-                c.button("paper", 98, "정말 추방", bx, BUTTON_Y, RED, p -> act.kick(p, m));
-            } else c.button("paper", 98, "추방", bx, BUTTON_Y, RED, p -> act.go(p, State.members(m.id().toString()).asking()));
+            if (state.asks(KICK)) c.button("paper", 98, "정말 추방", bx, BUTTON_Y, RED, p -> act.kick(p, m), "한 번 더 누르면 " + m.name() + "님을 추방해요");
+            else c.button("paper", 98, "추방", bx, BUTTON_Y, RED, p -> act.go(p, State.members(m.id().toString()).asking(KICK)));
         }
+    }
+
+    /**
+     * 마을 설정 (마을장·관리자): left = everyday management, right = 마을장 only. Buttons a 관리자 cannot use are drawn
+     * off with the reason on mouse-over.
+     */
+    private static void settings(BookCanvas c, Village v, Role role, State state, Actions act) {
+        boolean owner = role == Role.OWNER;
+        c.text("마을 설정", LEFT, TOP, INK);
+        c.right(role.label, LEFT + PAGE, TOP, GREEN);
+        c.image("shop/ui/divider_200", LEFT, 43);
+        int a = LEFT, b = LEFT + 102;
+        c.button("paper", 98, "영토 보기", a, 51, INK, act::territoryView, "주변 영토 경계를 파티클로 보여 줘요");
+        if (state.asks(UNCLAIM)) c.button("paper", 98, "정말 해제", b, 51, RED, act::unclaimChunk, "지금 서 있는 청크를 영토에서 빼요 · 환불 없음");
+        else c.button("paper", 98, "이 청크 해제", b, 51, INK, p -> act.go(p, State.SETTINGS.asking(UNCLAIM)),
+                "지금 서 있는 청크를 영토에서 빼요 · 환불 없음");
+        if (owner) c.button("paper", 98, "홈을 여기로", a, 75, INK, act::setHome, "지금 위치를 마을 홈으로 · 우리 영토 안에서만");
+        else c.button("off", 98, "홈을 여기로", a, 75, DIM, null, "마을장만 바꿀 수 있어요");
+        if (owner) c.button("paper", 98, "아이콘 변경", b, 75, INK, p -> act.go(p, State.icon(v.icon())));
+        else c.button("off", 98, "아이콘 변경", b, 75, DIM, null, "마을장만 바꿀 수 있어요");
+        c.button("paper", 98, "공지 수정", a, 99, INK, p -> act.editNotice(p, v));
+        if (v.members().size() < v.maxMembers()) c.button("paper", 98, "주민 초대", b, 99, INK, act::invite, "초대는 3일 동안 유효해요");
+        else c.button("off", 98, "주민 초대", b, 99, DIM, null, "마을 인원이 가득 찼어요");
+        c.button("paper", 98, "돌아가기", LEFT, BUTTON_Y, INK, p -> act.go(p, State.MAIN));
+
+        // Right page: 마을장 only.
+        c.text("마을장 전용", RIGHT, TOP, INK);
+        c.image("shop/ui/divider_200", RIGHT, 43);
+        if (!owner) c.button("off", 98, "마을 해산", RIGHT, 51, DIM, null, "마을장만 할 수 있어요");
+        else if (state.asks(DISBAND)) c.button("paper", 98, "정말 해산", RIGHT, 51, RED, act::disband, "주민·영토·공지가 모두 사라져요 · 되돌릴 수 없어요");
+        else c.button("paper", 98, "마을 해산", RIGHT, 51, RED, p -> act.go(p, State.SETTINGS.asking(DISBAND)),
+                "주민·영토·공지가 모두 사라져요");
+        c.button(owner ? "paper" : "off", 98, "마을장 위임", RIGHT + 102, 51, owner ? INK : DIM, owner ? p -> act.go(p, State.members(null)) : null,
+                owner ? "주민 목록에서 새 마을장을 골라요" : "마을장만 할 수 있어요");
     }
 
     private static net.kyori.adventure.text.object.PlayerHeadObjectContents head(Member m) {
@@ -538,11 +594,11 @@ public final class VillageMenu {
             int x = LEFT + (i % ICON_COLS) * 41, y = ICON_Y[i / ICON_COLS];
             c.image(option[0].equals(picked) ? "menu/ui/well_selected" : "menu/ui/well", x, y);
             icon(c, option[0], x, y);
-            c.click(x, y, 36, 36, p -> act.go(p, new State(View.ICON, null, false, option[0], page)), HoverEvent.showText(Component.text(option[1])));
+            c.click(x, y, 36, 36, p -> act.go(p, new State(View.ICON, null, null, option[0], page)), HoverEvent.showText(Component.text(option[1])));
         }
-        c.button("paper", 20, "<", LEFT + 132, BUTTON_Y, INK, page > 0 ? p -> act.go(p, new State(View.ICON, null, false, picked, page - 1)) : null);
+        c.button("paper", 20, "<", LEFT + 132, BUTTON_Y, INK, page > 0 ? p -> act.go(p, new State(View.ICON, null, null, picked, page - 1)) : null);
         c.centered((page + 1) + "/" + pages, LEFT + 152, 28, BUTTON_Y + 6, INK);
-        c.button("paper", 20, ">", LEFT + 180, BUTTON_Y, INK, page + 1 < pages ? p -> act.go(p, new State(View.ICON, null, false, picked, page + 1)) : null);
+        c.button("paper", 20, ">", LEFT + 180, BUTTON_Y, INK, page + 1 < pages ? p -> act.go(p, new State(View.ICON, null, null, picked, page + 1)) : null);
 
         // Right page: preview, 취소 / 적용.
         c.text("미리보기", RIGHT, TOP, INK);
@@ -553,8 +609,6 @@ public final class VillageMenu {
         c.image("shop/ui/divider_200", RIGHT, 85);
         c.text("현재 아이콘", RIGHT, 91, DIM);
         c.right(iconName(v.icon()), RIGHT + PAGE, 91, INK);
-        c.fitted("마을 화면과 받은 초대에 보여요.", RIGHT, 106, PAGE, BODY);
-        c.fitted("마을장만 바꿀 수 있어요.", RIGHT, 118, PAGE, BODY);
         c.button("paper", 98, "취소", RIGHT, BUTTON_Y, INK, p -> act.go(p, State.MAIN));
         if (picked.equals(v.icon())) c.button("off", 98, "적용", RIGHT + PAGE - 98, BUTTON_Y, DIM, null);
         else c.button("green", 98, "적용", RIGHT + PAGE - 98, BUTTON_Y, WHITE, p -> act.setIcon(p, picked));
