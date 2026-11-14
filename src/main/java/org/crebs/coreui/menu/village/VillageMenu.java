@@ -560,13 +560,11 @@ public final class VillageMenu {
         if (state.asks(UNCLAIM)) c.button("paper", 98, "정말 해제", b, 51, RED, act::unclaimChunk, "지금 서 있는 청크를 영토에서 빼요 · 환불 없음");
         else c.button("paper", 98, "이 청크 해제", b, 51, INK, p -> act.go(p, State.SETTINGS.asking(UNCLAIM)),
                 "지금 서 있는 청크를 영토에서 빼요 · 환불 없음");
-        if (owner) c.button("paper", 98, "홈을 여기로", a, 75, INK, act::setHome, "지금 위치를 마을 홈으로 · 우리 영토 안에서만");
-        else c.button("off", 98, "홈을 여기로", a, 75, DIM, null, "마을장만 바꿀 수 있어요");
+        if (owner) c.button("paper", 98, "홈 위치 변경", a, 75, INK, act::setHome, "지금 위치를 마을 홈으로 · 우리 영토 안에서만");
+        else c.button("off", 98, "홈 위치 변경", a, 75, DIM, null, "마을장만 바꿀 수 있어요");
         if (owner) c.button("paper", 98, "아이콘 변경", b, 75, INK, p -> act.go(p, State.icon(v.icon())));
         else c.button("off", 98, "아이콘 변경", b, 75, DIM, null, "마을장만 바꿀 수 있어요");
-        c.button("paper", 98, "공지 수정", a, 99, INK, p -> act.editNotice(p, v));
-        if (v.members().size() < v.maxMembers()) c.button("paper", 98, "주민 초대", b, 99, INK, act::invite, "초대는 3일 동안 유효해요");
-        else c.button("off", 98, "주민 초대", b, 99, DIM, null, "마을 인원이 가득 찼어요");
+        // 공지 수정 is on the main page, 초대 on the member list.
         c.button("paper", 98, "돌아가기", LEFT, BUTTON_Y, INK, p -> act.go(p, State.MAIN));
 
         // Right page: 마을장 only.
