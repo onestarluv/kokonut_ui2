@@ -373,7 +373,7 @@ public final class VillageMenu {
         icon(c, "vil", LEFT, 43);
         c.fitted("아직 마을이 없어요", LEFT + 44, 49, PAGE - 44, INK);
         c.image("shop/ui/divider_200", LEFT, 85);
-        String[][] rows = {{"창설 비용", money(o.createCost()) + " 실버"}, {"처음 인원", "최대 " + o.startMembers() + "명"},
+        String[][] rows = {{"창설 비용", money(o.createCost()) + " 실버"}, {"최대 인원", o.startMembers() + "명"},
                 {"마을 등급", "0 ~ " + MAX_GRADE + "등급"}, {"초대 유효", "3일"}};
         for (int i = 0; i < rows.length; i++) {
             c.text(rows[i][0], LEFT, 91 + i * 12, DIM);
@@ -557,9 +557,9 @@ public final class VillageMenu {
         c.image("shop/ui/divider_200", LEFT, 43);
         int a = LEFT, b = LEFT + 102;
         c.button("paper", 98, "영토 보기", a, 51, INK, act::territoryView, "주변 영토 경계를 파티클로 보여 줘요");
-        if (state.asks(UNCLAIM)) c.button("paper", 98, "정말 해제", b, 51, RED, act::unclaimChunk, "지금 서 있는 청크를 영토에서 빼요 · 환불 없음");
+        if (state.asks(UNCLAIM)) c.button("paper", 98, "정말 해제", b, 51, RED, act::unclaimChunk, "지금 서 있는 청크를 영토에서 빼요 · 가격의 25% 환불");
         else c.button("paper", 98, "이 청크 해제", b, 51, INK, p -> act.go(p, State.SETTINGS.asking(UNCLAIM)),
-                "지금 서 있는 청크를 영토에서 빼요 · 환불 없음");
+                "지금 서 있는 청크를 영토에서 빼요 · 가격의 25% 환불");
         if (owner) c.button("paper", 98, "홈 위치 변경", a, 75, INK, act::setHome, "지금 위치를 마을 홈으로 · 우리 영토 안에서만");
         else c.button("off", 98, "홈 위치 변경", a, 75, DIM, null, "마을장만 바꿀 수 있어요");
         if (owner) c.button("paper", 98, "아이콘 변경", b, 75, INK, p -> act.go(p, State.icon(v.icon())));
