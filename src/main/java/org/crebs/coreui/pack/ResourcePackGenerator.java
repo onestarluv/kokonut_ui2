@@ -80,6 +80,31 @@ public final class ResourcePackGenerator {
 
     public record Result(Path path, Map<String, Glyph> glyphs) {}
 
+    /**
+     * Nexo merges and serves {@code plugins/Nexo/pack/external_packs/*.zip} (like Kokonut_HUD's build folder), so the
+     * fresh pack is copied there whenever Nexo is installed; without this the players keep an old CoreUi.zip.
+     * After {@code /coreui reload} Nexo still has to rebuild its pack ({@code /nexo reload pack}).
+     */
+    private void copyToNexo(Path pack) throws IOException {
+        Path plugins = directory.toAbsolutePath().getParent();
+        if (plugins == null) return;
+        Path external = plugins.resolve("Nexo/pack/external_packs");
+        if (!Files.isDirectory(plugins.resolve("Nexo"))) return;
+        Files.createDirectories(external);
+        Path temporary = Files.createTempFile(external, "coreui-", ".tmp");
+        try {
+            Files.copy(pack, temporary, StandardCopyOption.REPLACE_EXISTING);
+            Path target = external.resolve("CoreUi.zip");
+            try {
+                Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException exception) {
+                Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+    }
+
     public Result generate() throws IOException {
         Path input = directory.resolve("Glyphs");
         Path output = directory.resolve("Pack");
@@ -159,6 +184,10 @@ public final class ResourcePackGenerator {
                 writeFont(pack, gson, id, "coreui:custom/" + relative, height, ascent, Glyph.ALL_OFFSETS);
             }
         }
+        // Damage skin digits and icons, cut from kokonut_damage's and Nexo's images (see DamageSkinGlyphs).
+        Path plugins = directory.toAbsolutePath().getParent();
+        if (plugins != null) DamageSkinGlyphs.write(pack, gson, DamageSkinGlyphs.collect(plugins), loaded,
+                (id, texture, height, ascent) -> writeFont(pack, gson, id, texture, height, ascent, Glyph.ALL_OFFSETS));
         // Glyphs that draw the client's own textures (e.g. vanilla item icons): only a font is written, sizes come
         // from bundled-vanilla-glyphs.yml (tools/VanillaGlyphs.java) and bundled-vanilla-items.yml (one icon per
         // vanilla item, tools/VanillaItemIcons.java). A PNG with the same id wins. "offsets" limits the providers.
@@ -200,6 +229,7 @@ public final class ResourcePackGenerator {
             } catch (AtomicMoveNotSupportedException exception) {
                 Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
             }
+            copyToNexo(target);
             return new Result(target, Map.copyOf(loaded));
         } finally {
             Files.deleteIfExists(temporary);

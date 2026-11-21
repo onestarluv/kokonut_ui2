@@ -49,11 +49,12 @@ class ColorNickMenuTest {
         public void clearSearch(Player p) { calls.add("clearSearch"); }
         public void equip(Player p, TitleMenu.Title title) { calls.add("equip #" + title.id()); }
         public void colorNick(Player p) { calls.add("colorNick"); }
+        public void damageSkin(Player p) { calls.add("damageSkin"); }
     }
 
     private static ColorNickMenu.View view(List<NickColor> owned, NickColor equipped, NickColor selected,
                                            int page, boolean ready, boolean busy) {
-        return new ColorNickMenu.View("코코넛", null, null, ready, busy, owned, equipped, selected, page);
+        return new ColorNickMenu.View("코코넛", null, null, ready, busy, owned, equipped, selected, page, false);
     }
 
     /** Distinct letter colors of a label (a gradient has several). */
@@ -189,16 +190,41 @@ class ColorNickMenuTest {
         var title = TitleMenu.Title.of(7, "<gold>개척자", "첫 발걸음");
         Log log = new Log();
         CoreMenu with = TitleMenu.build(GLYPHS, new TitleMenu.View("코코넛", null, null, true, false,
-                List.of(title), List.of(title), null, title, 0, "", true), log);
+                List.of(title), List.of(title), null, title, 0, "", true, false), log);
         assertTrue(images(with).contains("menu/ui/tab_green_off"));
         assertTrue(texts(with).contains("색 닉네임"));
         click(with, 120, 5);
         assertEquals(List.of("colorNick"), log.calls);
 
         CoreMenu without = TitleMenu.build(GLYPHS, new TitleMenu.View("코코넛", null, null, true, false,
-                List.of(title), List.of(title), null, title, 0, "", false), log);
+                List.of(title), List.of(title), null, title, 0, "", false, false), log);
         assertFalse(images(without).contains("menu/ui/tab_green_off"));
         assertFalse(clickable(without, 120, 5));
+    }
+
+    @Test
+    void damageSkinTabSitsAfterTheOtherTabsWhenAvailable() {
+        var title = TitleMenu.Title.of(7, "<gold>개척자", "첫 발걸음");
+        Log log = new Log();
+        // Title screen with the color tab: 칭호 · 색 닉네임 · 데미지 스킨.
+        CoreMenu both = TitleMenu.build(GLYPHS, new TitleMenu.View("코코넛", null, null, true, false,
+                List.of(title), List.of(title), null, title, 0, "", true, true), log);
+        assertTrue(texts(both).contains("데미지 스킨"));
+        click(both, 210, 5);
+        // Without the color tab it moves into the second slot.
+        CoreMenu alone = TitleMenu.build(GLYPHS, new TitleMenu.View("코코넛", null, null, true, false,
+                List.of(title), List.of(title), null, title, 0, "", false, true), log);
+        click(alone, 120, 5);
+        assertFalse(clickable(alone, 210, 5));
+        // Color screen: third slot.
+        CoreMenu color = ColorNickMenu.build(GLYPHS, new ColorNickMenu.View("코코넛", null, null, true, false,
+                ALL, null, c("black"), 0, true), log);
+        click(color, 210, 5);
+        assertEquals(List.of("damageSkin", "damageSkin", "damageSkin"), log.calls);
+
+        CoreMenu none = ColorNickMenu.build(GLYPHS, view(ALL, null, c("black"), 0, true, false), log);
+        assertFalse(texts(none).contains("데미지 스킨"));
+        assertFalse(clickable(none, 210, 5));
     }
 
     @Test

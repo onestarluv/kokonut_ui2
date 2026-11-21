@@ -66,7 +66,8 @@ public final class TitleMenu {
 
     /** What one frame shows. {@code shown} is {@code owned} after the search; {@code equipped} may be null. */
     record View(String player, net.kyori.adventure.text.object.PlayerHeadObjectContents head, int[] face, boolean ready, boolean busy,
-                List<Title> owned, List<Title> shown, Long equipped, Title selected, int page, String query, boolean colorTab) {
+                List<Title> owned, List<Title> shown, Long equipped, Title selected, int page, String query, boolean colorTab,
+                boolean skinTab) {
         int pages() {
             return Math.max(1, (shown.size() + ROWS - 1) / ROWS);
         }
@@ -87,6 +88,7 @@ public final class TitleMenu {
         void equip(Player p, Title title);
         void unequip(Player p);
         void colorNick(Player p);
+        void damageSkin(Player p);
         void close(Player p);
     }
 
@@ -115,9 +117,10 @@ public final class TitleMenu {
         int page = Math.clamp(state.page(), 0, pages - 1);
         Title selected = pick(shown, page, state.selected(), equipped);
         View view = new View(displayName(player), MainMenu.head(player), coreUi.getSkinFaces().face(player), catalog.ready(player), catalog.busy(player), owned, shown, equipped, selected, page, state.query(),
-                colorTab != null && coreUi.getGlyphs().all().containsKey("menu/ui/tab_green_off"));
+                colorTab != null && coreUi.getGlyphs().all().containsKey("menu/ui/tab_green_off"),
+                CoreViews.damageSkinAvailable(coreUi) && coreUi.getGlyphs().all().containsKey("menu/ui/tab_off"));
         State now = new State(state.query(), page, selected == null ? null : selected.id());
-        coreUi.open(player, build(coreUi.getGlyphs().all(), view, new Actions() {
+        coreUi.open(player, build(coreUi.getGlyphs().all(), view, CoreViews.afterimageTab(coreUi), new Actions() {
             public void select(Player p, Title title) { show(coreUi, catalog, colorTab, p, new State(now.query(), now.page(), title.id())); }
             public void page(Player p, int to) { show(coreUi, catalog, colorTab, p, new State(now.query(), to, null)); }
             public void search(Player p) { askQuery(coreUi, catalog, colorTab, p, now); }
@@ -125,6 +128,7 @@ public final class TitleMenu {
             public void equip(Player p, Title title) { change(coreUi, catalog, colorTab, p, now, title.id()); }
             public void unequip(Player p) { change(coreUi, catalog, colorTab, p, now, null); }
             public void colorNick(Player p) { if (colorTab != null) colorTab.accept(p); }
+            public void damageSkin(Player p) { CoreViews.openDamageSkins(coreUi, p); }
             public void close(Player p) { coreUi.close(p); }
         }));
     }
@@ -192,10 +196,26 @@ public final class TitleMenu {
         else Bukkit.getScheduler().runTask(coreUi, task);
     }
 
+    /** Vanilla item drawn on the 데미지 스킨 tab. */
+    static final String SKIN_TAB_ICON = "iron_sword";
+
+    /** The 데미지 스킨 tab (red, inactive) at {@code x}; it opens {@link DamageSkinMenu}. */
+    static void skinTab(Canvas c, int x, Consumer<Player> onClick) {
+        c.image("menu/ui/tab_off", x, 0);
+        c.item(SKIN_TAB_ICON, x + 4, 2);
+        c.text("데미지 스킨", x + 22, 6, WHITE);
+        c.click(x, 0, 88, 20, onClick, HoverEvent.showText(Component.text("보유한 데미지 스킨 장착")));
+    }
+
     /** One frame; pure apart from the callbacks, so offline checks can build it with sample data. */
     static CoreMenu build(Map<String, Glyph> g, View v, Actions act) {
+        return build(g, v, null, act);
+    }
+
+    /** {@code afterimageTab} opens the 잔상 screen; null = no tab. */
+    static CoreMenu build(Map<String, Glyph> g, View v, Consumer<Player> afterimageTab, Actions act) {
         Canvas c = new Canvas(g, ID, "칭호");
-        // Chrome: book, title tab (joined to the book), the 색 닉네임 tab beside it, close.
+        // Chrome: book, title tab (joined to the book), the 색 닉네임 and 데미지 스킨 tabs beside it, close.
         for (int col = 0; col < 2; col++) {
             c.image("dex/ui/page_0_" + col, col * 228, 20);
             c.image("dex/ui/page_1_" + col, col * 228, 153);
@@ -210,6 +230,8 @@ public final class TitleMenu {
             c.text("색 닉네임", 130, 6, WHITE);
             c.click(108, 0, 88, 20, act::colorNick, null);
         }
+        if (v.skinTab()) skinTab(c, v.colorTab() ? 200 : 108, act::damageSkin);
+        if (afterimageTab != null) AfterimageMenu.tab(c, AfterimageMenu.tabX(v.colorTab(), v.skinTab()), afterimageTab);
         c.image("dex/ui/close", 432, 0);
         c.click(432, 0, 20, 20, act::close, null);
 

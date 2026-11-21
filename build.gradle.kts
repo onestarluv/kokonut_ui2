@@ -17,6 +17,10 @@ dependencies {
     compileOnly(files(providers.gradleProperty("kokonutCoreJar").orElse("../Kokonut_Core/build/libs/Kokonut-Core-cbt-1.0.jar")))
     // Optional Kokonut-Mail mailbox (main menu 우편함 button).
     compileOnly(files(providers.gradleProperty("kokonutMailJar").orElse("../Kokonut_Mail/build/libs/Kokonut-Mail-cbt-1.0.jar")))
+    // Optional kokonut_damage skins (꾸미기 데미지 스킨 tab): its public API module.
+    compileOnly(files(providers.gradleProperty("damageApiJar").orElse("../Kokonut_Damage/api/build/libs/api-cbt-1.0.jar")))
+    // Optional kokonut_particle move effects (꾸미기 잔상 tab): its MoveEffectService.
+    compileOnly(files(providers.gradleProperty("particleJar").orElse("../Kokonut_Particle/build/libs/kokonut_particle-cbt-1.0.jar")))
     // Optional BetterHud (Kokonut_HUD) shader integration; resolved from the server at runtime.
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testImplementation("io.papermc.paper:paper-api:26.3.build.243-stable")

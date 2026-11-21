@@ -7,7 +7,7 @@ version: '${version}'
 main: org.crebs.coreui.CoreUi
 api-version: '26.3'
 load: POSTWORLD
-softdepend: [Kokonut-Core, Kokonut-Mail, Kokonut_HUD, BetterHud]
+softdepend: [Kokonut-Core, Kokonut-Mail, Kokonut_HUD, BetterHud, kokonut_damage, kokonut_particle]
 commands:
   메인메뉴:
     description: 메인 메뉴 열기 (이동·도감·꾸미기·우편함·설정)

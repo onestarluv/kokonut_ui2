@@ -69,6 +69,67 @@ public final class CoreViews {
         };
     }
 
+    /** Plugin name of the damage skin fork (Kokonut_Damage). */
+    static final String DAMAGE_PLUGIN = "kokonut_damage";
+
+    /** Whether the 꾸미기 screens show the 데미지 스킨 tab. */
+    static boolean damageSkinAvailable(CoreUi coreUi) {
+        return coreUi.getServer().getPluginManager().isPluginEnabled(DAMAGE_PLUGIN);
+    }
+
+    /** The 데미지 스킨 tab: the book screen of {@link DamageSkinMenu}, with 칭호 and 색 닉네임 tabs back. */
+    static void openDamageSkins(CoreUi coreUi, Player player) {
+        if (!damageSkinAvailable(coreUi)) {
+            Messages.send(player, "데미지 스킨 플러그인이 꺼져 있어요.");
+            return;
+        }
+        boolean opened;
+        try {
+            opened = DamageSkinMenu.open(coreUi, DamageSkins.INSTANCE, player, p -> {
+                if (!openTitles(coreUi, p)) Messages.send(p, "칭호 화면을 아직 불러오지 못했어요.");
+            }, colorTab(coreUi));
+        } catch (LinkageError olderDamagePlugin) {
+            opened = false;
+        }
+        if (!opened) Messages.send(player, "데미지 스킨 화면을 아직 불러오지 못했어요.");
+    }
+
+    /** Plugin name of the move effect plugin (Kokonut_Particle). */
+    static final String PARTICLE_PLUGIN = "kokonut_particle";
+
+    /** Whether the 꾸미기 screens show the 잔상 tab. */
+    static boolean afterimageAvailable(CoreUi coreUi) {
+        if (!coreUi.getServer().getPluginManager().isPluginEnabled(PARTICLE_PLUGIN)) return false;
+        try {
+            return Afterimages.available();
+        } catch (LinkageError olderParticlePlugin) {
+            return false;
+        }
+    }
+
+    /** What the other 꾸미기 screens' 잔상 tab does; null (no tab) when kokonut_particle is off. */
+    static Consumer<Player> afterimageTab(CoreUi coreUi) {
+        return afterimageAvailable(coreUi) ? p -> openAfterimages(coreUi, p) : null;
+    }
+
+    /** The 잔상 tab: the book screen of {@link AfterimageMenu}, with the other 꾸미기 tabs back. */
+    static void openAfterimages(CoreUi coreUi, Player player) {
+        if (!afterimageAvailable(coreUi)) {
+            Messages.send(player, "잔상 플러그인이 꺼져 있어요.");
+            return;
+        }
+        boolean opened;
+        try {
+            opened = AfterimageMenu.open(coreUi, Afterimages.INSTANCE, player, new AfterimageMenu.Tabs(
+                    p -> { if (!openTitles(coreUi, p)) Messages.send(p, "칭호 화면을 아직 불러오지 못했어요."); },
+                    colorTab(coreUi),
+                    damageSkinAvailable(coreUi) ? p -> openDamageSkins(coreUi, p) : null));
+        } catch (LinkageError olderParticlePlugin) {
+            opened = false;
+        }
+        if (!opened) Messages.send(player, "잔상 화면을 아직 불러오지 못했어요.");
+    }
+
     /** {@code /마을} without arguments opens the village screen. */
     private static final class Villages {
         static void register(CoreUi coreUi) {

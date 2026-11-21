@@ -49,7 +49,7 @@ public final class ColorNickMenu {
 
     /** What one frame shows. {@code equipped} and {@code selected} may be null. */
     record View(String player, PlayerHeadObjectContents head, int[] face, boolean ready, boolean busy,
-                List<NickColor> owned, NickColor equipped, NickColor selected, int page) {
+                List<NickColor> owned, NickColor equipped, NickColor selected, int page, boolean skinTab) {
         int pages() {
             return Math.max(1, (owned.size() + ROWS - 1) / ROWS);
         }
@@ -64,6 +64,7 @@ public final class ColorNickMenu {
         void equip(Player p, NickColor color);
         void unequip(Player p);
         void titles(Player p);
+        void damageSkin(Player p);
         void close(Player p);
     }
 
@@ -91,14 +92,15 @@ public final class ColorNickMenu {
         int page = Math.clamp(state.page(), 0, Math.max(1, (owned.size() + ROWS - 1) / ROWS) - 1);
         NickColor selected = pick(owned, page, state.selected(), equipped);
         View view = new View(TitleMenu.displayName(player), MainMenu.head(player), coreUi.getSkinFaces().face(player),
-                ready, catalog.busy(player), owned, equipped, selected, page);
+                ready, catalog.busy(player), owned, equipped, selected, page, CoreViews.damageSkinAvailable(coreUi));
         State now = new State(page, selected);
-        coreUi.open(player, build(coreUi.getGlyphs().all(), view, new Actions() {
+        coreUi.open(player, build(coreUi.getGlyphs().all(), view, CoreViews.afterimageTab(coreUi), new Actions() {
             public void select(Player p, NickColor color) { show(coreUi, catalog, titleTab, p, new State(now.page(), color)); }
             public void page(Player p, int to) { show(coreUi, catalog, titleTab, p, new State(to, null)); }
             public void equip(Player p, NickColor color) { change(coreUi, catalog, titleTab, p, now, color); }
             public void unequip(Player p) { change(coreUi, catalog, titleTab, p, now, null); }
             public void titles(Player p) { titleTab.accept(p); }
+            public void damageSkin(Player p) { CoreViews.openDamageSkins(coreUi, p); }
             public void close(Player p) { coreUi.close(p); }
         }));
     }
@@ -125,8 +127,13 @@ public final class ColorNickMenu {
 
     /** One frame; pure apart from the callbacks, so tests and offline checks can build it with sample data. */
     static CoreMenu build(Map<String, Glyph> g, View v, Actions act) {
+        return build(g, v, null, act);
+    }
+
+    /** {@code afterimageTab} opens the 잔상 screen; null = no tab. */
+    static CoreMenu build(Map<String, Glyph> g, View v, Consumer<Player> afterimageTab, Actions act) {
         TitleMenu.Canvas c = new TitleMenu.Canvas(g, ID, "색 닉네임");
-        // Chrome: book, 칭호 tab (inactive, goes back), 색 닉네임 tab (active, joined to the book), close.
+        // Chrome: book, 칭호 tab (inactive, goes back), 색 닉네임 tab (active, joined to the book), 데미지 스킨 tab, close.
         for (int col = 0; col < 2; col++) {
             c.image("dex/ui/page_0_" + col, col * 228, 20);
             c.image("dex/ui/page_1_" + col, col * 228, 153);
@@ -139,6 +146,8 @@ public final class ColorNickMenu {
         c.item(TAB_ICON, 112, 2);
         c.text("색 닉네임", 130, 6, WHITE);
         c.image("menu/ui/tab_green_join", 109, 20);
+        if (v.skinTab()) TitleMenu.skinTab(c, 200, act::damageSkin);
+        if (afterimageTab != null) AfterimageMenu.tab(c, AfterimageMenu.tabX(true, v.skinTab()), afterimageTab);
         c.image("dex/ui/close", 432, 0);
         c.click(432, 0, 20, 20, act::close, null);
 
