@@ -47,6 +47,7 @@ menu/item/paper minecraft:item/paper.png 32
 menu/item/comparator minecraft:item/comparator.png 32
 menu/item/cocoa_beans minecraft:item/cocoa_beans.png 16
 menu/item/totem_of_undying minecraft:item/totem_of_undying.png 32
+menu/item/wolf_spawn_egg minecraft:item/wolf_spawn_egg.png 32
 # Village icon picker (VillageMenu): the same items at 32 px, drawable at any y.
 village/icon/emerald minecraft:item/emerald.png 32
 village/icon/diamond minecraft:item/diamond.png 32

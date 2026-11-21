@@ -242,6 +242,14 @@ glyphs:
     ascent: 8
   menu/ui/panel_116_1:
     ascent: 8
+  menu/ui/panel_272_00:
+    ascent: 8
+  menu/ui/panel_272_01:
+    ascent: 8
+  menu/ui/panel_272_10:
+    ascent: 8
+  menu/ui/panel_272_11:
+    ascent: 8
   menu/ui/plate_104:
     ascent: 8
   menu/ui/plate_112:

@@ -19,13 +19,16 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Main menu (이동 · 도감 · 꾸미기 · 우편함 · 설정) in the dex's leather-and-parchment style. All sizes are GUI px.
+ * Main menu in the dex's leather-and-parchment style, at the village/dex book size (456 x 292 under the tabs).
+ * Top row: 이동 · 도감 · 꾸미기 · 퀘스트 · 우편함 · 설정; lower 장비 · 동료 row: 장신구 · 펫. All sizes are GUI px.
  * Glyphs: {@code menu/ui/...} (bundled PNGs), {@code menu/item/...} and {@code dex/...} (vanilla item icons, dex kit).
  * Like the dex, every glyph hangs from the text line its top is on, so later (lower) elements paint on top.
  */
 public final class MainMenu {
-    static final int WIDTH = 320, HEIGHT = 136;
-    private static final int PANEL_Y = 20, CARD_Y = 66, CARD_W = 40, CARD_H = 54, CARD_GAP = 4;
+    static final int WIDTH = 480, HEIGHT = 292;
+    /** Visible panel width (the book's), the canvas is wider like the book screens. */
+    private static final int PANEL_W = 456;
+    private static final int PANEL_Y = 20, CARD_Y = 78, GEAR_Y = 170, CARD_W = 40, CARD_H = 54, CARD_GAP = 16;
     private static final TextColor INK = TextColor.color(0x3B2A1A), DIM = TextColor.color(0x7A6446),
             GOLD = TextColor.color(0xA8740A), RED = TextColor.color(0xA83A2A), PURPLE = TextColor.color(0x7A4FB0),
             WHITE = TextColor.color(0xFFFFFF);
@@ -52,7 +55,7 @@ public final class MainMenu {
     /** Returns false while the menu glyphs are not loaded. */
     public static boolean open(CoreUi coreUi, Player player) {
         var glyphs = coreUi.getGlyphs().all();
-        if (!glyphs.containsKey("menu/ui/panel_116_0") || !glyphs.containsKey("menu/icon/deco_32") || !glyphs.containsKey("menu/icon/setting_32")
+        if (!glyphs.containsKey("menu/ui/panel_272_00") || !glyphs.containsKey("menu/ui/panel_272_11") || !glyphs.containsKey("menu/icon/deco_32") || !glyphs.containsKey("menu/icon/setting_32")
                 || !glyphs.containsKey("menu/ui/profile_bg_8") || !glyphs.containsKey("menu/ui/tag_8")
                 || !glyphs.containsKey("menu/ui/px_2") || !glyphs.containsKey("menu/ui/head_frame_20")
                 || !glyphs.containsKey("menu/icon/wiki") || !glyphs.containsKey("menu/icon/minelist")
@@ -102,7 +105,7 @@ public final class MainMenu {
         return head.build();
     }
 
-    /** Seven compact buttons: icon and name only (names up to about 4 Hangul characters fit the 40 px card). */
+    /** Top row: icon and name only (names up to about 4 Hangul characters fit the 40 px card). */
     static List<Button> buttons(CoreUi coreUi, Info info) {
         return List.of(
                 new Button("move", "이동", "menu/icon/warp_32", p -> soon(p, "이동")),
@@ -114,7 +117,6 @@ public final class MainMenu {
                     if (!coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Core")
                             || !CoreViews.openTitles(coreUi, p)) soon(p, "꾸미기");
                 }),
-                new Button("accessory", "장신구", "menu/item/totem_of_undying", p -> run(coreUi, p, "장신구")),
                 new Button("quest", "퀘스트", "menu/icon/quest_32", p -> {
                     // Prototype with sample quests (QuestMenu); real quest data is not connected yet.
                     if (!org.crebs.coreui.menu.quest.QuestMenu.open(coreUi, p)) soon(p, "퀘스트");
@@ -129,6 +131,23 @@ public final class MainMenu {
                     if (!MailBridge.open(p)) Messages.send(p, "우편함이 아직 준비되지 않았어요.");
                 }),
                 new Button("settings", "설정", "menu/icon/setting_32", p -> soon(p, "설정")));
+    }
+
+    /** Lower 장비 · 동료 row: accessories and pets. */
+    static List<Button> gear(CoreUi coreUi) {
+        return List.of(
+                new Button("accessory", "장신구", "menu/item/totem_of_undying", p -> run(coreUi, p, "장신구")),
+                new Button("pet", "펫", "menu/item/wolf_spawn_egg", p -> {
+                    boolean opened = false;
+                    if (coreUi.getServer().getPluginManager().isPluginEnabled(Pets.PLUGIN)) {
+                        try {
+                            opened = Pets.openScreen(p);
+                        } catch (LinkageError olderPetsPlugin) {
+                            opened = false;
+                        }
+                    }
+                    if (!opened) Messages.send(p, "펫 플러그인이 꺼져 있어요.");
+                }));
     }
 
     /** Closes the menu and runs another plugin's command (e.g. /장신구 opens the accessory inventory). */
@@ -161,10 +180,13 @@ public final class MainMenu {
                 if (coreUi == null || !org.crebs.coreui.menu.village.VillageMenu.open(coreUi, p)) Messages.send(p, "마을 화면을 아직 불러오지 못했어요.");
             });
         }
-        c.image("dex/ui/close", 300, 0);
-        c.click(300, 0, 20, 20, p -> coreUi.close(p));
-        c.image("menu/ui/panel_116_0", 0, PANEL_Y);
-        c.image("menu/ui/panel_116_1", 160, PANEL_Y);
+        c.image("dex/ui/close", PANEL_W - 24, 0);
+        c.click(PANEL_W - 24, 0, 20, 20, p -> coreUi.close(p));
+        // Panel tiles: 228 px wide, split at screen y 153 like the book (glyphs over 256 px are not drawn).
+        c.image("menu/ui/panel_272_00", 0, PANEL_Y);
+        c.image("menu/ui/panel_272_01", 228, PANEL_Y);
+        c.image("menu/ui/panel_272_10", 0, 153);
+        c.image("menu/ui/panel_272_11", 228, 153);
         c.image("menu/ui/tab_join", 13, PANEL_Y);
 
         // Profile row: face, the equipped title on top, nickname below (no location line: without a title the
@@ -187,7 +209,7 @@ public final class MainMenu {
         // Link buttons (wiki, minelist, discord): icon only, the name in the tooltip; right-aligned to the divider.
         for (int i = 0; i < info.links().size(); i++) {
             Link link = info.links().get(i);
-            int x = 306 - (info.links().size() - i) * 28 + 4;
+            int x = PANEL_W - 14 - (info.links().size() - i) * 28 + 4;
             c.image("dex/ui/btn_paper_24", x, 33);
             c.image(link.icon(), x + 4, 35);
             var tooltip = net.kyori.adventure.text.event.HoverEvent.showText(Component.text(link.label(), WHITE));
@@ -196,26 +218,34 @@ public final class MainMenu {
             else spot.onClick(p -> Messages.send(p, link.label() + " 주소가 아직 준비되지 않았어요.")).add();
         }
 
-        // One row of seven buttons: icon and name.
-        List<Button> buttons = buttons(coreUi, info);
-        int left = (WIDTH - (buttons.size() * CARD_W + (buttons.size() - 1) * CARD_GAP)) / 2;
+        // Top row: the menus. Lower row (below the second divider at screen y 142): 장비 · 동료.
+        c.text("메뉴", 16, 64, DIM);
+        cards(c, buttons(coreUi, info), CARD_Y, info);
+        c.text("장비 · 동료", 16, 156, DIM);
+        cards(c, gear(coreUi), GEAR_Y, info);
+        c.centered("Shift+F 로 언제든 이 메뉴를 열 수 있어요", 0, PANEL_W, 250, DIM);
+        return c.b.build();
+    }
+
+    /** One centered row of 40 px cards at {@code y}. */
+    private static void cards(Canvas c, List<Button> buttons, int cardY, Info info) {
+        int left = (PANEL_W - (buttons.size() * CARD_W + (buttons.size() - 1) * CARD_GAP)) / 2;
         for (int i = 0; i < buttons.size(); i++) {
             Button button = buttons.get(i);
             int x = left + i * (CARD_W + CARD_GAP);
-            c.image("menu/ui/card_40", x, CARD_Y);
-            c.image("menu/ui/well", x + 2, CARD_Y + 3);
-            c.image(button.icon(), x + 4, CARD_Y + 5);
-            c.centered(button.label(), x, CARD_W, CARD_Y + 42, INK);
+            c.image("menu/ui/card_40", x, cardY);
+            c.image("menu/ui/well", x + 2, cardY + 3);
+            c.image(button.icon(), x + 4, cardY + 5);
+            c.centered(button.label(), x, CARD_W, cardY + 42, INK);
             if (button.id().equals("mail") && info.mail() != null && info.mail() > 0) {
                 String count = info.mail() > 99 ? "99+" : String.valueOf(info.mail());
                 int width = count.length() > 2 ? 18 : 12;
-                // y = CARD_Y + 15 is a text line after the icon well's, so the badge paints over the icon corner.
-                c.image("menu/ui/badge_" + width, x + CARD_W - width - 1, CARD_Y + 15);
-                c.centered(count, x + CARD_W - width - 1, width, CARD_Y + 17, WHITE);
+                // y = cardY + 15 is a text line after the icon well's, so the badge paints over the icon corner.
+                c.image("menu/ui/badge_" + width, x + CARD_W - width - 1, cardY + 15);
+                c.centered(count, x + CARD_W - width - 1, width, cardY + 17, WHITE);
             }
-            c.click(x, CARD_Y, CARD_W, CARD_H, button.action());
+            c.click(x, cardY, CARD_W, CARD_H, button.action());
         }
-        return c.b.build();
     }
 
     private static final class Canvas {

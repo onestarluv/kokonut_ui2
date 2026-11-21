@@ -52,6 +52,10 @@ public class MenuPreview {
             gem(glyphs, out.replace("shop-preview", "gem-preview"), hotspots);
             return;
         }
+        if (List.of(args).contains("pet")) {  // only the pet screens: pet-preview-*.png
+            pet(glyphs, out.replace("shop-preview", "pet-preview"), hotspots);
+            return;
+        }
         if (List.of(args).contains("skill")) {  // only the skill screens: skill-preview-*.png
             skill(glyphs, out.replace("shop-preview", "skill-preview"), hotspots);
             return;
@@ -303,6 +307,70 @@ public class MenuPreview {
         };
         for (Object[] f : frames) {
             CoreMenu m = (CoreMenu) build.invoke(null, glyphs, skill, f[1], f[2], noop);
+            render(m, hotspots, new File(out + "-" + f[0] + ".png"));
+            System.out.println("wrote " + out + "-" + f[0] + ".png (" + m.getElements().size() + " elements)");
+        }
+    }
+
+    /** Pet screens (PetMenu) with sample pets: summoned living pet, waiting pet, recovering pet, max tier, empty. */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static void pet(Map<String, Glyph> glyphs, String out, boolean hotspots) throws Exception {
+        Class<?> menu = Class.forName("org.crebs.coreui.menu.kokonut.PetMenu");
+        Class<?> pet = Class.forName("org.crebs.coreui.menu.kokonut.PetMenu$Pet");
+        Class<?> stats = Class.forName("org.crebs.coreui.menu.kokonut.PetMenu$Stats");
+        Class<?> view = Class.forName("org.crebs.coreui.menu.kokonut.PetMenu$View");
+        Class<?> status = Class.forName("org.crebs.coreui.menu.kokonut.PetMenu$Status");
+        Class<?> actions = Class.forName("org.crebs.coreui.menu.kokonut.PetMenu$Actions");
+        Constructor<?> newPet = pet.getDeclaredConstructors()[0], newStats = stats.getDeclaredConstructors()[0],
+                newView = view.getDeclaredConstructors()[0];
+        newPet.setAccessible(true); newStats.setAccessible(true); newView.setAccessible(true);
+        Method build = menu.getDeclaredMethod("build", Map.class, view, actions);
+        build.setAccessible(true);
+        Object noop = Proxy.newProxyInstance(menu.getClassLoader(), new Class<?>[]{actions}, (p, m, a) -> null);
+        var legacy = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection();
+        java.util.function.Function<String, Component> tx = legacy::deserialize;
+        Object ready = Enum.valueOf((Class) status, "READY"), dead = Enum.valueOf((Class) status, "DEAD");
+        List<Component> desc = List.of(tx.apply("§7붓을 휘둘러 멀리 있는 적을"), tx.apply("§7물감으로 공격하는 장난꾸러기 고양이."),
+                tx.apply("§7"), tx.apply("§f등급이 오르면 §b공격력 증가"));
+        Object rare = newStats.newInstance(tx.apply("Lv.3"), tx.apply("Lv.4"), 72.0, 100.0, 0.12, 200, 0, 100, 820.0, 500.0, 1500.0);
+        Object common = newStats.newInstance(tx.apply("Lv.1"), tx.apply("Lv.2"), 80.0, 80.0, 0.1, 0, 0, 0, 120.0, 0.0, 500.0);
+        Object mythic = newStats.newInstance(tx.apply("Lv.6"), null, 160.0, 160.0, 0.2, 800, 0, 400, 6200.0, 5000.0, 5000.0);
+        Object artist = newPet.newInstance("am_pet_palcat_artist", "wolf_spawn_egg", Component.text("언커먼", net.kyori.adventure.text.format.TextColor.color(0x55FF55)), tx.apply("§b팔캣 화가"), tx.apply("코코"), desc, true, ready, 0, rare, 0,
+                true, true, true, false, false);
+        Object musician = newPet.newInstance("am_pet_palcat_musician", "wolf_spawn_egg", Component.text("레어", net.kyori.adventure.text.format.TextColor.color(0x5599FF)), tx.apply("§b팔캣 음악가"), null,
+                List.of(tx.apply("§7주변 플레이어에게 힘과 성급함을 주는 고양이.")), false, ready, 0, common, 3, true, false, false, false, false);
+        Object shoveler = newPet.newInstance("am_pet_palcat_shoveler", "wolf_spawn_egg", Component.text("미스틱", net.kyori.adventure.text.format.TextColor.color(0xFF55AA)), tx.apply("§b팔캣 광부"), null,
+                List.of(tx.apply("§7땅을 파서 광물을 찾아 주는 고양이.")), false, dead, 12, mythic, 6, true, false, true, true, true);
+        List<Object> all = List.of(artist, musician, shoveler);
+        Object[][] frames = {
+                {"summoned", all, artist}, {"waiting", all, musician}, {"recovering", all, shoveler},
+                {"empty", List.of(), null},
+        };
+        // Pickup settings screen.
+        Class<?> pm = Class.forName("org.crebs.coreui.menu.kokonut.PetPickupMenu");
+        Class<?> pEntry = Class.forName("org.crebs.coreui.menu.kokonut.PetPickupMenu$Entry");
+        Class<?> pView = Class.forName("org.crebs.coreui.menu.kokonut.PetPickupMenu$View");
+        Class<?> pMode = Class.forName("org.crebs.coreui.menu.kokonut.PetPickupMenu$Mode");
+        Class<?> pActions = Class.forName("org.crebs.coreui.menu.kokonut.PetPickupMenu$Actions");
+        Constructor<?> newEntry = pEntry.getDeclaredConstructors()[0], newPView = pView.getDeclaredConstructors()[0];
+        newEntry.setAccessible(true); newPView.setAccessible(true);
+        Method pBuild = pm.getDeclaredMethod("build", Map.class, pView, boolean.class, List.class, pActions);
+        pBuild.setAccessible(true);
+        List<Object> entries = new ArrayList<>();
+        for (String id : List.of("cobblestone", "dirt", "rotten_flesh", "bone", "string", "diamond", "iron_ingot", "gold_ingot", "coal"))
+            entries.add(newEntry.newInstance("minecraft:" + id, id, Component.text(id)));
+        Object pv = newPView.newInstance("am_pet_palcat_shoveler", "팔캣 광부", 6, Enum.valueOf((Class) pMode, "WHITELIST"), entries, 42);
+        Object pNoop = Proxy.newProxyInstance(pm.getClassLoader(), new Class<?>[]{pActions}, (p, m, a) -> null);
+        render((CoreMenu) pBuild.invoke(null, glyphs, pv, false, List.of(), pNoop), hotspots, new File(out + "-pickup.png"));
+        Class<?> pCand = Class.forName("org.crebs.coreui.menu.kokonut.PetPickupMenu$Candidate");
+        Constructor<?> newCand = pCand.getDeclaredConstructors()[0];
+        newCand.setAccessible(true);
+        List<Object> cands = new ArrayList<>();
+        for (int k = 0; k < entries.size(); k++) cands.add(newCand.newInstance(entries.get(k), k % 3 == 0));
+        render((CoreMenu) pBuild.invoke(null, glyphs, pv, true, cands, pNoop), hotspots, new File(out + "-picker.png"));
+        System.out.println("wrote " + out + "-pickup.png");
+        for (Object[] f : frames) {
+            CoreMenu m = (CoreMenu) build.invoke(null, glyphs, newView.newInstance(f[1], f[2], 0), noop);
             render(m, hotspots, new File(out + "-" + f[0] + ".png"));
             System.out.println("wrote " + out + "-" + f[0] + ".png (" + m.getElements().size() + " elements)");
         }

@@ -283,6 +283,12 @@ vanilla:
     height: 32
     ascent: 8
     advance: 31
+  menu/item/wolf_spawn_egg:
+    texture: minecraft:item/wolf_spawn_egg.png
+    width: 32
+    height: 32
+    ascent: 8
+    advance: 29
   village/icon/emerald:
     texture: minecraft:item/emerald.png
     width: 32

@@ -66,6 +66,14 @@ public final class CoreUi extends JavaPlugin {
                 getLogger().warning("Kokonut-Mail is too old for the dialog mailbox; it keeps its chest GUI");
             }
         }
+        if (getServer().getPluginManager().isPluginEnabled(org.crebs.coreui.menu.kokonut.Pets.PLUGIN)) {
+            try {
+                org.crebs.coreui.menu.kokonut.Pets.register(this);
+                getLogger().info("Kokonut_Pets /펫 now opens the CoreUi pet screen");
+            } catch (LinkageError olderPetsPlugin) {
+                getLogger().warning("MCPets has no Kokonut menu hook; /펫 keeps its chest GUI");
+            }
+        }
         if (getServer().getPluginManager().isPluginEnabled("Kokonut-Core")) {
             try {
                 org.crebs.coreui.menu.kokonut.CoreViews.register(this);
@@ -460,6 +468,13 @@ public final class CoreUi extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (getServer().getPluginManager().isPluginEnabled(org.crebs.coreui.menu.kokonut.Pets.PLUGIN)) {
+            try {
+                org.crebs.coreui.menu.kokonut.Pets.unregister();
+            } catch (LinkageError olderPetsPlugin) {
+                // never registered
+            }
+        }
         for (UUID id : new ArrayList<>(sessions.keySet())) {
             Player player = Bukkit.getPlayer(id);
             if (player != null) {

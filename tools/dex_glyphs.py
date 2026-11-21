@@ -397,7 +397,23 @@ def menu_glyphs():
     unknown.save("menu/ui/unknown_item")
     for w in (12, 18):  # unread mail badge: 1-2 digits / "99+"
         bevel(w, 12, RED, OUTLINE, lighten(RED, 0.3), darken(RED, 0.3)).save(f"menu/ui/badge_{w}")
+    main_panel_wide()
     title_glyphs()
+
+
+def main_panel_wide():
+    """Main menu at the village/dex book size (456 x 272 under the tabs): one parchment page, divider under the
+    profile row (y 40) and above the 장비 · 동료 row (y 122). Tiled 228 px wide and split at y 133 (screen y 153,
+    like the book) because the client cannot draw glyphs over 256 px."""
+    W, H = 456, 272
+    panel = bevel(W, H, hexc("#6B3A24"), OUTLINE, hexc("#9A5A36"), hexc("#3E1E10"))
+    panel.rect(7, 7, W - 14, H - 14, hexc("#EADBB5"))
+    panel.rect(7, H - 9, W - 14, 2, hexc("#CDB98A"))
+    panel.rect(14, 40, W - 28, 1, hexc("#CDB98A"))
+    panel.rect(14, 122, W - 28, 1, hexc("#CDB98A"))
+    for row, (y, h) in enumerate(((0, 133), (133, H - 133))):
+        for col in range(2):
+            panel.crop(col * 228, y, 228, h).save(f"menu/ui/panel_{H}_{row}{col}")
 
 
 def title_glyphs():
