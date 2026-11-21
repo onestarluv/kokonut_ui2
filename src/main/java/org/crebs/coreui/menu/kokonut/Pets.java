@@ -74,7 +74,8 @@ public final class Pets implements PetMenu.Catalog, PetPickupMenu.Catalog {
         if (pet != null) MCPetsAPI.summon(player, pet);
     }
     @Override public boolean revoke(Player player, String id) { return MCPetsAPI.revoke(player, id); }
-    @Override public boolean rename(Player player, String id) { return MCPetsAPI.rename(player, id); }
+    @Override public boolean setName(Player player, String id, String name) { return MCPetsAPI.setName(player, id, name); }
+    @Override public int maxNameLength() { return MCPetsAPI.maxNameLength(); }
     @Override public boolean skins(Player player, String id) { return MCPetsAPI.skins(player, id); }
     @Override public boolean inventory(Player player, String id) { return MCPetsAPI.inventory(player, id); }
     @Override public boolean mount(Player player, String id) { return MCPetsAPI.mount(player, id); }

@@ -70,8 +70,10 @@ public final class PetMenu {
         /** Summons; Kokonut_Pets reports the outcome in chat. */
         void summon(Player player, String id);
         boolean revoke(Player player, String id);
-        /** Asks for the new name in chat. */
-        boolean rename(Player player, String id);
+        /** Sets the name typed in the rename dialog (empty clears it); Kokonut_Pets checks it and reports in chat. */
+        boolean setName(Player player, String id, String name);
+        /** Longest name Kokonut_Pets accepts. */
+        int maxNameLength();
         /** Kokonut_Pets' skin chest. */
         boolean skins(Player player, String id);
         /** The pet's storage chest. */
@@ -152,6 +154,11 @@ public final class PetMenu {
                 later(coreUi, () -> show(coreUi, catalog, p, now));
             }
             public void option(Player p, Pet pet, Option option) {
+                if (option == Option.NAME) {
+                    if (!pet.active()) { notSummoned(p); return; }
+                    askName(coreUi, catalog, p, pet, () -> show(coreUi, catalog, p, now));
+                    return;
+                }
                 switch (option) {
                     case STICK -> {
                         if (!catalog.signalStick(p, pet.id())) notSummoned(p);
@@ -163,7 +170,7 @@ public final class PetMenu {
                         later(coreUi, () -> {
                             if (!p.isOnline()) return;
                             boolean done = switch (option) {
-                                case NAME -> catalog.rename(p, pet.id());
+                                case NAME -> true;
                                 case SKIN -> catalog.skins(p, pet.id());
                                 case BAG -> catalog.inventory(p, pet.id());
                                 case RIDE -> catalog.mount(p, pet.id());
@@ -181,6 +188,37 @@ public final class PetMenu {
             }
             public void close(Player p) { coreUi.close(p); }
         }));
+    }
+
+    /** Rename dialog: one text field with the current name; 확인 applies, 취소 goes back to the pet screen. */
+    private static void askName(CoreUi coreUi, Catalog catalog, Player player, Pet pet, Runnable back) {
+        coreUi.removeSession(player);
+        var once = net.kyori.adventure.text.event.ClickCallback.Options.builder().uses(1).lifetime(java.time.Duration.ofMinutes(10)).build();
+        String current = pet.nickname() == null ? "" : PLAIN.serialize(pet.nickname());
+        int max = Math.max(1, catalog.maxNameLength());
+        var confirm = io.papermc.paper.registry.data.dialog.ActionButton.builder(Component.text("확인")).width(100)
+                .action(io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> onMain(coreUi, () -> {
+                    String name = java.util.Objects.requireNonNullElse(response.getText("name"), "");
+                    catalog.setName(player, pet.id(), name);
+                    later(coreUi, back);
+                }), once)).build();
+        var cancel = io.papermc.paper.registry.data.dialog.ActionButton.builder(Component.text("취소")).width(100)
+                .action(io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> onMain(coreUi, back), once)).build();
+        player.showDialog(io.papermc.paper.dialog.Dialog.create(builder -> builder.empty()
+                .base(io.papermc.paper.registry.data.dialog.DialogBase.builder(Component.text(pet.plain() + " 이름"))
+                        .canCloseWithEscape(true).pause(false)
+                        .afterAction(io.papermc.paper.registry.data.dialog.DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
+                        .body(List.of(io.papermc.paper.registry.data.dialog.body.DialogBody.plainMessage(Component.text(
+                                "펫에게 붙일 이름을 입력하세요. (최대 " + max + "자)\n비우고 확인하면 이름이 지워져요."), 240)))
+                        .inputs(List.of(io.papermc.paper.registry.data.dialog.input.DialogInput.text("name", Component.text("이름"))
+                                .initial(current.length() > max ? current.substring(0, max) : current).maxLength(max).width(200).build()))
+                        .build())
+                .type(io.papermc.paper.registry.data.dialog.type.DialogType.confirmation(confirm, cancel))));
+    }
+
+    private static void onMain(CoreUi coreUi, Runnable task) {
+        if (org.bukkit.Bukkit.isPrimaryThread()) task.run();
+        else org.bukkit.Bukkit.getScheduler().runTask(coreUi, task);
     }
 
     private static void notSummoned(Player p) {
