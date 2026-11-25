@@ -11,8 +11,9 @@ import java.util.function.Consumer;
  * One shop for {@link ShopMenu}: a flat product list (no categories) and a {@link Mode}. A shop either only sells to
  * players ({@link Mode#BUY}, the player pays) or only buys from them ({@link Mode#SELL}, the player is paid). Every
  * product names its own currency. Shops are read from {@code plugins/Kokonut_UI/shops.yml} ({@link #loadAll}).
+ * A sell shop with {@code tiered} counts its silver payouts towards the player's daily sell tiers ({@link SellTiers}).
  */
-public record ShopCatalog(String id, String name, Mode mode, List<Product> products) {
+public record ShopCatalog(String id, String name, Mode mode, boolean tiered, List<Product> products) {
     /** Labels follow the player's point of view: in a BUY shop the player buys. */
     public enum Mode {
         BUY("구매 상점", "emerald", "구매", "구매하기"), SELL("판매 상점", "hopper", "판매", "판매하기");
@@ -50,18 +51,38 @@ public record ShopCatalog(String id, String name, Mode mode, List<Product> produ
     }
 
     /**
-     * One product, always traded one item at a time: {@code price} is per item (paid by the player in a BUY shop,
-     * paid to the player in a SELL shop) and the screen's quantity is the item count. {@code item} is a vanilla item
-     * key (icon {@code item/<key>}); {@code description} lines are drawn as they are (two lines, under about 200 px).
+     * What a product trades. {@code VANILLA}: a plain vanilla item (no custom meta), key = item key. {@code NEXO}: any
+     * item whose Nexo id is the key (e.g. Kokonut_Farming crops). {@code FISH}: any Kokonut-Fishing fish of the grade in
+     * the key (common … mystic). Only vanilla goods can be bought from a shop; the others are sell-only.
      */
-    public record Product(String id, String item, String name, double price, Currency currency, List<String> description) {
+    public record Goods(Kind kind, String key) {
+        public enum Kind { VANILLA, NEXO, FISH }
+
+        /** Kokonut-Fishing grades ({@code FishGrade}), lower case. */
+        public static final List<String> FISH_GRADES = List.of("common", "uncommon", "rare", "epic", "legendary", "mystic");
+
+        public Goods {
+            Objects.requireNonNull(kind, "kind");
+            Objects.requireNonNull(key, "key");
+        }
+    }
+
+    /**
+     * One product, always traded one item at a time: {@code price} is per item (paid by the player in a BUY shop,
+     * paid to the player in a SELL shop) and the screen's quantity is the item count. {@code item} is the vanilla item
+     * key drawn as the icon ({@code item/<key>}, "?" when there is none); {@code goods} is what is actually traded.
+     * {@code description} lines are drawn as they are (two lines, under about 200 px).
+     */
+    public record Product(String id, String item, String name, double price, Currency currency, List<String> description, Goods goods) {
         public Product {
             Objects.requireNonNull(currency, "currency");
+            Objects.requireNonNull(goods, "goods");
             description = List.copyOf(description);
         }
 
+        /** Vanilla goods' item type; null for Nexo items and fish. */
         public Material material() {
-            return Material.matchMaterial(item);
+            return goods.kind() == Goods.Kind.VANILLA ? Material.matchMaterial(goods.key()) : null;
         }
     }
 
@@ -79,6 +100,11 @@ public record ShopCatalog(String id, String name, Mode mode, List<Product> produ
     public ShopCatalog {
         Objects.requireNonNull(mode, "mode");
         products = List.copyOf(products);
+    }
+
+    /** Whether selling {@code product} here counts towards (and is cut by) the daily sell tiers: silver only. */
+    public boolean tieredFor(Product product) {
+        return tiered && mode == Mode.SELL && product.currency() == Currency.SILVER;
     }
 
     /**
@@ -107,13 +133,19 @@ public record ShopCatalog(String id, String name, Mode mode, List<Product> produ
                 warn.accept("shops." + id + ".mode must be buy or sell");
                 continue;
             }
+            boolean tiered = s.getBoolean("daily-tier", false);
+            if (tiered && mode != Mode.SELL) warn.accept("shops." + id + ".daily-tier only applies to sell shops");
             List<Product> products = new ArrayList<>();
             List<Map<?, ?>> raw = s.getMapList("products");
             for (int i = 0; i < raw.size(); i++) {
                 String where = "shops." + id + ".products[" + i + "]";
                 Map<?, ?> p = raw.get(i);
-                String item = String.valueOf(p.get("item")).toLowerCase(Locale.ROOT).replace("minecraft:", "");
-                if (!validItem.test(item)) { warn.accept(where + ": unknown item " + item); continue; }
+                Goods goods = goods(p, where, warn, validItem);
+                if (goods == null) continue;
+                if (mode == Mode.BUY && goods.kind() != Goods.Kind.VANILLA) { warn.accept(where + ": buy shops only sell vanilla items"); continue; }
+                String icon = p.get("icon") == null ? (goods.kind() == Goods.Kind.VANILLA ? goods.key() : null)
+                        : String.valueOf(p.get("icon")).toLowerCase(Locale.ROOT).replace("minecraft:", "");
+                if (icon != null && !validItem.test(icon)) { warn.accept(where + ": unknown icon " + icon); icon = null; }
                 double price = p.get("price") instanceof Number n ? n.doubleValue() : -1;
                 Currency currency;
                 try {
@@ -127,10 +159,30 @@ public record ShopCatalog(String id, String name, Mode mode, List<Product> produ
                         ? lines.stream().map(String::valueOf).toList()
                         : p.get("description") == null ? List.of() : List.of(String.valueOf(p.get("description")));
                 if (p.containsKey("amount")) warn.accept(where + ": amount is ignored (products are sold one item at a time; price is per item)");
-                products.add(new Product(item + "#" + i, item, name == null ? item : String.valueOf(name), price, currency, description));
+                products.add(new Product(goods.key() + "#" + i, icon, name == null ? goods.key() : String.valueOf(name),
+                        price, currency, description, goods));
             }
-            shops.put(id, new ShopCatalog(id, s.getString("name", id), mode, products));
+            shops.put(id, new ShopCatalog(id, s.getString("name", id), mode, tiered && mode == Mode.SELL, products));
         }
         return shops;
+    }
+
+    /** Exactly one of {@code item}, {@code nexo}, {@code fish}; null (with a warning) when it is missing or invalid. */
+    private static Goods goods(Map<?, ?> p, String where, Consumer<String> warn, java.util.function.Predicate<String> validItem) {
+        int kinds = (p.containsKey("item") ? 1 : 0) + (p.containsKey("nexo") ? 1 : 0) + (p.containsKey("fish") ? 1 : 0);
+        if (kinds != 1) { warn.accept(where + ": set exactly one of item, nexo, fish"); return null; }
+        if (p.containsKey("item")) {
+            String item = String.valueOf(p.get("item")).toLowerCase(Locale.ROOT).replace("minecraft:", "");
+            if (!validItem.test(item)) { warn.accept(where + ": unknown item " + item); return null; }
+            return new Goods(Goods.Kind.VANILLA, item);
+        }
+        if (p.containsKey("nexo")) {
+            String nexo = String.valueOf(p.get("nexo")).strip().replace("nexo:", "");
+            if (nexo.isEmpty()) { warn.accept(where + ": empty nexo id"); return null; }
+            return new Goods(Goods.Kind.NEXO, nexo);
+        }
+        String grade = String.valueOf(p.get("fish")).toLowerCase(Locale.ROOT).strip();
+        if (!Goods.FISH_GRADES.contains(grade)) { warn.accept(where + ": fish must be one of " + Goods.FISH_GRADES); return null; }
+        return new Goods(Goods.Kind.FISH, grade);
     }
 }

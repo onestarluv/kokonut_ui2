@@ -146,6 +146,2934 @@ glyphs:
     ascent: 8
   dex/ui/tab_relic_on:
     ascent: 8
+  furniture/icon/acacia_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/acacia_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/bamboo_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/birch_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/cherry_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/crimson_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/dark_oak_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/jungle_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/mangrove_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/oak_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/pale_oak_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/poplar_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/spruce_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_big_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_desktop_corner:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_fancy_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_fancy_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_fancy_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_fancy_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_long_bench:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_long_bureau:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_long_crate:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_long_desktop:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_long_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_long_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_long_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_modern_chair:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_modern_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_modern_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_outside_big_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_outside_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_shelving:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_table:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/icon/warped_tall_stool:
+    height: 16
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/acacia_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/bamboo_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/birch_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/cherry_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/crimson_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/dark_oak_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/jungle_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/mangrove_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/oak_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/pale_oak_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/poplar_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/spruce_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_big_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_desktop_corner:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_fancy_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_fancy_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_fancy_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_fancy_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_long_bench:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_long_bureau:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_long_crate:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_long_desktop:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_long_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_long_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_long_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_modern_chair:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_modern_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_modern_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_outside_big_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_outside_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_shelving:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_table:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/preview/warped_tall_stool:
+    height: 32
+    ascent: 8
+    offsets: [2]
+  furniture/ui/button_50:
+    ascent: 8
+  furniture/ui/button_50_off:
+    ascent: 8
+  furniture/ui/panel_226:
+    ascent: 8
+  furniture/ui/recipe:
+    ascent: 8
+  furniture/ui/recipe_on:
+    ascent: 8
+  furniture/ui/scroller:
+    ascent: 8
+  furniture/ui/slot:
+    ascent: 8
+  furniture/ui/wood_on:
+    ascent: 8
   gem/ui/facet_bad:
     ascent: 8
   gem/ui/facet_empty:
@@ -503,4 +3431,26 @@ glyphs:
   skill/ui/xp_64:
     ascent: 8
   skill/ui/xp_8:
+    ascent: 8
+  travel/ui/dot_busy:
+    ascent: 8
+  travel/ui/dot_down:
+    ascent: 8
+  travel/ui/dot_full:
+    ascent: 8
+  travel/ui/dot_smooth:
+    ascent: 8
+  travel/ui/here:
+    ascent: 8
+  travel/ui/panel_252:
+    ascent: 8
+  travel/ui/row:
+    ascent: 8
+  travel/ui/row_on:
+    ascent: 8
+  travel/ui/scroller_off:
+    ascent: 8
+  travel/ui/tab:
+    ascent: 8
+  travel/ui/tab_on:
     ascent: 8

@@ -157,6 +157,51 @@ public final class CoreUi extends JavaPlugin {
                 }
                 return true;
             }
+            if (args.length >= 1 && args.length <= 2 && args[0].equalsIgnoreCase("furniture")) {
+                // /coreui furniture          : furniture workbench (prototype, coreui.demo)
+                // /coreui furniture <player> : open it for someone else; the Nexo furniture tmf_worktable runs this
+                //                              from the console when it is right-clicked (coreui.furniture.others)
+                Player target;
+                if (args.length == 2) {
+                    if (!sender.hasPermission("coreui.furniture.others")) {
+                        Messages.send(sender, "You do not have permission to open the furniture workbench for other players");
+                        return true;
+                    }
+                    target = getServer().getPlayerExact(args[1]);
+                    if (target == null) {
+                        Messages.send(sender, "플레이어 '" + args[1] + "'이(가) 접속해 있지 않아요.");
+                        return true;
+                    }
+                } else if (sender instanceof Player self) {
+                    if (!sender.hasPermission("coreui.demo")) {
+                        Messages.send(sender, "You do not have permission to open the furniture workbench prototype");
+                        return true;
+                    }
+                    target = self;
+                } else {
+                    Messages.send(sender, "Usage from the console: /coreui furniture <player>");
+                    return true;
+                }
+                if (!org.crebs.coreui.menu.furniture.FurnitureMenu.open(this, target)) {
+                    Messages.send(sender, "가구 제작대 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
+                }
+                return true;
+            }
+            if (args.length == 1 && args[0].equalsIgnoreCase("travel")) {
+                // /coreui travel : server travel screen (coreui.demo until it is opened to everyone)
+                if (!sender.hasPermission("coreui.demo")) {
+                    Messages.send(sender, "You do not have permission to open the travel prototype");
+                    return true;
+                }
+                if (!(sender instanceof Player self)) {
+                    Messages.send(sender, "Open the travel prototype in-game: /coreui travel");
+                    return true;
+                }
+                if (!org.crebs.coreui.menu.travel.TravelMenu.open(this, self)) {
+                    Messages.send(sender, "이동 화면 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
+                }
+                return true;
+            }
             if (args.length == 1 && args[0].equalsIgnoreCase("skill")) {
                 // /coreui skill : skill tree (prototype, coreui.demo)
                 if (!sender.hasPermission("coreui.demo")) {
@@ -235,13 +280,14 @@ public final class CoreUi extends JavaPlugin {
                 Messages.send(sender, "CoreUi demo opened. Apply plugins/CoreUi/Pack/CoreUi.zip to your client resource packs");
                 return true;
             }
-            Messages.send(sender, "Usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui skill | /coreui gem | /coreui shop <id> [player] | /coreui reload");
+            Messages.send(sender, "Usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui skill | /coreui gem | /coreui travel | /coreui furniture [player] | /coreui shop <id> [player] | /coreui reload");
             return true;
         });
         Objects.requireNonNull(getCommand("coreui")).setTabCompleter((sender, command, label, args) -> {
             if (args.length == 1) {
                 List<String> suggestions = new ArrayList<>();
-                if (sender.hasPermission("coreui.demo")) { suggestions.add("demo"); suggestions.add("quest"); suggestions.add("skill"); suggestions.add("gem"); }
+                if (sender.hasPermission("coreui.demo")) { suggestions.add("demo"); suggestions.add("quest"); suggestions.add("skill"); suggestions.add("gem"); suggestions.add("travel"); }
+                if (sender.hasPermission("coreui.demo") || sender.hasPermission("coreui.furniture.others")) suggestions.add("furniture");
                 if (sender.hasPermission("coreui.shop") || sender.hasPermission("coreui.shop.others")) suggestions.add("shop");
                 if (sender.hasPermission("coreui.reload")) suggestions.add("reload");
                 return suggestions.stream().filter(value -> value.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();

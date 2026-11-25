@@ -70,6 +70,10 @@ public final class ShopMenu {
         void close(Player p);
     }
 
+    /** The state last drawn for each player (main thread), so a background load redraws the view they are on. */
+    private static final Map<Player, Shown> SHOWN = new WeakHashMap<>();
+    private record Shown(ShopCatalog shop, State state) {}
+
     private ShopMenu() {
     }
 
@@ -85,8 +89,10 @@ public final class ShopMenu {
 
     private static void show(CoreUi coreUi, Player player, ShopCatalog shop, State state) {
         if (!player.isOnline()) return;
+        SHOWN.put(player, new Shown(shop, state));
         Map<String, Integer> held = shop.mode() == Mode.SELL ? held(player, shop) : Map.of();
-        coreUi.open(player, build(coreUi.getGlyphs().all(), shop, state, wallet(coreUi, player), held, new Actions() {
+        Double sold = shop.tiered() ? soldToday(coreUi, player, shop) : null;
+        coreUi.open(player, build(coreUi.getGlyphs().all(), shop, state, wallet(coreUi, player), held, ShopRegistry.tiers(), sold, new Actions() {
             public void go(Player p, State next) { show(coreUi, p, shop, next); }
             public void search(Player p) { askQuery(coreUi, p, shop, state); }
             public void trade(Player p, Product product, int quantity) { ShopMenu.trade(coreUi, p, shop, product, quantity, state); }
@@ -103,18 +109,31 @@ public final class ShopMenu {
         }
     }
 
-    /** How many plain (no custom meta) items of each product the player carries; a sell shop only takes those. */
+    /**
+     * Today's base silver sold in tiered shops from the cache; null while unknown, in which case it is loaded in the
+     * background and the shop is redrawn once it arrives (if it is still open).
+     */
+    private static Double soldToday(CoreUi coreUi, Player player, ShopCatalog shop) {
+        if (!coreUi.getServer().getPluginManager().isPluginEnabled("Kokonut-Core")) return null;
+        try {
+            SellTiers tiers = ShopRegistry.tiers();
+            Double sold = org.crebs.coreui.menu.kokonut.DailySales.peek(player.getUniqueId(), tiers);
+            if (sold == null) org.crebs.coreui.menu.kokonut.DailySales.load(coreUi, player.getUniqueId(), tiers, () -> {
+                Shown now = SHOWN.get(player);
+                if (now != null && now.shop() == shop && stillOpen(coreUi, player)
+                        && org.crebs.coreui.menu.kokonut.DailySales.peek(player.getUniqueId(), tiers) != null)
+                    show(coreUi, player, shop, now.state());
+            });
+            return sold;
+        } catch (LinkageError olderCore) {
+            return null;
+        }
+    }
+
+    /** How many items of each product the player carries that the shop would take ({@link ShopGoods}). */
     private static Map<String, Integer> held(Player player, ShopCatalog shop) {
         Map<String, Integer> held = new HashMap<>();
-        for (Product p : shop.products()) {
-            Material type = p.material();
-            if (type == null || !type.isItem()) continue;
-            ItemStack plain = new ItemStack(type);
-            int count = 0;
-            for (ItemStack item : player.getInventory().getStorageContents())
-                if (item != null && item.isSimilar(plain)) count += item.getAmount();
-            held.put(p.id(), count);
-        }
+        for (Product p : shop.products()) held.put(p.id(), ShopGoods.held(player.getInventory(), p));
         return held;
     }
 
@@ -169,8 +188,10 @@ public final class ShopMenu {
     /**
      * One frame; pure apart from the callbacks, so offline checks and the preview tool can build it with sample data.
      * {@code wallet} is null while Core's snapshot is loading (or Core is off); {@code held} is only used by sell shops.
+     * {@code soldToday} is the player's base silver sold today in tiered shops, null while unknown (or not tiered).
      */
-    static CoreMenu build(Map<String, Glyph> g, ShopCatalog shop, State state, Wallet wallet, Map<String, Integer> held, Actions act) {
+    static CoreMenu build(Map<String, Glyph> g, ShopCatalog shop, State state, Wallet wallet, Map<String, Integer> held,
+                          SellTiers tiers, Double soldToday, Actions act) {
         Canvas c = new Canvas(g);
         boolean sell = shop.mode() == Mode.SELL;
         List<Product> all = shop.products();
@@ -263,10 +284,13 @@ public final class ShopMenu {
         c.button("paper", 20, "+", x + 92, y, INK, q < max ? pl -> act.go(pl, state.quantity(Math.min(max, q + 1))) : null);
         c.button("paper", 24, "+10", x + 116, y, INK, q < max ? pl -> act.go(pl, state.quantity(Math.min(max, q + 10))) : null);
 
-        double total = selected.price() * q;
+        // Tiered sell shops pay the daily bracket rate (SellTiers); the row prices stay the base price.
+        boolean tiered = shop.tieredFor(selected);
+        double gross = selected.price() * q;
+        double total = tiered && soldToday != null ? tiers.payout(soldToday, gross) : gross;
         double balance = wallet == null ? Double.NaN : wallet.of(selected.currency());
         boolean ok = sell ? have >= q : wallet != null && balance >= total;
-        c.text(sell ? "받는 금액" : "합계", RIGHT, 158, DIM);
+        c.text(sell ? (total + 0.005 < gross ? "받는 금액 · 구간 적용" : "받는 금액") : "합계", RIGHT, 158, DIM);
         c.priceRight(selected.currency(), total, RIGHT + PAGE, 154, !sell && wallet != null && !ok ? RED : sell ? GREEN : INK);
         c.text(sell ? "판매 후 잔액" : "구매 후 잔액", RIGHT, 176, DIM);
         if (wallet == null) c.right("확인 중", RIGHT + PAGE, 176, DIM);
@@ -286,6 +310,23 @@ public final class ShopMenu {
             c.fitted(value, cx + 18, 220, 44, currencies[i] == selected.currency() ? INK : DIM);
         }
 
+        // Daily sell tier (tiered shops): today's base sales against the current bracket's end, and its rate.
+        if (shop.tiered()) {
+            String line;
+            TextColor colour = DIM;
+            if (soldToday == null) line = "오늘 판매액 확인 중";
+            else {
+                SellTiers.Tier tier = tiers.at(soldToday);
+                line = "오늘 판매액 " + Currency.SILVER.format(soldToday)
+                        + (tier.until() == Double.POSITIVE_INFINITY ? "" : " / " + Currency.SILVER.format(tier.until()))
+                        + " · 단가 " + Math.round(tier.rate() * 100) + "%";
+                if (tier.rate() < 1) colour = RED;
+            }
+            c.fitted(line, RIGHT, 240, PAGE, colour);
+            c.click(RIGHT, 238, PAGE, 12, pl -> { }, HoverEvent.showText(Component.text(tiers.describe()
+                    + "\n농산물·축산물 판매액을 합산해요. 광물·물고기는 제외.")));
+        }
+
         // Buy shops: one 100 px button. Sell shops: "전체 판매" and "판매하기" side by side, 98 px each, where
         // "전체 판매" sells every plain item of this product the player carries (not limited to the quantity field).
         int bw = sell ? 98 : 100, bx = RIGHT + PAGE - bw;
@@ -296,9 +337,11 @@ public final class ShopMenu {
             if (have < 1) c.button("off", bw, "전체 판매", RIGHT, BUTTON_Y, DIM, null);
             else {
                 c.button("green", bw, "전체 판매", RIGHT, BUTTON_Y, WHITE, null);
+                double whole = selected.price() * have;
+                double pay = tiered && soldToday != null ? tiers.payout(soldToday, whole) : whole;
                 c.click(RIGHT, BUTTON_Y, bw, 20, pl -> act.trade(pl, selected, have), HoverEvent.showText(Component.text(
-                        "보유한 " + selected.name() + " " + have + "개 모두 판매\n+" + selected.currency().format(selected.price() * have)
-                                + " " + selected.currency().label)));
+                        "보유한 " + selected.name() + " " + have + "개 모두 판매\n+" + selected.currency().format(pay)
+                                + " " + selected.currency().label + (pay + 0.005 < whole ? " (판매 단가 구간 적용)" : ""))));
             }
         }
         return c.b.build();

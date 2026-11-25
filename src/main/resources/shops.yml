@@ -1,10 +1,27 @@
 # Kokonut_UI 상점 (/coreui shop <id> [플레이어]). 변경 후 /coreui reload.
 # mode: buy  = 플레이어가 사는 상점 (재화 차감 → 아이템 지급)
-#       sell = 플레이어가 파는 상점 (아이템 회수 → 재화 지급, 이름·인챈트 등이 없는 순수 바닐라 아이템만)
+#       sell = 플레이어가 파는 상점 (아이템 회수 → 재화 지급)
 # 상품은 모두 1개 단위로 거래합니다(화면의 수량 = 아이템 개수).
-# 상품: item(바닐라 아이템 키), name(표시 이름), price(1개 가격),
+# 상품: 아래 셋 중 하나로 무엇을 거래하는지 정합니다.
+#         item: 바닐라 아이템 키 — 이름·인챈트 등이 없는 순수 바닐라 아이템만
+#         nexo: Nexo 아이템 id   — 판매 상점 전용 (Kokonut_Farming 작물 등)
+#         fish: 등급(common · uncommon · rare · epic · legendary · mystic) — 판매 상점 전용, Kokonut-Fishing 물고기 중 그 등급 전부
+#       icon(목록에 그릴 바닐라 아이템 키, item이면 생략 가능, 없으면 "?"), name(표시 이름), price(1개 가격),
 #       currency(silver | gold | kokonut — 골드·코코넛은 정수, 실버는 소수 둘째 자리까지), description(최대 2줄 표시)
+# daily-tier: true 인 판매 상점은 실버 판매액이 아래 sell-tiers(개인별·매일 초기화)에 합산되고 구간 단가가 적용됩니다.
 # NPC에 연결하려면 콘솔 명령으로: coreui shop <id> %player%
+#
+# 매입가 출처: 에고버스 경제 기획서 (2026-11-23) — 밀 3실버 / 철 원석 10실버 기준, 행운 0.
+
+# 판매 단가 구간 (기획서 8절). until = 하루 누적 판매액(기본 매입가 기준) 상한, 마지막 구간은 until 없음.
+# 경계는 채광 시급(약 2,143) × 1.5 / × 3 → 100 단위 반올림. 3구간 진입 전 최대 실수령 4,800실버.
+sell-tiers:
+  zone: Asia/Seoul        # 이 시간대의 0시에 초기화
+  tiers:
+    - {until: 3200, rate: 1.0}
+    - {until: 6400, rate: 0.5}
+    - {rate: 0.1}
+
 shops:
   general:
     name: 에고버스 잡화점
@@ -26,19 +43,92 @@ shops:
       - {item: name_tag, name: 이름표, price: 5, currency: kokonut, description: [몹에게 이름을 붙여요.]}
       - {item: totem_of_undying, name: 불사의 토템, price: 30, currency: kokonut, description: [한 번 죽음을 막아 줘요., 장신구 칸에 넣을 수 있어요.]}
       - {item: elytra, name: 겉날개, price: 120, currency: kokonut, description: [하늘을 활공해요.]}
+
+  # 기획서 4절 농작물. 매입 안 함: 독감자, 수박 블록, 대나무·켈프, 모든 씨앗.
   farm:
     name: 농산물 매입소
     mode: sell
+    daily-tier: true
     products:
-      - {item: wheat, name: 밀, price: 0.25, currency: silver, description: [가장 흔한 작물이에요.]}
-      - {item: carrot, name: 당근, price: 0.28, currency: silver}
-      - {item: potato, name: 감자, price: 0.28, currency: silver}
-      - {item: beetroot, name: 비트, price: 0.3, currency: silver}
-      - {item: pumpkin, name: 호박, price: 1.5, currency: silver}
-      - {item: melon_slice, name: 수박 조각, price: 0.15, currency: silver}
-      - {item: sugar_cane, name: 사탕수수, price: 0.18, currency: silver}
-      - {item: egg, name: 달걀, price: 0.18, currency: silver}
-      - {item: cod, name: 대구, price: 0.9, currency: silver, description: [갓 잡은 생선만 받아요.]}
-      - {item: salmon, name: 연어, price: 1.1, currency: silver}
-      - {item: raw_iron, name: 철 원석, price: 2, currency: silver, description: [제련하지 않은 원석이에요.]}
-      - {item: raw_gold, name: 금 원석, price: 4, currency: silver}
+      - {item: wheat, name: 밀, price: 3, currency: silver, description: [기준 작물이에요.]}
+      - {item: carrot, name: 당근, price: 1.8, currency: silver}
+      - {item: potato, name: 감자, price: 1.8, currency: silver, description: [독감자는 받지 않아요.]}
+      - {item: beetroot, name: 비트, price: 2, currency: silver}
+      - {item: pumpkin, name: 호박, price: 3, currency: silver}
+      - {item: melon_slice, name: 수박 조각, price: 0.7, currency: silver, description: [수박 블록은 조각으로 나눠서 팔아 주세요.]}
+      - {item: sugar_cane, name: 사탕수수, price: 1.2, currency: silver}
+      - {item: cactus, name: 선인장, price: 1, currency: silver}
+      - {item: cocoa_beans, name: 코코아 콩, price: 0.3, currency: silver}
+      - {item: sweet_berries, name: 달콤한 열매, price: 0.3, currency: silver}
+      - {item: nether_wart, name: 네더 사마귀, price: 2, currency: silver, description: [네더에서만 자라는 작물이에요.]}
+      - {item: torchflower, name: 횃불꽃, price: 5, currency: silver, description: [스니퍼가 찾아 준 고대 꽃이에요.]}
+      - {item: pitcher_plant, name: 낭상화, price: 5, currency: silver, description: [스니퍼가 찾아 준 고대 꽃이에요.]}
+      - {nexo: onion, name: 양파, price: 3, currency: silver, description: [에고버스 커스텀 작물이에요.]}
+
+  # 기획서 7절 축산물. 생고기만 매입. 매입 안 함: 익힌 고기, 가죽, 토끼 가죽, 우유, 몹 농장 드롭.
+  ranch:
+    name: 축산물 매입소
+    mode: sell
+    daily-tier: true
+    products:
+      - {item: beef, name: 생 소고기, price: 4, currency: silver, description: [익힌 고기는 받지 않아요.]}
+      - {item: porkchop, name: 생 돼지고기, price: 4, currency: silver}
+      - {item: mutton, name: 생 양고기, price: 3.5, currency: silver}
+      - {item: chicken, name: 생 닭고기, price: 3, currency: silver}
+      - {item: rabbit, name: 생 토끼고기, price: 3, currency: silver}
+      - {item: feather, name: 깃털, price: 2, currency: silver}
+      - {item: rabbit_foot, name: 토끼발, price: 5, currency: silver}
+      - {item: egg, name: 달걀, price: 0.3, currency: silver}
+      - {item: brown_egg, name: 갈색 달걀, price: 0.3, currency: silver}
+      - {item: blue_egg, name: 파란색 달걀, price: 0.3, currency: silver}
+      - {item: white_wool, name: 흰색 양털, price: 0.5, currency: silver}
+      - {item: light_gray_wool, name: 회백색 양털, price: 0.5, currency: silver}
+      - {item: gray_wool, name: 회색 양털, price: 0.5, currency: silver}
+      - {item: black_wool, name: 검은색 양털, price: 0.5, currency: silver}
+      - {item: brown_wool, name: 갈색 양털, price: 0.5, currency: silver}
+      - {item: red_wool, name: 빨간색 양털, price: 0.5, currency: silver}
+      - {item: orange_wool, name: 주황색 양털, price: 0.5, currency: silver}
+      - {item: yellow_wool, name: 노란색 양털, price: 0.5, currency: silver}
+      - {item: lime_wool, name: 연두색 양털, price: 0.5, currency: silver}
+      - {item: green_wool, name: 초록색 양털, price: 0.5, currency: silver}
+      - {item: cyan_wool, name: 청록색 양털, price: 0.5, currency: silver}
+      - {item: light_blue_wool, name: 하늘색 양털, price: 0.5, currency: silver}
+      - {item: blue_wool, name: 파란색 양털, price: 0.5, currency: silver}
+      - {item: purple_wool, name: 보라색 양털, price: 0.5, currency: silver}
+      - {item: magenta_wool, name: 자홍색 양털, price: 0.5, currency: silver}
+      - {item: pink_wool, name: 분홍색 양털, price: 0.5, currency: silver}
+
+  # 기획서 5절 광물. 원석·광물 형태만, 블록은 정확히 9배. 판매 단가 구간 없음.
+  # 매입 안 함: 주괴·조각, 섬세한 손길 광석 블록, 숯, 자수정 조각, 네더 석영(피글린 정책 결정 전), 에메랄드.
+  mine:
+    name: 광물 매입소
+    mode: sell
+    products:
+      - {item: coal, name: 석탄, price: 5, currency: silver}
+      - {item: raw_iron, name: 철 원석, price: 10, currency: silver, description: [기준 광물이에요. 주괴는 받지 않아요.]}
+      - {item: raw_copper, name: 구리 원석, price: 3.5, currency: silver}
+      - {item: raw_gold, name: 금 원석, price: 24, currency: silver}
+      - {item: redstone, name: 레드스톤 가루, price: 4, currency: silver}
+      - {item: lapis_lazuli, name: 청금석, price: 8, currency: silver}
+      - {item: diamond, name: 다이아몬드, price: 120, currency: silver}
+      - {item: ancient_debris, name: 고대 잔해, price: 300, currency: silver, description: [네더라이트 파편·주괴는 받지 않아요.]}
+      - {item: coal_block, name: 석탄 블록, price: 45, currency: silver}
+      - {item: raw_iron_block, name: 철 원석 블록, price: 90, currency: silver}
+      - {item: raw_copper_block, name: 구리 원석 블록, price: 31.5, currency: silver}
+      - {item: raw_gold_block, name: 금 원석 블록, price: 216, currency: silver}
+      - {item: redstone_block, name: 레드스톤 블록, price: 36, currency: silver}
+      - {item: lapis_block, name: 청금석 블록, price: 72, currency: silver}
+      - {item: diamond_block, name: 다이아몬드 블록, price: 1080, currency: silver}
+
+  # 기획서 6절 물고기. 같은 등급은 같은 가격, 쓰레기는 매입 안 함. 판매 단가 구간 없음.
+  # 미스틱은 실버로 매입하지 않고 골드로만 매입.
+  fish:
+    name: 어시장
+    mode: sell
+    products:
+      - {fish: common, icon: cod, name: 커먼 물고기, price: 1.5, currency: silver, description: [커먼 등급이면 어떤 종이든 받아요.]}
+      - {fish: uncommon, icon: salmon, name: 언커먼 물고기, price: 5, currency: silver, description: [언커먼 등급이면 어떤 종이든 받아요.]}
+      - {fish: rare, icon: tropical_fish, name: 레어 물고기, price: 12, currency: silver, description: [레어 등급이면 어떤 종이든 받아요.]}
+      - {fish: epic, icon: pufferfish, name: 에픽 물고기, price: 30, currency: silver, description: [에픽 등급이면 어떤 종이든 받아요.]}
+      - {fish: legendary, icon: heart_of_the_sea, name: 레전더리 물고기, price: 100, currency: silver, description: [레전더리 등급이면 어떤 종이든 받아요.]}
+      - {fish: mystic, icon: nether_star, name: 미스틱 물고기, price: 5, currency: gold, description: [미스틱은 골드로만 매입해요.]}

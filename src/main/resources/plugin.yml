@@ -7,7 +7,7 @@ version: '${version}'
 main: org.crebs.coreui.CoreUi
 api-version: '26.3'
 load: POSTWORLD
-softdepend: [Kokonut-Core, Kokonut-Mail, Kokonut_HUD, BetterHud, kokonut_damage, kokonut_particle, Kokonut_Pets]
+softdepend: [Kokonut-Core, Kokonut-Mail, Kokonut_HUD, BetterHud, kokonut_damage, kokonut_particle, Kokonut_Pets, Nexo]
 commands:
   메인메뉴:
     description: 메인 메뉴 열기 (이동·도감·꾸미기·우편함·설정)
@@ -19,7 +19,7 @@ commands:
     permission: coreui.dex
   coreui:
     description: Opens the CoreUi demo or rebuilds its resource pack
-    usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui skill | /coreui gem | /coreui shop <id> [player] | /coreui reload
+    usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui skill | /coreui gem | /coreui travel | /coreui furniture [player] | /coreui shop <id> [player] | /coreui reload
 permissions:
   coreui.demo:
     default: op
@@ -37,6 +37,9 @@ permissions:
     default: op
   # /coreui quest npc <giver> <player>: open an NPC quest offer for another player (console / NPC commands).
   coreui.quest.others:
+    default: op
+  # /coreui furniture <player>: open the furniture workbench for another player (console: Nexo furniture click action).
+  coreui.furniture.others:
     default: op
   coreui.reload:
     default: op

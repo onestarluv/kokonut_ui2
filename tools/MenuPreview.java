@@ -52,6 +52,14 @@ public class MenuPreview {
             gem(glyphs, out.replace("shop-preview", "gem-preview"), hotspots);
             return;
         }
+        if (List.of(args).contains("travel")) {  // only the server travel screens: travel-preview-*.png
+            travel(glyphs, out.replace("shop-preview", "travel-preview"), hotspots);
+            return;
+        }
+        if (List.of(args).contains("furniture")) {  // only the furniture workbench: furniture-preview-*.png
+            furniture(glyphs, out.replace("shop-preview", "furniture-preview"), hotspots);
+            return;
+        }
         if (List.of(args).contains("pet")) {  // only the pet screens: pet-preview-*.png
             pet(glyphs, out.replace("shop-preview", "pet-preview"), hotspots);
             return;
@@ -76,7 +84,9 @@ public class MenuPreview {
         newState.setAccessible(true);
         Object purse = wallet.getConstructor(double.class, long.class, long.class).newInstance(1234.5, 18L, 7L);
         Object noop = Proxy.newProxyInstance(menu.getClassLoader(), new Class<?>[]{actions}, (p, m, a) -> null);
-        Method build = menu.getDeclaredMethod("build", Map.class, catalog, state, wallet, Map.class, actions);
+        Class<?> tiersType = Class.forName("org.crebs.coreui.menu.shop.SellTiers");
+        Object tiers = tiersType.getField("DEFAULT").get(null);
+        Method build = menu.getDeclaredMethod("build", Map.class, catalog, state, wallet, Map.class, tiersType, Double.class, actions);
         build.setAccessible(true);
         Map<String, Integer> held = Map.of("wheat#0", 70, "carrot#1", 9, "potato#2", 33, "cod#8", 8, "raw_iron#10", 40);
 
@@ -84,11 +94,12 @@ public class MenuPreview {
                 {"buy", buyShop, newState.newInstance("", 0, "lantern#5", 3), purse, Map.of()},
                 {"buy-search", buyShop, newState.newInstance("ㅂㄷ", 0, null, 1), purse, Map.of()},
                 {"buy-short", buyShop, newState.newInstance("", 2, "elytra#15", 1), purse, Map.of()},
-                {"sell", sellShop, newState.newInstance("", 0, "wheat#0", 4), purse, held},
+                {"sell", sellShop, newState.newInstance("", 0, "wheat#0", 4), purse, held, 1250.0},
+                {"sell-tier", sellShop, newState.newInstance("", 0, "wheat#0", 64), purse, held, 3150.0},
                 {"sell-loading", sellShop, newState.newInstance("", 0, "carrot#1", 1), null, held},
         };
         for (Object[] f : frames) {
-            CoreMenu m = (CoreMenu) build.invoke(null, glyphs, f[1], f[2], f[3], f[4], noop);
+            CoreMenu m = (CoreMenu) build.invoke(null, glyphs, f[1], f[2], f[3], f[4], tiers, f.length > 5 ? f[5] : null, noop);
             String file = out + "-" + f[0] + ".png";
             render(m, hotspots, new File(file));
             System.out.println("wrote " + file + " (" + m.getElements().size() + " elements)");
@@ -149,6 +160,43 @@ public class MenuPreview {
 
     /** Gem cutting (GemMenu) with a fixed roll sequence: gem-preview-{start,cutting,done}.png. */
     @SuppressWarnings("unchecked")
+    /** Server travel with fixed proxy answers: the player's own server, spawn, and a category without servers. */
+    static void travel(Map<String, Glyph> glyphs, String out, boolean hotspots) throws Exception {
+        var menu = org.crebs.coreui.menu.travel.TravelMenu.class;
+        var noop = (org.crebs.coreui.menu.travel.TravelMenu.Actions) Proxy.newProxyInstance(menu.getClassLoader(),
+                new Class<?>[]{org.crebs.coreui.menu.travel.TravelMenu.Actions.class}, (p, m, a) -> null);
+        var network = org.crebs.coreui.menu.travel.TravelCatalog.of(Map.of("spawn", new org.crebs.coreui.menu.travel.TravelCatalog.Live(true, 3, 100), "home1", new org.crebs.coreui.menu.travel.TravelCatalog.Live(true, 7, 100)), true, "home1");
+        String[][] frames = {{"current", null, null}, {"spawn", "server", "spawn"}, {"wild", "wild", null}};
+        for (String[] f : frames) {
+            CoreMenu m = org.crebs.coreui.menu.travel.TravelMenu.build(glyphs, network,
+                    new org.crebs.coreui.menu.travel.TravelMenu.State(f[1], f[2], f[1] == null ? -1 : 0), noop);
+            render(m, hotspots, new File(out + "-" + f[0] + ".png"));
+            System.out.println("wrote " + out + "-" + f[0] + ".png (" + m.getElements().size() + " elements)");
+        }
+    }
+
+    /** Furniture workbench: nothing chosen, a piece the player can pay for, and a scrolled list with too few materials. */
+    static void furniture(Map<String, Glyph> glyphs, String out, boolean hotspots) throws Exception {
+        var menu = org.crebs.coreui.menu.furniture.FurnitureMenu.class;
+        var noop = (org.crebs.coreui.menu.furniture.FurnitureMenu.Actions) Proxy.newProxyInstance(menu.getClassLoader(),
+                new Class<?>[]{org.crebs.coreui.menu.furniture.FurnitureMenu.Actions.class}, (p, m, a) -> null);
+        record Frame(String name, org.crebs.coreui.menu.furniture.FurnitureCatalog.Wood wood,
+                     org.crebs.coreui.menu.furniture.FurnitureCatalog.Type type, int scroll, Map<String, Integer> items, long kokonut) {}
+        var woods = org.crebs.coreui.menu.furniture.FurnitureCatalog.Wood.values();
+        var types = org.crebs.coreui.menu.furniture.FurnitureCatalog.Type.values();
+        List<Frame> frames = List.of(
+                new Frame("start", woods[0], null, 0, Map.of(), 12),
+                new Frame("ready", woods[1], types[9], 0, Map.of("spruce_planks", 32, "stick", 16), 12),
+                new Frame("short", woods[8], types[20], 3, Map.of("pale_oak_planks", 10, "pale_oak_log", 1), 1));
+        for (Frame f : frames) {
+            CoreMenu m = org.crebs.coreui.menu.furniture.FurnitureMenu.build(glyphs,
+                    new org.crebs.coreui.menu.furniture.FurnitureMenu.State(f.wood(), f.type(), f.scroll()),
+                    new org.crebs.coreui.menu.furniture.FurnitureMenu.Stock(f.items(), f.kokonut()), noop);
+            render(m, hotspots, new File(out + "-" + f.name() + ".png"));
+            System.out.println("wrote " + out + "-" + f.name() + ".png (" + m.getElements().size() + " elements)");
+        }
+    }
+
     static void gem(Map<String, Glyph> glyphs, String out, boolean hotspots) throws Exception {
         Class<?> menu = Class.forName("org.crebs.coreui.menu.gem.GemMenu");
         Class<?> cutting = Class.forName("org.crebs.coreui.menu.gem.GemCutting");

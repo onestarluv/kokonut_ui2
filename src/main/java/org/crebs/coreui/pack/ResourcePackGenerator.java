@@ -49,6 +49,17 @@ public final class ResourcePackGenerator {
         }
     }
 
+    /** The "offsets" list of a glyph entry as a {@link Glyph#offsetMask()}; all nine offsets without one. */
+    private static int offsetMask(org.bukkit.configuration.ConfigurationSection entry, String id) throws IOException {
+        if (entry == null || !entry.isList("offsets")) return Glyph.ALL_OFFSETS;
+        int mask = 0;
+        for (int offset : entry.getIntegerList("offsets")) {
+            if (offset < 0 || offset > 8) throw new IOException("Invalid offset for glyph: " + id);
+            mask |= 1 << offset;
+        }
+        return mask;
+    }
+
     private YamlConfiguration bundledYaml(String name) throws IOException {
         YamlConfiguration yaml = new YamlConfiguration();
         try (JarFile jar = new JarFile(pluginJar.toFile())) {
@@ -178,10 +189,13 @@ public final class ResourcePackGenerator {
                     }
                 }
                 int advance = (int) (right * ((float) height / image.getHeight()) + 0.5F) + 1;
-                Glyph glyph = new Glyph(id, width, height, ascent, advance);
+                // "offsets" (glyphs.yml, else the bundled defaults) limits the font providers of large icon sets.
+                int mask = offsetMask(config.isList(key + ".offsets") ? config.getConfigurationSection(key)
+                        : defaults.getConfigurationSection(key), id);
+                Glyph glyph = new Glyph(id, width, height, ascent, advance, mask);
                 loaded.put(id, glyph);
                 pack.write("assets/coreui/textures/custom/" + relative, file);
-                writeFont(pack, gson, id, "coreui:custom/" + relative, height, ascent, Glyph.ALL_OFFSETS);
+                writeFont(pack, gson, id, "coreui:custom/" + relative, height, ascent, mask);
             }
         }
         // Damage skin digits and icons, cut from kokonut_damage's and Nexo's images (see DamageSkinGlyphs).
@@ -201,14 +215,7 @@ public final class ResourcePackGenerator {
                 String texture = Objects.requireNonNull(entry.getString("texture"), "texture of " + id);
                 int height = entry.getInt("height"), ascent = entry.getInt("ascent", height);
                 if (height < 1 || height > 256 || ascent < -256 || ascent > height) throw new IOException("Invalid height/ascent for glyph: " + id);
-                int mask = Glyph.ALL_OFFSETS;
-                if (entry.isList("offsets")) {
-                    mask = 0;
-                    for (int offset : entry.getIntegerList("offsets")) {
-                        if (offset < 0 || offset > 8) throw new IOException("Invalid offset for glyph: " + id);
-                        mask |= 1 << offset;
-                    }
-                }
+                int mask = offsetMask(entry, id);
                 loaded.put(id, new Glyph(id, entry.getInt("width", height), height, ascent, entry.getInt("advance", height + 1), mask));
                 writeFont(pack, gson, id, texture, height, ascent, mask);
             }

@@ -15,6 +15,9 @@ import org.crebs.coreui.menu.shop.ShopCatalog;
 import org.crebs.coreui.menu.shop.ShopCatalog.Currency;
 import org.crebs.coreui.menu.shop.ShopCatalog.Mode;
 import org.crebs.coreui.menu.shop.ShopCatalog.Product;
+import org.crebs.coreui.menu.shop.SellTiers;
+import org.crebs.coreui.menu.shop.ShopGoods;
+import org.crebs.coreui.menu.shop.ShopRegistry;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -42,15 +45,16 @@ public final class ShopTrades {
     /** Trades {@code units} single items; {@code done} runs on the main thread when it has finished (or failed). */
     public static void trade(CoreUi plugin, Player player, ShopCatalog shop, Product product, int units, Runnable done) {
         Material type = product.material();
-        if (type == null || units < 1) { done.run(); return; }
+        if ((shop.mode() == Mode.BUY && type == null) || units < 1) { done.run(); return; }
         if (!BUSY.add(player.getUniqueId())) return;
         int count = units;
         double total = total(product.currency(), product.price() * units);
         UUID id = player.getUniqueId();
         var context = new CurrencyChangeContext("shop:" + shop.id(),
                 "상점 " + shop.mode().verb + " " + shop.name() + " · " + product.name() + " " + count + "개", id);
+        if (shop.mode() == Mode.SELL) { sell(plugin, player, shop, product, count, total, context, done); return; }
         ItemStack plain = new ItemStack(type);
-        if (shop.mode() == Mode.BUY) {
+        {
             if (space(player.getInventory(), plain) < count) {
                 finish(player, false, "인벤토리 공간이 부족해요. " + count + "개가 들어갈 자리를 비워 주세요.", done);
                 return;
@@ -62,21 +66,53 @@ public final class ShopTrades {
                 give(player, plain, count);
                 finish(player, true, product.name() + " " + count + "개를 샀어요. (-" + product.currency().format(total) + " " + product.currency().label + ")", done);
             });
-        } else {
-            if (!removePlain(player.getInventory(), plain, count)) {
-                finish(player, false, product.name() + "이(가) " + count + "개 필요해요.", done);
+        }
+    }
+
+    /**
+     * Sell: take the matching items, then (off the main thread) count the base total towards today's sales when the
+     * shop is tiered and pay what the tiers allow. If paying fails the sales count is undone and the same items go back.
+     */
+    private static void sell(CoreUi plugin, Player player, ShopCatalog shop, Product product, int count, double gross,
+                             CurrencyChangeContext context, Runnable done) {
+        UUID id = player.getUniqueId();
+        List<ItemStack> taken = ShopGoods.remove(player.getInventory(), product, count);
+        if (taken == null) {
+            finish(player, false, product.name() + "이(가) " + count + "개 필요해요.", done);
+            return;
+        }
+        boolean tiered = shop.tieredFor(product);
+        SellTiers tiers = ShopRegistry.tiers();
+        async(plugin, () -> {
+            double pay = gross;
+            if (tiered) {
+                double after = DailySales.add(plugin, id, tiers, gross);
+                pay = tiers.payout(after - gross, gross);
+            }
+            try {
+                if (pay > 0) add(id, product.currency(), pay, context);
+            } catch (RuntimeException failure) {
+                if (tiered) DailySales.add(plugin, id, tiers, -gross);
+                throw failure;
+            }
+            return pay;
+        }, (pay, error) -> {
+            if (error != null) {
+                if (player.isOnline()) giveBack(player, taken);
+                else plugin.getLogger().severe("Shop sell payout failed and " + player.getName() + " is offline; " + count + " " + product.name() + " were not returned");
+                finish(player, false, "정산 중 오류가 나서 아이템을 돌려드렸어요.", done);
                 return;
             }
-            async(plugin, () -> { add(id, product.currency(), total, context); return true; }, (ok, error) -> {
-                if (error != null) {
-                    if (player.isOnline()) give(player, plain, count);
-                    else plugin.getLogger().severe("Shop sell payout failed and " + player.getName() + " is offline; " + count + " " + type + " were not returned");
-                    finish(player, false, "정산 중 오류가 나서 아이템을 돌려드렸어요.", done);
-                    return;
-                }
-                finish(player, true, product.name() + " " + count + "개를 팔았어요. (+" + product.currency().format(total) + " " + product.currency().label + ")", done);
-            });
-        }
+            String label = product.currency().label;
+            String note = pay + 0.005 < gross
+                    ? " · 판매 단가 구간 적용, 기본 " + product.currency().format(gross) + " " + label : "";
+            finish(player, true, product.name() + " " + count + "개를 팔았어요. (+" + product.currency().format(pay) + " " + label + note + ")", done);
+        });
+    }
+
+    private static void giveBack(Player player, List<ItemStack> items) {
+        for (ItemStack rest : player.getInventory().addItem(items.toArray(ItemStack[]::new)).values())
+            player.getWorld().dropItemNaturally(player.getLocation(), rest);
     }
 
     private static double total(Currency currency, double raw) {
@@ -110,10 +146,11 @@ public final class ShopTrades {
         });
     }
 
-    private interface Work<T> { T run(); }
-    private interface Then<T> { void accept(T value, Throwable error); }
+    interface Work<T> { T run(); }
+    interface Then<T> { void accept(T value, Throwable error); }
 
-    private static <T> void async(CoreUi plugin, Work<T> work, Then<T> then) {
+    /** Runs {@code work} off the main thread and {@code then} back on it; shared with {@link FurnitureCrafts}. */
+    static <T> void async(CoreUi plugin, Work<T> work, Then<T> then) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             T value = null;
             Throwable error = null;
@@ -121,7 +158,7 @@ public final class ShopTrades {
                 value = work.run();
             } catch (Throwable failure) {
                 error = failure;
-                plugin.getLogger().log(Level.SEVERE, "Shop currency call failed", failure);
+                plugin.getLogger().log(Level.SEVERE, "Currency call failed", failure);
             }
             T v = value;
             Throwable e = error;
@@ -155,7 +192,7 @@ public final class ShopTrades {
         return count;
     }
 
-    private static boolean removePlain(PlayerInventory inventory, ItemStack plain, int count) {
+    static boolean removePlain(PlayerInventory inventory, ItemStack plain, int count) {
         if (held(inventory, plain) < count) return false;
         int slots = inventory.getStorageContents().length; // storage slots are inventory slots 0..35
         for (int slot = 0; slot < slots && count > 0; slot++) {
@@ -169,7 +206,7 @@ public final class ShopTrades {
     }
 
     /** Gives {@code count} items in full stacks; anything that no longer fits drops at the player's feet. */
-    private static void give(Player player, ItemStack plain, int count) {
+    static void give(Player player, ItemStack plain, int count) {
         List<ItemStack> stacks = new ArrayList<>();
         for (int left = count; left > 0; left -= plain.getMaxStackSize()) stacks.add(plain.asQuantity(Math.min(left, plain.getMaxStackSize())));
         for (ItemStack rest : player.getInventory().addItem(stacks.toArray(ItemStack[]::new)).values())

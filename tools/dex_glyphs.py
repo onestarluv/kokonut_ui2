@@ -77,7 +77,7 @@ class Img:
         if self.h < 8:
             self.px += [[CLEAR] * self.w for _ in range(8 - self.h)]
             self.h = 8
-        path = os.path.join(OUT, (rel if rel.startswith(("menu/", "shop/", "quest/", "skill/", "gem/")) else "dex/" + rel) + ".png")
+        path = os.path.join(OUT, (rel if rel.startswith(("menu/", "shop/", "quest/", "skill/", "gem/", "furniture/", "travel/")) else "dex/" + rel) + ".png")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         raw = b"".join(b"\x00" + b"".join(bytes(p) for p in row) for row in self.px)
 
@@ -320,6 +320,8 @@ def main():
     quest_glyphs()
     skill_glyphs()
     gem_glyphs()
+    furniture_glyphs()
+    travel_glyphs()
     icon_art()
     write_defaults()
     count = sum(len(f) for _, _, f in os.walk(OUT))
@@ -327,6 +329,7 @@ def main():
 
 
 HEIGHTS = {}  # glyph id -> display height when it differs from the PNG (scaled by the client)
+OFFSETS = {}  # glyph id -> the only vertical offsets (y % 9) it is drawn at; large icon sets ship one font provider each
 
 
 def icon_art():
@@ -589,6 +592,142 @@ def gem_glyphs():
     empty.save("gem/ui/facet_empty")
 
 
+# ---------------------------------------------------------------- 가구 제작대 (바닐라 컨테이너 스타일)
+# 좌표는 menu/furniture/FurnitureMenu 와 같아야 한다 (GUI px).
+FURN_W, FURN_H = 226, 135
+FURN_WOODS, FURN_WOOD_COLS = 13, 4  # 나무 칸: 한 줄에 4개, 나무 수만큼만 그린다
+FURN_ICON_OFFSET = 2  # 가구 그림은 y % 9 == 2 자리에만 그린다 (바닐라 아이템 아이콘과 같은 자리)
+
+
+def inset(img, x, y, w, h, fill="#8B8B8B", dark="#373737", light="#FFFFFF"):
+    """바닐라 슬롯 모양: 위·왼쪽 어두운 선, 아래·오른쪽 밝은 선, 두 색이 만나는 모서리는 바탕색.
+    색을 바꾸면 석재 절단기의 조합법 버튼·스크롤 손잡이처럼 볼록한 모양도 같은 규칙으로 그려진다."""
+    img.rect(x, y, w, h, hexc(fill))
+    img.rect(x, y, w - 1, 1, hexc(dark))
+    img.rect(x, y, 1, h - 1, hexc(dark))
+    img.rect(x + 1, y + h - 1, w - 1, 1, hexc(light))
+    img.rect(x + w - 1, y + 1, 1, h - 1, hexc(light))
+
+
+def vanilla_panel(w, h):
+    """바닐라 컨테이너 배경: 검은 외곽선(모서리 둥글림), 왼쪽·위 흰 2px, 오른쪽·아래 회색 2px."""
+    colors = {"K": hexc("#000000"), "W": hexc("#FFFFFF"), "C": hexc("#C6C6C6"), "S": hexc("#555555"), ".": CLEAR}
+    img = Img(w, h, colors["C"])
+    img.rect(0, 0, w, 1, colors["K"])
+    img.rect(0, h - 1, w, 1, colors["K"])
+    img.rect(0, 0, 1, h, colors["K"])
+    img.rect(w - 1, 0, 1, h, colors["K"])
+    img.rect(1, 1, w - 2, 2, colors["W"])
+    img.rect(1, 1, 2, h - 2, colors["W"])
+    img.rect(w - 3, 1, 2, h - 2, colors["S"])
+    img.rect(1, h - 3, w - 2, 2, colors["S"])
+    corners = {(0, 0): ("..KK", ".KWW", "KWWW", "KWWW"), (w - 4, 0): ("K...", "WK..", "WCK.", "CSSK"),
+               (0, h - 4): ("KWWC", ".KCS", "..KS", "...K"), (w - 4, h - 4): ("SSSK", "SSSK", "SSK.", "KK..")}
+    for (cx, cy), rows in corners.items():
+        for dy, row in enumerate(rows):
+            for dx, ch in enumerate(row):
+                img.px[cy + dy][cx + dx] = colors[ch]
+    return img
+
+
+def furniture_glyphs():
+    """가구 제작대 화면: 배경 패널(나무 칸, 가구 목록 자리, 스크롤 홈, 미리보기 칸을 함께 그림)과
+    조합법 버튼·스크롤 손잡이·재료 칸·제작 버튼. 가구 그림은 tools/furniture_icons.py 가 art/furniture 에 만든다."""
+    panel = vanilla_panel(FURN_W, FURN_H)
+    for i in range(FURN_WOODS):
+        inset(panel, 8 + i % FURN_WOOD_COLS * 18, 19 + i // FURN_WOOD_COLS * 18, 18, 18)
+    left = 8 + FURN_WOOD_COLS * 18 + 7                             # 나무 칸 오른쪽 끝에서 7px 띄운다
+    inset(panel, left, 18, 66, 74, fill="#51493A", light="#6B614C")  # 조합법 버튼 4x4 (16x18) 자리
+    inset(panel, left + 68, 18, 14, 74)                            # 스크롤 홈
+    inset(panel, left + 89, 36, 36, 36)                            # 미리보기 칸 (32px 그림)
+    # 크기가 바뀌면 이름도 바꾼다 (서버 Glyphs 폴더의 예전 파일은 덮어쓰지 않으므로)
+    panel.save(f"furniture/ui/panel_{FURN_W}")
+
+    slot = Img(18, 18)
+    inset(slot, 0, 0, 18, 18)
+    slot.save("furniture/ui/slot")
+    chosen = Img(20, 20, hexc("#FFFFFF"))                          # 고른 나무: 칸보다 1px 큰 흰 테(2px), 그림 위에 덧그린다
+    chosen.rect(2, 2, 16, 16, CLEAR)
+    chosen.save("furniture/ui/wood_on")
+
+    for name, hi, fill, lo in (("recipe", "#E0CA9F", "#A09172", "#544C3B"), ("recipe_on", "#211D17", "#51493A", "#6B614C")):
+        img = Img(16, 18)
+        inset(img, 0, 0, 16, 18, fill=fill, dark=hi, light=lo)
+        img.save("furniture/ui/" + name)
+    scroller = Img(12, 15)
+    inset(scroller, 0, 0, 12, 15, fill="#C3C3C3", dark="#FFFFFF", light="#9C9C9C")
+    scroller.rect(1, 1, 10, 13, hexc("#E4E4E4"))
+    for y in range(2, 14, 2):
+        scroller.rect(2, y, 8, 1, hexc("#C3C3C3"))
+    scroller.save("furniture/ui/scroller")
+
+    button = Img(50, 20, hexc("#000000"))
+    button.rect(1, 1, 48, 18, hexc("#B1B1B1"))
+    button.rect(1, 1, 48, 1, hexc("#D5D5D5"))
+    button.rect(1, 1, 1, 16, hexc("#D5D5D5"))
+    button.rect(1, 17, 48, 2, hexc("#9C9C9C"))
+    button.save("furniture/ui/button_50")
+    off = Img(50, 20, hexc("#000000"))
+    off.rect(1, 1, 48, 18, hexc("#727272"))
+    off.save("furniture/ui/button_50_off")
+
+    art = os.path.join(ROOT, "art", "furniture")
+    for kind, height in (("icon", 16), ("preview", 32)):       # 원본은 2배 크기(32/64px)라 큰 GUI 배율에서 또렷하다
+        src, dst = os.path.join(art, kind), os.path.join(OUT, "furniture", kind)
+        if not os.path.isdir(src):
+            continue
+        os.makedirs(dst, exist_ok=True)
+        for fn in sorted(os.listdir(src)):
+            if fn.endswith(".png"):
+                shutil.copyfile(os.path.join(src, fn), os.path.join(dst, fn))
+                HEIGHTS[f"furniture/{kind}/{fn[:-4]}"] = height
+                OFFSETS[f"furniture/{kind}/{fn[:-4]}"] = [FURN_ICON_OFFSET]
+
+
+# ---------------------------------------------------------------- 서버 이동 (바닐라 컨테이너 스타일)
+# 좌표는 menu/travel/TravelMenu 와 같아야 한다 (GUI px). 칸·선택 테·스크롤 손잡이·버튼은 furniture/ui 것을 같이 쓴다.
+TRAVEL_W, TRAVEL_H = 252, 136
+TRAVEL_TAB_W, TRAVEL_ROW_W, TRAVEL_ROWS = 48, 166, 4  # 분류 4개와 서버 줄 4개가 같은 높이로 나란히 선다
+
+
+def travel_glyphs():
+    """서버 이동 화면: 배경 패널(분류 자리, 서버 목록 자리, 스크롤 홈 포함), 분류 버튼과 목록 한 줄(보통·선택),
+    현재 위치 표시, 혼잡도 점 4색."""
+    panel = vanilla_panel(TRAVEL_W, TRAVEL_H)
+    height = TRAVEL_ROWS * 18 + 2
+    list_x = 8 + TRAVEL_TAB_W + 2 + 2
+    inset(panel, 8, 18, TRAVEL_TAB_W + 2, height, fill="#51493A", light="#6B614C")       # 분류 버튼 4개 (48x18) 자리
+    inset(panel, list_x, 18, TRAVEL_ROW_W + 2, height, fill="#51493A", light="#6B614C")  # 서버 줄 4개 (166x18) 자리
+    inset(panel, list_x + TRAVEL_ROW_W + 4, 18, 14, height)                              # 스크롤 홈
+    panel.save(f"travel/ui/panel_{TRAVEL_W}")
+    # 석재 절단기 조합법 버튼과 같은 색: 보통(밝은 황갈색), 선택(어두운 갈색)
+    for name, width in (("tab", TRAVEL_TAB_W), ("row", TRAVEL_ROW_W)):
+        for suffix, hi, fill, lo in (("", "#E0CA9F", "#A09172", "#544C3B"), ("_on", "#211D17", "#51493A", "#6B614C")):
+            img = Img(width, 18)
+            inset(img, 0, 0, width, 18, fill=fill, dark=hi, light=lo)
+            img.save(f"travel/ui/{name}{suffix}")
+    # 현재 위치 표시: 흰 삼각형 (메뉴에서 색을 곱해 쓴다)
+    here = Img(4, 7)
+    for y, w in enumerate((1, 2, 3, 4, 3, 2, 1)):
+        here.rect(0, y, w, 1, hexc("#FFFFFF"))
+    here.save("travel/ui/here")
+    # 넘길 줄이 없을 때의 스크롤 손잡이 (바닐라처럼 어둡게)
+    off = Img(12, 15)
+    inset(off, 0, 0, 12, 15, fill="#6A6A6A", dark="#8B8B8B", light="#373737")
+    off.rect(1, 1, 10, 13, hexc("#787878"))
+    for y in range(2, 14, 2):
+        off.rect(2, y, 8, 1, hexc("#6A6A6A"))
+    off.save("travel/ui/scroller_off")
+    for name, color in (("smooth", "#5FD03A"), ("busy", "#F0B020"), ("full", "#E84A3A"), ("down", "#8A8A8A")):
+        dot = Img(6, 6, hexc("#2B2418"))
+        dot.rect(1, 1, 4, 4, hexc(color))
+        dot.rect(1, 1, 3, 1, lighten(hexc(color), 0.45))
+        dot.rect(1, 1, 1, 3, lighten(hexc(color), 0.45))
+        for corner in ((0, 0), (5, 0), (0, 5), (5, 5)):
+            dot.px[corner[1]][corner[0]] = CLEAR
+        dot.save("travel/ui/dot_" + name)
+
+
 def write_defaults():
     """bundled-glyphs.yml: ascent min(8, height) makes every glyph hang from the text line its top is on, so
     CoreUi's line-by-line painting layers elements top to bottom instead of letting tall images cover earlier lines."""
@@ -605,6 +744,8 @@ def write_defaults():
             if gid in HEIGHTS:
                 lines.append(f"    height: {height}")
             lines.append(f"    ascent: {min(8, height)}")
+            if gid in OFFSETS:
+                lines.append(f"    offsets: [{', '.join(str(o) for o in OFFSETS[gid])}]")
     with open(os.path.join(ROOT, "src", "main", "resources", "bundled-glyphs.yml"), "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
 

@@ -23,6 +23,8 @@ dependencies {
     compileOnly(files(providers.gradleProperty("particleJar").orElse("../Kokonut_Particle/build/libs/kokonut_particle-cbt-1.0.jar")))
     // Optional Kokonut_Pets (MCPets fork): /펫 opens the CoreUi pet screen. Built first by buildUi (buildPets).
     compileOnly(files(providers.gradleProperty("petsJar").orElse("../Kokonut_Pets/build/libs/Kokonut_Pets-cbt-1.0.jar")))
+    // Optional Nexo: the furniture workbench gives its pieces as Nexo items. Never bundled.
+    compileOnly(files(providers.gradleProperty("nexoJar").orElse("D:/egoverse/home1/plugins/nexo-1.29.1.jar")))
     // Optional BetterHud (Kokonut_HUD) shader integration; resolved from the server at runtime.
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testImplementation("io.papermc.paper:paper-api:26.3.build.243-stable")

@@ -108,7 +108,10 @@ public final class MainMenu {
     /** Top row: icon and name only (names up to about 4 Hangul characters fit the 40 px card). */
     static List<Button> buttons(CoreUi coreUi, Info info) {
         return List.of(
-                new Button("move", "이동", "menu/icon/warp_32", p -> soon(p, "이동")),
+                new Button("move", "이동", "menu/icon/warp_32", p -> {
+                    // Server travel through the Velocity proxy (TravelMenu).
+                    if (!org.crebs.coreui.menu.travel.TravelMenu.open(coreUi, p)) soon(p, "이동");
+                }),
                 new Button("dex", "도감", "menu/icon/collect_32", p -> {
                     if (!ItemDexMenu.open(coreUi, p)) Messages.send(p, "도감을 아직 불러오지 못했어요.");
                 }),
