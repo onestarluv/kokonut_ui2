@@ -3454,3 +3454,201 @@ glyphs:
     ascent: 8
   travel/ui/tab_on:
     ascent: 8
+  smithy/fx/burst_blue:
+    ascent: 8
+  smithy/fx/burst_gold:
+    ascent: 8
+  smithy/fx/burst_red:
+    ascent: 8
+  smithy/fx/burst_violet:
+    ascent: 8
+  smithy/fx/cracks:
+    ascent: 8
+  smithy/fx/flash:
+    ascent: 8
+  smithy/fx/shock:
+    ascent: 8
+  smithy/fx/smoke:
+    ascent: 8
+  smithy/fx/stamp_break:
+    ascent: 8
+  smithy/fx/stamp_core:
+    ascent: 8
+  smithy/fx/stamp_destroyed:
+    ascent: 8
+  smithy/fx/stamp_failure:
+    ascent: 8
+  smithy/fx/stamp_success:
+    ascent: 8
+  smithy/num/green_0:
+    ascent: 8
+  smithy/num/green_1:
+    ascent: 8
+  smithy/num/green_2:
+    ascent: 8
+  smithy/num/green_3:
+    ascent: 8
+  smithy/num/green_4:
+    ascent: 8
+  smithy/num/green_5:
+    ascent: 8
+  smithy/num/green_6:
+    ascent: 8
+  smithy/num/green_7:
+    ascent: 8
+  smithy/num/green_8:
+    ascent: 8
+  smithy/num/green_9:
+    ascent: 8
+  smithy/num/green_pct:
+    ascent: 8
+  smithy/num/green_plus:
+    ascent: 8
+  smithy/num/red_0:
+    ascent: 8
+  smithy/num/red_1:
+    ascent: 8
+  smithy/num/red_2:
+    ascent: 8
+  smithy/num/red_3:
+    ascent: 8
+  smithy/num/red_4:
+    ascent: 8
+  smithy/num/red_5:
+    ascent: 8
+  smithy/num/red_6:
+    ascent: 8
+  smithy/num/red_7:
+    ascent: 8
+  smithy/num/red_8:
+    ascent: 8
+  smithy/num/red_9:
+    ascent: 8
+  smithy/num/red_pct:
+    ascent: 8
+  smithy/num/red_plus:
+    ascent: 8
+  smithy/num/violet_0:
+    ascent: 8
+  smithy/num/violet_1:
+    ascent: 8
+  smithy/num/violet_2:
+    ascent: 8
+  smithy/num/violet_3:
+    ascent: 8
+  smithy/num/violet_4:
+    ascent: 8
+  smithy/num/violet_5:
+    ascent: 8
+  smithy/num/violet_6:
+    ascent: 8
+  smithy/num/violet_7:
+    ascent: 8
+  smithy/num/violet_8:
+    ascent: 8
+  smithy/num/violet_9:
+    ascent: 8
+  smithy/num/violet_pct:
+    ascent: 8
+  smithy/num/violet_plus:
+    ascent: 8
+  smithy/ui/anvil:
+    ascent: 8
+  smithy/ui/badge_from:
+    ascent: 8
+  smithy/ui/badge_to:
+    ascent: 8
+  smithy/ui/bar:
+    ascent: 8
+  smithy/ui/beam_0:
+    ascent: 8
+  smithy/ui/beam_1:
+    ascent: 8
+  smithy/ui/beam_2:
+    ascent: 8
+  smithy/ui/beam_3:
+    ascent: 8
+  smithy/ui/beam_4:
+    ascent: 8
+  smithy/ui/bg_0:
+    ascent: 8
+  smithy/ui/bg_1:
+    ascent: 8
+  smithy/ui/btn_off_134:
+    ascent: 8
+  smithy/ui/btn_off_62:
+    ascent: 8
+  smithy/ui/btn_on_134:
+    ascent: 8
+  smithy/ui/btn_on_62:
+    ascent: 8
+  smithy/ui/close:
+    ascent: 8
+  smithy/ui/fill_1:
+    ascent: 8
+  smithy/ui/fill_16:
+    ascent: 8
+  smithy/ui/fill_2:
+    ascent: 8
+  smithy/ui/fill_32:
+    ascent: 8
+  smithy/ui/fill_4:
+    ascent: 8
+  smithy/ui/fill_64:
+    ascent: 8
+  smithy/ui/fill_8:
+    ascent: 8
+  smithy/ui/glow_blue:
+    ascent: 8
+  smithy/ui/glow_ember:
+    ascent: 8
+  smithy/ui/glow_orb:
+    ascent: 8
+  smithy/ui/glow_violet:
+    ascent: 8
+  smithy/ui/hammer:
+    ascent: 8
+  smithy/ui/hline:
+    ascent: 8
+  smithy/ui/level_plate:
+    ascent: 8
+  smithy/ui/orb_off:
+    ascent: 8
+  smithy/ui/orb_on:
+    ascent: 8
+  smithy/ui/pip_d_lock:
+    ascent: 8
+  smithy/ui/pip_d_on:
+    ascent: 8
+  smithy/ui/pip_d_open:
+    ascent: 8
+  smithy/ui/pip_m_lock:
+    ascent: 8
+  smithy/ui/pip_m_on:
+    ascent: 8
+  smithy/ui/pip_m_open:
+    ascent: 8
+  smithy/ui/pip_o_lock:
+    ascent: 8
+  smithy/ui/pip_o_on:
+    ascent: 8
+  smithy/ui/pip_o_open:
+    ascent: 8
+  smithy/ui/pip_s_lock:
+    ascent: 8
+  smithy/ui/pip_s_on:
+    ascent: 8
+  smithy/ui/pip_s_open:
+    ascent: 8
+  smithy/ui/ring:
+    ascent: 8
+  smithy/ui/slot:
+    ascent: 8
+  smithy/ui/slot_on:
+    ascent: 8
+  smithy/ui/tab_off:
+    ascent: 8
+  smithy/ui/tab_on:
+    ascent: 8
+  smithy/ui/vline:
+    ascent: 8

@@ -157,6 +157,41 @@ public final class CoreUi extends JavaPlugin {
                 }
                 return true;
             }
+            if (args.length >= 1 && args.length <= 2 && args[0].equalsIgnoreCase("smithy")) {
+                // /coreui smithy          : blacksmith (tool upgrade, breakthrough, 마력 핵), coreui.demo for now
+                // /coreui smithy <player> : open it for someone else; the blacksmith NPC runs this from the console
+                //                           (coreui.smithy.others)
+                Player target;
+                if (args.length == 2) {
+                    if (!sender.hasPermission("coreui.smithy.others")) {
+                        Messages.send(sender, "You do not have permission to open the blacksmith for other players");
+                        return true;
+                    }
+                    target = getServer().getPlayerExact(args[1]);
+                    if (target == null) {
+                        Messages.send(sender, "플레이어 '" + args[1] + "'이(가) 접속해 있지 않아요.");
+                        return true;
+                    }
+                } else if (sender instanceof Player self) {
+                    if (!sender.hasPermission("coreui.demo")) {
+                        Messages.send(sender, "You do not have permission to open the blacksmith");
+                        return true;
+                    }
+                    target = self;
+                } else {
+                    Messages.send(sender, "Usage from the console: /coreui smithy <player>");
+                    return true;
+                }
+                if (!getServer().getPluginManager().isPluginEnabled("Kokonut-Core")
+                        || !getServer().getPluginManager().isPluginEnabled("Kokonut-Enchants")) {
+                    Messages.send(sender, "대장간은 Kokonut-Core와 Kokonut-Enchants가 켜져 있어야 열려요.");
+                    return true;
+                }
+                if (!org.crebs.coreui.menu.smithy.SmithyMenu.open(this, target)) {
+                    Messages.send(sender, "대장간 이미지를 아직 불러오지 못했어요. 잠시 후 다시 시도하거나 /coreui reload 하세요.");
+                }
+                return true;
+            }
             if (args.length >= 1 && args.length <= 2 && args[0].equalsIgnoreCase("furniture")) {
                 // /coreui furniture          : furniture workbench (prototype, coreui.demo)
                 // /coreui furniture <player> : open it for someone else; the Nexo furniture tmf_worktable runs this
@@ -280,7 +315,7 @@ public final class CoreUi extends JavaPlugin {
                 Messages.send(sender, "CoreUi demo opened. Apply plugins/CoreUi/Pack/CoreUi.zip to your client resource packs");
                 return true;
             }
-            Messages.send(sender, "Usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui skill | /coreui gem | /coreui travel | /coreui furniture [player] | /coreui shop <id> [player] | /coreui reload");
+            Messages.send(sender, "Usage: /coreui demo [light|dark] | /coreui quest [npc <giver> [player]] | /coreui skill | /coreui gem | /coreui travel | /coreui furniture [player] | /coreui smithy [player] | /coreui shop <id> [player] | /coreui reload");
             return true;
         });
         Objects.requireNonNull(getCommand("coreui")).setTabCompleter((sender, command, label, args) -> {
@@ -288,6 +323,7 @@ public final class CoreUi extends JavaPlugin {
                 List<String> suggestions = new ArrayList<>();
                 if (sender.hasPermission("coreui.demo")) { suggestions.add("demo"); suggestions.add("quest"); suggestions.add("skill"); suggestions.add("gem"); suggestions.add("travel"); }
                 if (sender.hasPermission("coreui.demo") || sender.hasPermission("coreui.furniture.others")) suggestions.add("furniture");
+                if (sender.hasPermission("coreui.demo") || sender.hasPermission("coreui.smithy.others")) suggestions.add("smithy");
                 if (sender.hasPermission("coreui.shop") || sender.hasPermission("coreui.shop.others")) suggestions.add("shop");
                 if (sender.hasPermission("coreui.reload")) suggestions.add("reload");
                 return suggestions.stream().filter(value -> value.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();

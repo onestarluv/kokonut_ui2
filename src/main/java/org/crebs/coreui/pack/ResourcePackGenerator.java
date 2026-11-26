@@ -74,18 +74,59 @@ public final class ResourcePackGenerator {
         return yaml;
     }
 
+    /** Where the hashes of the bundled glyphs last installed are kept (Glyphs/.bundled-hashes). */
+    private static final String BUNDLED_HASHES = ".bundled-hashes";
+
+    /**
+     * Copies the jar's bundled glyphs into Glyphs/. A file that is still exactly what an earlier jar installed is
+     * replaced by the new bundled version (so redrawn art reaches the pack); a file someone edited is left alone. For
+     * files installed before the hashes were kept, only CoreUi's own smithy/ art is replaced.
+     */
     private static void installBundledGlyphs(JarFile jar, Path input) throws IOException {
         Path root = input.toAbsolutePath().normalize();
+        Path record = root.resolve(BUNDLED_HASHES);
+        java.util.Properties hashes = new java.util.Properties();
+        if (Files.exists(record)) {
+            try (var reader = Files.newBufferedReader(record, StandardCharsets.UTF_8)) {
+                hashes.load(reader);
+            }
+        }
         var entries = jar.entries();
         while (entries.hasMoreElements()) {
             var entry = entries.nextElement();
             if (entry.isDirectory() || !entry.getName().startsWith(BUNDLED_GLYPHS)) continue;
-            Path target = root.resolve(entry.getName().substring(BUNDLED_GLYPHS.length())).normalize();
-            if (!target.startsWith(root) || Files.exists(target)) continue;
-            Files.createDirectories(target.getParent());
+            String relative = entry.getName().substring(BUNDLED_GLYPHS.length());
+            Path target = root.resolve(relative).normalize();
+            if (!target.startsWith(root)) continue;
+            byte[] bundled;
             try (InputStream stream = jar.getInputStream(entry)) {
-                Files.copy(stream, target);
+                bundled = stream.readAllBytes();
             }
+            String hash = sha1(bundled);
+            if (Files.exists(target)) {
+                String current = sha1(Files.readAllBytes(target));
+                if (current.equals(hash)) {
+                    hashes.setProperty(relative, hash);
+                    continue;
+                }
+                String installed = hashes.getProperty(relative);
+                boolean untouched = installed != null ? installed.equals(current) : relative.startsWith("smithy/");
+                if (!untouched) continue;
+            }
+            Files.createDirectories(target.getParent());
+            Files.write(target, bundled);
+            hashes.setProperty(relative, hash);
+        }
+        try (var writer = Files.newBufferedWriter(record, StandardCharsets.UTF_8)) {
+            hashes.store(writer, "Hashes of the bundled glyphs CoreUi installed; edited files are not replaced");
+        }
+    }
+
+    private static String sha1(byte[] bytes) {
+        try {
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-1").digest(bytes));
+        } catch (java.security.NoSuchAlgorithmException exception) {
+            throw new IllegalStateException(exception);
         }
     }
 
@@ -132,7 +173,8 @@ public final class ResourcePackGenerator {
         ResourcePack pack = new ResourcePack();
         // Bundled glyph sets ship their own height/ascent defaults; entries in glyphs.yml still win.
         YamlConfiguration defaults = bundledYaml("bundled-glyphs.yml");
-        List<YamlConfiguration> vanillaTables = List.of(bundledYaml("bundled-vanilla-glyphs.yml"), bundledYaml("bundled-vanilla-items.yml"));
+        List<YamlConfiguration> vanillaTables = List.of(bundledYaml("bundled-vanilla-glyphs.yml"), bundledYaml("bundled-vanilla-items.yml"),
+                bundledYaml("bundled-smithy-glyphs.yml"));
         try (JarFile jar = new JarFile(pluginJar.toFile())) {
             Path example = input.resolve("example-arrow.png");
             if (Files.notExists(example)) {

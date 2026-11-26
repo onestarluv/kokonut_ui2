@@ -48,6 +48,10 @@ public class MenuPreview {
             @Override public Glyph get(Object key) { return glyph((String) key); }
             @Override public boolean containsKey(Object key) { return glyph((String) key) != null; }
         };
+        if (List.of(args).contains("smithy")) {  // only the blacksmith: smithy-preview-*.png (needs the Kokonut-Core jar)
+            smithy(glyphs, out.replace("shop-preview", "smithy-preview"), hotspots);
+            return;
+        }
         if (List.of(args).contains("gem")) {  // only the gem cutting screens: gem-preview-*.png
             gem(glyphs, out.replace("shop-preview", "gem-preview"), hotspots);
             return;
@@ -195,6 +199,105 @@ public class MenuPreview {
             render(m, hotspots, new File(out + "-" + f.name() + ".png"));
             System.out.println("wrote " + out + "-" + f.name() + ".png (" + m.getElements().size() + " elements)");
         }
+    }
+
+    /** Blacksmith screens with sample gear: upgrade, breakthrough (2 of 5 lit), 마력 핵. */
+    static void smithy(Map<String, Glyph> glyphs, String out, boolean hotspots) throws Exception {
+        String base = "org.crebs.coreui.menu.smithy.SmithyMenu";
+        Class<?> menu = Class.forName(base);
+        Class<?> session = Class.forName(base + "$Session"), gear = Class.forName(base + "$Gear"),
+                view = Class.forName(base + "$View"), mode = Class.forName(base + "$Mode"),
+                actions = Class.forName(base + "$Actions");
+        Class<?> need = Class.forName("kr.gomsv.kokonutCore.api.smithy.SmithyService$Need");
+        Class<?> up = Class.forName("kr.gomsv.kokonutCore.api.smithy.SmithyService$UpgradeView");
+        Class<?> br = Class.forName("kr.gomsv.kokonutCore.api.smithy.SmithyService$BreakView");
+        Class<?> co = Class.forName("kr.gomsv.kokonutCore.api.smithy.SmithyService$CoreView");
+        Method build = menu.getDeclaredMethod("build", Map.class, view, actions);
+        build.setAccessible(true);
+        Object noop = Proxy.newProxyInstance(menu.getClassLoader(), new Class<?>[]{actions}, (px, m, a) -> null);
+        Constructor<?> newGear = gear.getDeclaredConstructors()[0];
+        newGear.setAccessible(true);
+        Constructor<?> newView = view.getDeclaredConstructors()[0];
+        newView.setAccessible(true);
+        Constructor<?> newSession = session.getDeclaredConstructor();
+        newSession.setAccessible(true);
+        Constructor<?> newNeed = need.getDeclaredConstructors()[0];
+        Constructor<?> newUp = up.getDeclaredConstructors()[0];
+        Constructor<?> newBr = br.getDeclaredConstructors()[0];
+        Constructor<?> newCo = co.getDeclaredConstructors()[0];
+        List<Object> list = List.of(
+                newGear.newInstance(0, "netherite_pickaxe", "오리할콘 곡괭이", 7, "오리할콘"),
+                newGear.newInstance(1, "diamond_sword", "다이아몬드 검", 3, "기본"),
+                newGear.newInstance(2, "netherite_axe", "네더라이트 도끼", 5, "기본"),
+                newGear.newInstance(38, "netherite_chestplate", "네더라이트 흉갑", 2, "기본"),
+                newGear.newInstance(3, "fishing_rod", "낚싯대", 0, "기본"));
+        Object upgrade = newUp.newInstance(true, true, "", 7, 10, "오리할콘", 37.5, 8, 23, 4, 13_000L, 4L,
+                List.of(newNeed.newInstance("오리할콘", "copper_ingot", 8, 21), newNeed.newInstance("마력 핵", "heart_of_the_sea", 3, 5)), 20, 5);
+        Object breakView = newBr.newInstance(true, true, "", 5, 5, "기본", "오리할콘", 50_000L,
+                List.of(newNeed.newInstance("오리할콘", "copper_ingot", 128, 140), newNeed.newInstance("황철석", "raw_iron", 64, 64)));
+        Object core = newCo.newInstance(List.of(newNeed.newInstance("아르카늄", "amethyst_shard", 1, 12),
+                newNeed.newInstance("에고스톤", "echo_shard", 1, 5), newNeed.newInstance("에테르", "quartz", 1, 9)), 5);
+        Object[] modes = mode.getEnumConstants();
+        String[] names = {"upgrade", "break", "core"};
+        int[] slots = {0, 2, 0};
+        for (int i = 0; i < 3; i++) {
+            Object s = newSession.newInstance();
+            setField(s, "mode", modes[i]);
+            setField(s, "slot", slots[i]);
+            if (i == 1) setField(s, "lit", new boolean[]{true, false, true, false, false});
+            if (i == 0) {
+                setField(s, "message", "강화 실패… 장인의 기운 37.5%");
+                setField(s, "messageColor", net.kyori.adventure.text.format.TextColor.color(0xF2C14E));
+            }
+            Object v = newView.newInstance(s, list, upgrade, breakView, core);
+            CoreMenu m = (CoreMenu) build.invoke(null, glyphs, v, noop);
+            render(m, hotspots, new File(out + "-" + names[i] + ".png"));
+            System.out.println("wrote " + out + "-" + names[i] + ".png (" + m.getElements().size() + " elements)");
+        }        // Result scenes (smithy-preview-fx-<kind>.png).
+        Class<?> effect = Class.forName(base + "$Effect");
+        Constructor<?> newEffect = effect.getDeclaredConstructors()[0];
+        newEffect.setAccessible(true);
+        Object[][] scenes = {
+                {"success", modes[0], "netherite_pickaxe", "오리할콘 곡괭이", "+8 강화 성공!", 0x7ED957},
+                {"failure", modes[0], "netherite_pickaxe", "오리할콘 곡괭이", "강화 실패… 장인의 기운 49%", 0xF2C14E},
+                {"destroyed", modes[0], "netherite_pickaxe", "미스릴 곡괭이", "장비가 파괴됐어요! 복원 주문서로 되돌릴 수 있어요. 장인의 기운 14%", 0xFF5A4A},
+                {"break", modes[1], "netherite_axe", "오리할콘 도끼", "오리할콘 돌파 성공! 이제 +10까지 강화할 수 있어요.", 0x7ED957},
+                {"core", modes[2], "heart_of_the_sea", "마력 핵 ×5", "마력 핵 5개를 만들었어요.", 0x7ED957}};
+        for (Object[] scene : scenes) {
+            Object s = newSession.newInstance();
+            setField(s, "mode", scene[1]);
+            setField(s, "slot", 0);
+            setField(s, "effect", newEffect.newInstance(scene[0], scene[2], scene[3]));
+            setField(s, "message", scene[4]);
+            setField(s, "messageColor", net.kyori.adventure.text.format.TextColor.color((Integer) scene[5]));
+            Object v = newView.newInstance(s, list, upgrade, breakView, core);
+            CoreMenu m = (CoreMenu) build.invoke(null, glyphs, v, noop);
+            render(m, hotspots, new File(out + "-fx-" + scene[0] + ".png"));
+            System.out.println("wrote " + out + "-fx-" + scene[0] + ".png");
+        }
+        // Lead-in frames (smithy-preview-anim-<kind>-<frame>.png).
+        Object[][] anims = {{"upgrade", modes[0], "netherite_pickaxe", "오리할콘 곡괭이", 1},
+                {"break", modes[1], "netherite_axe", "네더라이트 도끼", 1}, {"core", modes[2], "heart_of_the_sea", "마력 핵 ×5", 1}};
+        for (Object[] anim : anims) {
+            for (int f = 0; f < (Integer) anim[4]; f++) {
+                Object s = newSession.newInstance();
+                setField(s, "mode", anim[1]);
+                setField(s, "slot", 0);
+                setField(s, "busy", true);
+                setField(s, "anim", anim[0]);
+                setField(s, "animFrame", f);
+                setField(s, "animItem", newEffect.newInstance(anim[0], anim[2], anim[3]));
+                Object v = newView.newInstance(s, list, upgrade, breakView, core);
+                CoreMenu m = (CoreMenu) build.invoke(null, glyphs, v, noop);
+                render(m, hotspots, new File(out + "-anim-" + anim[0] + "-" + f + ".png"));
+            }
+        }
+    }
+
+    static void setField(Object target, String name, Object value) throws Exception {
+        Field f = target.getClass().getDeclaredField(name);
+        f.setAccessible(true);
+        f.set(target, value);
     }
 
     static void gem(Map<String, Glyph> glyphs, String out, boolean hotspots) throws Exception {
@@ -439,7 +542,7 @@ public class MenuPreview {
 
     static void readYaml() throws Exception {
         String key = null;
-        for (String table : List.of("bundled-vanilla-items.yml", "bundled-vanilla-glyphs.yml")) {
+        for (String table : List.of("bundled-vanilla-items.yml", "bundled-vanilla-glyphs.yml", "bundled-smithy-glyphs.yml")) {
             for (String line : Files.readAllLines(RES.resolve(table))) {
                 if (line.startsWith("  ") && !line.startsWith("    ") && line.trim().endsWith(":")) key = line.trim().replace(":", "");
                 else if (key != null && line.trim().startsWith("texture: ")) VANILLA.put(key, line.trim().substring(9));

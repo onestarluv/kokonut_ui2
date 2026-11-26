@@ -33,5 +33,9 @@ public final class MenuListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         plugin.removeSession(event.getPlayer());
         org.crebs.coreui.menu.gem.GemMenu.forget(event.getPlayer().getUniqueId());
+        // SmithyMenu uses Core types: only touch it when Core is there.
+        if (plugin.getServer().getPluginManager().isPluginEnabled("Kokonut-Core")) {
+            org.crebs.coreui.menu.smithy.SmithyMenu.forget(event.getPlayer().getUniqueId());
+        }
     }
 }
